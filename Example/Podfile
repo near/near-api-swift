@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'nearclientios_Example' do
+  pod 'nearclientios', :path => '../'
+
+  target 'nearclientios_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
