@@ -7,3 +7,9 @@
 //
 
 import Foundation
+
+internal protocol Network {
+  var name: String {get}
+  var chainId: String {get}
+  var _defaultProvider: ((_ providers: Any) -> Any)? {get}
+}
