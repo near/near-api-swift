@@ -32,9 +32,9 @@ extension ConnectionConfig {
 }
 
 internal struct Connection {
-  private let networkId: String
-  private let provider: Provider
-  private let signer: Signer
+  let networkId: String
+  let provider: Provider
+  let signer: Signer
 }
 
 extension Connection {

@@ -24,6 +24,17 @@ internal extension Data {
   }
 }
 
+internal extension Data {
+  var json: [String: Any]? {
+    return try? JSONSerialization.jsonObject(with: self, options: []) as? [String: Any]
+  }
+
+  init(json: [String: Any]) {
+    let data = try? JSONSerialization.data(withJSONObject: json, options: [])
+    self.init(bytes: data?.bytes ?? [], count: data?.bytes.count ?? 0)
+  }
+}
+
 internal extension Collection where Element == UInt8 {
   var baseEncoded: String {
     return String(bytes: self, encoding: .utf8) ?? ""

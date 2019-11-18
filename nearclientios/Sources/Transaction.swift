@@ -24,7 +24,18 @@ internal enum AccessKeyPermission {
   case fullAccess(FullAccessPermission)
 }
 
-internal struct AccessKey {
+extension AccessKeyPermission: Codable {
+  //TODO: implement
+  func encode(to encoder: Encoder) throws {
+
+  }
+
+  init(from decoder: Decoder) throws {
+
+  }
+}
+
+internal struct AccessKey: Codable {
   let nonce: Number
   let permission: AccessKeyPermission
 }
@@ -52,7 +63,7 @@ internal struct DeployContract: IAction {
 internal struct FunctionCall: IAction {
   let methodName: String
   let args: [UInt8]
-  let gas: BigInt
+  let gas: Number
   let deposit: BigInt
 }
 
@@ -86,7 +97,7 @@ func deployContract(code: [UInt8]) -> Action {
   return .deployContract(DeployContract(code: code))
 }
 
-func functionCall(methodName: String, args: [UInt8], gas: BigInt, deposit: BigInt) -> Action {
+func functionCall(methodName: String, args: [UInt8], gas: Number, deposit: BigInt) -> Action {
   return .functionCall(FunctionCall(methodName: methodName, args: args, gas: gas, deposit: deposit))
 }
 

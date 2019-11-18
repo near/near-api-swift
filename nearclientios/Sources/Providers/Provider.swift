@@ -11,19 +11,19 @@ import PromiseKit
 
 internal typealias Number = Int
 
-internal protocol SyncInfo {
-  var latest_block_hash: String {get}
-  var latest_block_height: Number {get}
-  var latest_block_time: String {get}
-  var latest_state_root: String {get}
-  var syncing: Bool {get}
+internal struct SyncInfo: Codable {
+  let latest_block_hash: String
+  let latest_block_height: Number
+  let latest_block_time: String
+  let latest_state_root: String
+  let syncing: Bool
 }
 
-internal protocol NodeStatusResult {
-  var chain_id: String {get}
-  var rpc_addr: Number {get}
-  var sync_info: SyncInfo {get}
-  var validators: [String] {get}
+internal struct NodeStatusResult: Codable {
+  let chain_id: String
+  let rpc_addr: Number
+  let sync_info: SyncInfo
+  let validators: [String]
 }
 
 internal typealias BlockHash = String
@@ -50,36 +50,36 @@ internal enum FinalExecutionStatusBasic: String {
     case failure = "Failure"
 }
 
-internal protocol ExecutionError {
-  var error_message: String {get}
-  var error_type: String {get}
+internal struct ExecutionError {
+  var error_message: String
+  var error_type: String
 }
 
-internal protocol FinalExecutionStatus {
-  var SuccessValue: String? {get}
-  var Failure: ExecutionError? {get}
+internal enum FinalExecutionStatus {
+  case SuccessValue(String?)
+  case Failure(ExecutionError)
 }
 
-internal protocol ExecutionOutcomeWithId {
-  var id: String {get}
-  var outcome: ExecutionOutcome {get}
+internal struct ExecutionOutcomeWithId {
+  let id: String
+  let outcome: ExecutionOutcome
 }
 
-internal protocol ExecutionOutcome {
+internal struct ExecutionOutcome {
 // TODO find correct representation way for this
 //  var status: ExecutionStatus | ExecutionStatusBasic
-  var status: ExecutionStatus {get}
-  var logs: [String] {get}
-  var receipt_ids: [String] {get}
-  var gas_burnt: Number {get}
+  let status: ExecutionStatus
+  let logs: [String]
+  let receipt_ids: [String]
+  let gas_burnt: Number
 }
 
-internal protocol FinalExecutionOutcome {
+internal struct FinalExecutionOutcome {
   // TODO find correct representation way for this
 //    status: FinalExecutionStatus | FinalExecutionStatusBasic
-  var status: FinalExecutionStatus {get}
-  var transaction: ExecutionOutcomeWithId {get}
-  var receipts: [ExecutionOutcomeWithId] {get}
+  let status: FinalExecutionStatus
+  let transaction: ExecutionOutcomeWithId
+  let receipts: [ExecutionOutcomeWithId]
 }
 
 internal protocol TotalWeight {
@@ -141,6 +141,59 @@ internal protocol Transaction {
   var body: Any {get}
 }
 
+internal protocol BlockResult {
+  var header: BlockHeader {get}
+  var transactions: [Transaction] {get}
+}
+
+func adaptTransactionResult(txResult: Data) -> FinalExecutionOutcome {
+    // Fixing legacy transaction result
+//    if ('transactions' in txResult) {
+//        txResult = txResult as LegacyFinalTransactionResult;
+//        let status;
+//        if (txResult.status === LegacyFinalTransactionStatus.Unknown) {
+//            status = FinalExecutionStatusBasic.NotStarted;
+//        } else if (txResult.status === LegacyFinalTransactionStatus.Started) {
+//            status = FinalExecutionStatusBasic.Started;
+//        } else if (txResult.status === LegacyFinalTransactionStatus.Failed) {
+//            status = FinalExecutionStatusBasic.Failure;
+//        } else if (txResult.status === LegacyFinalTransactionStatus.Completed) {
+//            let result = '';
+//            for (let i = txResult.transactions.length - 1; i >= 0; --i) {
+//                const r = txResult.transactions[i];
+//                if (r.result && r.result.result && r.result.result.length > 0) {
+//                    result = r.result.result;
+//                    break;
+//                }
+//            }
+//            status = {
+//                SuccessValue: result,
+//            };
+//        }
+//        txResult = {
+//            status,
+//            transaction: mapLegacyTransactionLog(txResult.transactions.splice(0, 1)[0]),
+//            receipts: txResult.transactions.map(mapLegacyTransactionLog),
+//        };
+//    }
+//
+//    // Adapting from old error handling.
+//    txResult.transaction = fixLegacyBasicExecutionOutcomeFailure(txResult.transaction);
+//    txResult.receipts = txResult.receipts.map(fixLegacyBasicExecutionOutcomeFailure);
+//
+//    // Fixing master error status
+//    if (txResult.status === FinalExecutionStatusBasic.Failure) {
+//        const err = ([txResult.transaction, ...txResult.receipts]
+//            .find(t => typeof t.outcome.status === 'object' && typeof t.outcome.status.Failure === 'object')
+//            .outcome.status as ExecutionStatus).Failure;
+//        txResult.status = {
+//            Failure: err
+//        };
+//    }
+
+//    return txResult;
+}
+
 internal enum ProviderType {
   case jsonRPC(URL)
 }
@@ -151,7 +204,7 @@ internal protocol Provider {
 
   func sendTransaction(signedTransaction: SignedTransaction) -> Promise<FinalExecutionOutcome>
   func txStatus(txHash: [UInt8], accountId: String) -> Promise<FinalExecutionOutcome>
-  func query(path: String, data: String) -> Promise<Any>
+  func query<T: Codable>(path: String, data: String) -> Promise<T>
   func block(blockId: BlockId) -> Promise<BlockResult>
   func chunk(chunkId: ChunkId) -> Promise<ChunkResult>
 }

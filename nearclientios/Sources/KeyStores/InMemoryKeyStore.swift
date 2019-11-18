@@ -9,6 +9,9 @@
 import Foundation
 import PromiseKit
 
+/**
+* Simple in-memory keystore for testing purposes.
+*/
 internal class InMemoryKeyStore {
   private var keys: [String: String]
 

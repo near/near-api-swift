@@ -58,6 +58,17 @@ internal struct PublicKey {
   }
 }
 
+extension PublicKey: Codable {
+  //TODO: implement
+  func encode(to encoder: Encoder) throws {
+
+  }
+
+  init(from decoder: Decoder) throws {
+
+  }
+}
+
 internal enum KeyPairDecodeError: Error {
   case invalidKeyFormat(String)
   case unknowCurve(String)

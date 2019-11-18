@@ -13,3 +13,12 @@ internal protocol Network {
   var chainId: String {get}
   var _defaultProvider: ((_ providers: Any) -> Any)? {get}
 }
+
+extension Network {
+  var _defaultProvider: ((_ providers: Any) -> Any)? {return nil}
+}
+
+internal struct NetworkImpl: Network {
+  let name: String
+  let chainId: String
+}
