@@ -84,7 +84,7 @@ internal final class Account {
     }
   }
 
-  private func state() throws -> Promise<AccountState> {
+  func state() throws -> Promise<AccountState> {
     try await(ready)
     return .value(_state!)
   }
@@ -162,7 +162,7 @@ internal final class Account {
     return .value(contractAccount)
   }
 
-  private func sendMoney(receiverId: String, amount: BigInt) throws -> Promise<FinalExecutionOutcome> {
+  func sendMoney(receiverId: String, amount: BigInt) throws -> Promise<FinalExecutionOutcome> {
     return try signAndSendTransaction(receiverId: receiverId, actions: [transfer(deposit: amount)])
   }
 

@@ -15,7 +15,7 @@ import PromiseKit
 internal class InMemoryKeyStore {
   private var keys: [String: String]
 
-  init(keys: [String: String]) {
+  init(keys: [String: String] = [:]) {
     self.keys = keys
   }
 }

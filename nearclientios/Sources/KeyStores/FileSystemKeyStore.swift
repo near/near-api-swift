@@ -120,13 +120,13 @@ extension UnencryptedFileSystemKeyStore {
     return manager.targetDirectory.appendingPathComponent("\(networkPath)/\(accountId).json")
   }
 
-  private func loadJsonFile(path: String) throws -> Promise<AccountInfo> {
+  private static func loadJsonFile(path: String) throws -> Promise<AccountInfo> {
     let content = try Data(contentsOf: URL(fileURLWithPath: path), options: [])
     let accountInfo = try JSONDecoder().decode(AccountInfo.self, from: content)
     return .value(accountInfo)
   }
 
-  private func readKeyFile(path: String) throws -> Promise<(String, KeyPair)> {
+  static func readKeyFile(path: String) throws -> Promise<(String, KeyPair)> {
     let accountInfo = try await(loadJsonFile(path: path))
     // The private key might be in private_key or secret_key field.
     var privateKey = accountInfo.private_key

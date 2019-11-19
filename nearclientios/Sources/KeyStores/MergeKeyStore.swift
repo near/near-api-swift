@@ -15,7 +15,7 @@ import AwaitKit
  */
 internal struct MergeKeyStore {
   /// First keystore gets all write calls, read calls are attempted from start to end of array
-  private var keyStores: [KeyStore]
+  private(set) var keyStores: [KeyStore]
 }
 
 extension MergeKeyStore: KeyStore {

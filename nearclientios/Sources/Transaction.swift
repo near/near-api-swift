@@ -237,10 +237,15 @@ internal enum Action {
 //    ]}],
 //])
 
+enum SignError: Error {
+  case noPublicKey
+}
 
 func signTransaction(receiverId: String, nonce: Number, actions: [Action], blockHash: [UInt8],
                      signer: Signer, accountId: String, networkId: String) throws -> Promise<([UInt8], SignedTransaction)> {
-  let publicKey = try await(signer.getPublicKey(accountId: accountId, networkId: networkId))
+  guard let publicKey = try await(signer.getPublicKey(accountId: accountId, networkId: networkId)) else {
+    throw SignError.noPublicKey
+  }
   let transaction = SignedTransaction.Transaction(signerId: accountId, publicKey: publicKey, nonce: nonce,
                                 receiverId: receiverId, actions: actions, blockHash: blockHash)
   //TODO
@@ -248,6 +253,6 @@ func signTransaction(receiverId: String, nonce: Number, actions: [Action], block
   let message = [UInt8]()
   let hash = message.digest
   let signature = try await(signer.signMessage(message: message, accountId: accountId, networkId: networkId))
-  let signedTx = SignedTransaction(transaction: transaction, signature: Signature(signature.signature))
+  let signedTx = SignedTransaction(transaction: transaction, signature: Signature(signature: signature.signature)
   return .value((hash, signedTx))
 }
