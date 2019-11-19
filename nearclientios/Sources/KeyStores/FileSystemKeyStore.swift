@@ -58,7 +58,7 @@ extension UnencryptedFileSystemKeyStore: KeyStore {
     let path = getKeyFileUrl(networkPath: networkPath, accountId: accountId).path
     guard manager.fileExists(atPath: path) else {return .value(nil)}
     do {
-      let accountKeyPair = try await(readKeyFile(path: path))
+      let accountKeyPair = try await(UnencryptedFileSystemKeyStore.readKeyFile(path: path))
       return .value(accountKeyPair.1)
     } catch let error {
       return .init(error: error)
