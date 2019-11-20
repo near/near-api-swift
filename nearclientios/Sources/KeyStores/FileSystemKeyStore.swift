@@ -13,13 +13,13 @@ import AwaitKit
 /**
 // Format of the account stored on disk.
 */
-internal protocol GeneralAccountInfo {
+internal protocol AccountInfoProtocol {
   var account_id: String {get}
   var private_key: String? {get}
   var secret_key: String? {get}
 }
 
-internal struct AccountInfo: GeneralAccountInfo, Codable {
+internal struct AccountInfo: AccountInfoProtocol, Codable {
   let account_id: String
   let private_key: String?
   let secret_key: String?
@@ -27,13 +27,16 @@ internal struct AccountInfo: GeneralAccountInfo, Codable {
 
 internal struct UnencryptedFileSystemKeyStore {
   let keyDir: String
-  let manager: FileManager = .default
+  let manager: FileManager
+
+  init(keyDir: String, manager: FileManager = .default) {
+    self.keyDir = keyDir
+    self.manager = manager
+  }
 }
 
-extension UnencryptedFileSystemKeyStore {
-  enum Error: Swift.Error {
-    case noPrivateKey
-  }
+internal enum UnencryptedFileSystemKeyStoreError: Error {
+  case noPrivateKey
 }
 
 extension UnencryptedFileSystemKeyStore: KeyStore {
@@ -133,7 +136,7 @@ extension UnencryptedFileSystemKeyStore {
     if privateKey == nil, accountInfo.secret_key != nil {
       privateKey = accountInfo.secret_key
     }
-    guard privateKey != nil else {return .init(error: Error.noPrivateKey)}
+    guard privateKey != nil else {return .init(error: UnencryptedFileSystemKeyStoreError.noPrivateKey)}
     let keyPair = try keyPairFromString(encodedKey: privateKey!)
     return .value((accountInfo.account_id, keyPair))
   }

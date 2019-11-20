@@ -11,6 +11,8 @@ import BigInt
 import PromiseKit
 import AwaitKit
 
+//TODO complete this part
+
 internal struct FunctionCallPermission {
   let allowance: BigInt?
   let receiverId: String
@@ -24,15 +26,15 @@ internal enum AccessKeyPermission {
   case fullAccess(FullAccessPermission)
 }
 
+//TODO: Implement codable
 extension AccessKeyPermission: Codable {
-  //TODO: implement
-  func encode(to encoder: Encoder) throws {
-
+  enum NotImplemented: Error {
+    case decoder
   }
-
   init(from decoder: Decoder) throws {
-
+    throw NotImplemented.decoder
   }
+  func encode(to encoder: Encoder) throws {}
 }
 
 internal struct AccessKey: Codable {
@@ -121,34 +123,33 @@ func deleteAccount(beneficiaryId: String) -> Action {
   return .deleteAccount(DeleteAccount(beneficiaryId: beneficiaryId))
 }
 
+internal struct SignatureBorchable {
+  let keyType: KeyType
+  let data: [UInt8]
+
+  init(signature: [UInt8]) {
+    self.keyType = KeyType.ED25519
+    self.data = signature
+  }
+}
+
+internal struct TransactionBorchable {
+  let signerId: String
+  let publicKey: PublicKey
+  let nonce: Number
+  let receiverId: String
+  let actions: [Action]
+  let blockHash: [UInt8]
+}
+
 internal struct SignedTransaction {
-
-  struct Signature {
-    let keyType: KeyType
-    let data: [UInt8]
-
-    init(signature: [UInt8]) {
-      self.keyType = KeyType.ED25519
-      self.data = signature
-    }
-  }
-
-  struct Transaction {
-    let signerId: String
-    let publicKey: PublicKey
-    let nonce: Number
-    let receiverId: String
-    let actions: [Action]
-    let blockHash: [UInt8]
-  }
-
-  let transaction: Transaction
-  let signature: Signature
+  let transaction: TransactionBorchable
+  let signature: SignatureBorchable
 
   func encode() -> [UInt8] {
     return []
     //TODO
-    //      return serialize(SCHEMA, this)
+    //return serialize(SCHEMA, this)
   }
 }
 
@@ -246,13 +247,13 @@ func signTransaction(receiverId: String, nonce: Number, actions: [Action], block
   guard let publicKey = try await(signer.getPublicKey(accountId: accountId, networkId: networkId)) else {
     throw SignError.noPublicKey
   }
-  let transaction = SignedTransaction.Transaction(signerId: accountId, publicKey: publicKey, nonce: nonce,
+  let transaction = TransactionBorchable(signerId: accountId, publicKey: publicKey, nonce: nonce,
                                 receiverId: receiverId, actions: actions, blockHash: blockHash)
   //TODO
   //let message = serialize(SCHEMA, transaction)
   let message = [UInt8]()
   let hash = message.digest
   let signature = try await(signer.signMessage(message: message, accountId: accountId, networkId: networkId))
-  let signedTx = SignedTransaction(transaction: transaction, signature: Signature(signature: signature.signature)
+  let signedTx = SignedTransaction(transaction: transaction, signature: SignatureBorchable(signature: signature.signature))
   return .value((hash, signedTx))
 }

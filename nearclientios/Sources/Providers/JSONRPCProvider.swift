@@ -31,64 +31,46 @@ extension JSONRPCProvider {
     return _nextId
   }
 
-  private func sendJsonRpc(method: String, params: [Any]) -> Promise<Data> {
+  private func sendJsonRpc<T: Decodable>(method: String, params: [Any]) throws -> Promise<T> {
     let request: [String: Any] = ["method": method,
                                   "params": params,
                                   "id": getId(),
                                   "jsonrpc": "2.0"]
     return fetchJson(connection: connection, json: request)
+      .map {try JSONDecoder().decode(T.self, from: $0)}
   }
 }
 
 extension JSONRPCProvider: Provider {
   func getNetwork() -> Promise<Network> {
-    let result: Network = NetworkImpl(name: "test", chainId: "test")
+    let result: Network = Network(name: "test", chainId: "test")
     return .value(result)
   }
 
-  func status() -> Promise<NodeStatusResult> {
-    return sendJsonRpc(method: "status", params: [])
-      .then {response -> Promise<NodeStatusResult> in
-        do {
-          let result = try JSONDecoder().decode(NodeStatusResult.self, from: response)
-          return Promise.value(result)
-        } catch let error {
-          return Promise(error: error)
-        }
-    }
+  func status() throws -> Promise<NodeStatusResult> {
+    return try sendJsonRpc(method: "status", params: [])
   }
 
-  func sendTransaction(signedTransaction: SignedTransaction) -> Promise<FinalExecutionOutcome> {
+  func sendTransaction(signedTransaction: SignedTransaction) throws -> Promise<FinalExecutionOutcome> {
     let bytes = signedTransaction.encode()
     let params = [Data(bytes: bytes, count: bytes.count).base64EncodedString()]
-    return sendJsonRpc(method: "broadcast_tx_commit", params: params)
-      .map(adaptTransactionResult)
+    return try sendJsonRpc(method: "broadcast_tx_commit", params: params)
   }
 
-  func txStatus(txHash: [UInt8], accountId: String) -> Promise<FinalExecutionOutcome> {
+  func txStatus(txHash: [UInt8], accountId: String) throws -> Promise<FinalExecutionOutcome> {
     let params = [txHash.baseEncoded, accountId]
-    return sendJsonRpc(method: "tx", params: params)
-      .map(adaptTransactionResult)
+    return try sendJsonRpc(method: "tx", params: params)
   }
 
-  func query<T: Codable>(path: String, data: String) -> Promise<T> {
-    return sendJsonRpc(method: "query", params: [path, data])
-      .then { response -> Promise<T> in
-        do {
-          let result = try JSONDecoder().decode(T.self, from: response)
-          return Promise.value(result)
-        } catch let error {
-          return Promise(error: error)
-        }
-    }
-//      Error("Quering \(path) failed: \(error.localizedDescription).\n\(JSON.stringify(result, null, 2))")
+  func query<T: Decodable>(path: String, data: String) throws -> Promise<T> {
+    return try sendJsonRpc(method: "query", params: [path, data])
   }
 
-  func block(blockId: BlockId) -> Promise<BlockResult> {
-    return sendJsonRpc(method: "block", params: [blockId])
+  func block(blockId: BlockId) throws -> Promise<BlockResult> {
+    return try sendJsonRpc(method: "block", params: [blockId])
   }
 
-  func chunk(chunkId: ChunkId) -> Promise<ChunkResult> {
-    return sendJsonRpc(method: "chunk", params: [chunkId])
+  func chunk(chunkId: ChunkId) throws -> Promise<ChunkResult> {
+    return try sendJsonRpc(method: "chunk", params: [chunkId])
   }
 }

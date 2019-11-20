@@ -8,17 +8,14 @@
 
 import Foundation
 
-internal protocol Network {
+internal protocol NetworkProtocol {
   var name: String {get}
   var chainId: String {get}
   var _defaultProvider: ((_ providers: Any) -> Any)? {get}
 }
 
-extension Network {
-  var _defaultProvider: ((_ providers: Any) -> Any)? {return nil}
-}
-
-internal struct NetworkImpl: Network {
+internal struct Network: NetworkProtocol {
   let name: String
   let chainId: String
+  var _defaultProvider: ((_ providers: Any) -> Any)?
 }

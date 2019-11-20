@@ -11,6 +11,8 @@ import PromiseKit
 import AwaitKit
 import BigInt
 
+//TODO complete this part
+
 /// Default amount of tokens to be send with the function calls. Used to pay for the fees
 /// incurred while running the contract execution. The unused amount will be refunded back to
 /// the originator.
@@ -59,7 +61,11 @@ internal final class Account {
   private var _accessKey: AccessKey?
 
   private lazy var ready: Promise<Void> = {
-    return fetchState()
+    do {
+      return try fetchState()
+    } catch let error {
+      return .init(error: error)
+    }
   }()
 
   init(connection: Connection, accountId: String) {
@@ -67,21 +73,18 @@ internal final class Account {
     self.accountId = accountId;
   }
 
-  private func fetchState() -> Promise<Void> {
-    do {
-      _state = try await(connection.provider.query(path: "account/${this.accountId}", data: ""))
-      guard let publicKey = try await(connection.signer.getPublicKey(accountId: accountId,
-                                                                     networkId: connection.networkId)) else {
-        print("Missing public key for \(accountId) in \(connection.networkId)")
-        return .value(())
-      }
-      _accessKey = try await(connection.provider.query(path: "access_key/\(accountId)/\(publicKey.toString())", data: ""))
-      guard _accessKey != nil else {
-        return .init(error: AccountError.noAccessKey("Failed to fetch access key for '\(accountId)' with public key \(publicKey.toString())"))
-      }
-    } catch let error {
-      return .init(error: error)
+  private func fetchState() throws -> Promise<Void> {
+    _state = try await(connection.provider.query(path: "account/${this.accountId}", data: ""))
+    guard let publicKey = try await(connection.signer.getPublicKey(accountId: accountId,
+                                                                   networkId: connection.networkId)) else {
+                                                                    print("Missing public key for \(accountId) in \(connection.networkId)")
+                                                                    return .value(())
     }
+    _accessKey = try await(connection.provider.query(path: "access_key/\(accountId)/\(publicKey.toString())", data: ""))
+    guard _accessKey != nil else {
+      return .init(error: AccountError.noAccessKey("Failed to fetch access key for '\(accountId)' with public key \(publicKey.toString())"))
+    }
+    return .value(())
   }
 
   func state() throws -> Promise<AccountState> {
@@ -141,7 +144,7 @@ internal final class Account {
     let flatLogs = ([result.transaction] + result.receipts).reduce([], {$0 + $1.outcome.logs})
     printLogs(contractId: signedTx.transaction.receiverId, logs: flatLogs)
 
-    if case FinalExecutionStatus.Failure(let error) = result.status {
+    if let error = result.status.Failure {
       throw TypedError.error(type: "Transaction \(result.transaction.id) failed. \(error.error_message)",
         message: error.error_type)
     }
@@ -212,13 +215,15 @@ internal final class Account {
                                       actions: [nearclientios.stake(stake: amount, publicKey: publicKey)])
   }
 
-  private func viewFunction(contractId: String, methodName: String, args: [String: Any] = [:]) throws -> Promise<Any> {
+  private func viewFunction<T: Codable>(contractId: String, methodName: String, args: [String: Any] = [:]) throws -> Promise<T> {
     let data = String(data: Data(json: args), encoding: .utf8) ?? ""
-    let result = try await(connection.provider.query(path: "call/\(contractId)/\(methodName)", data: data))
-    if result.logs {
-      printLogs(contractId, result.logs)
-    }
-    return result.result && result.result.length > 0 && JSON.parse(Buffer.from(result.result).toString());
+    let result: T = try await(connection.provider.query(path: "call/\(contractId)/\(methodName)", data: data))
+    return .value(result)
+    //TODO: don't get it
+//    if result.logs {
+//      printLogs(contractId, result.logs)
+//    }
+//    return result.result && result.result.length > 0 && JSON.parse(Buffer.from(result.result).toString());
   }
 
   /// Returns array of {access_key: AccessKey, public_key: PublicKey} items.

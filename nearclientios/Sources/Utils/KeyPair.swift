@@ -9,18 +9,18 @@
 import Foundation
 import TweetNacl
 
-internal protocol GeneralSignature {
+internal protocol SignatureProtocol {
   var signature: [UInt8] {get}
   var publicKey: PublicKey {get}
 }
 
-internal struct Signature: GeneralSignature {
+internal struct Signature: SignatureProtocol {
   let signature: [UInt8]
   let publicKey: PublicKey
 }
 
 /** All supported key types */
-internal enum KeyType: String {
+internal enum KeyType: String, Codable {
     case ED25519 = "ed25519"
 }
 
@@ -32,7 +32,7 @@ internal enum PublicKeyDecodeError: Error {
 /**
  * PublicKey representation that has type and bytes of the key.
  */
-internal struct PublicKey {
+internal struct PublicKey: Codable {
   private let keyType: KeyType
   internal let data: [UInt8]
 
@@ -58,25 +58,14 @@ internal struct PublicKey {
   }
 }
 
-extension PublicKey: Codable {
-  //TODO: implement
-  func encode(to encoder: Encoder) throws {
-
-  }
-
-  init(from decoder: Decoder) throws {
-
-  }
-}
-
 internal enum KeyPairDecodeError: Error {
   case invalidKeyFormat(String)
   case unknowCurve(String)
 }
 
 internal protocol KeyPair {
-  func sign(message: [UInt8]) throws -> GeneralSignature
-//  func verify(message: Uint8Array, signature: Uint8Array) -> Bool
+  func sign(message: [UInt8]) throws -> SignatureProtocol
+  func verify(message: [UInt8], signature: [UInt8]) throws -> Bool
   func toString() -> String
   func getPublicKey() -> PublicKey
 }
@@ -142,7 +131,7 @@ internal struct KeyPairEd25519 {
 }
 
 extension KeyPairEd25519: KeyPair {
-  func sign(message: [UInt8]) throws -> GeneralSignature {
+  func sign(message: [UInt8]) throws -> SignatureProtocol {
     let signature = try NaclSign.signDetached(message: message.data, secretKey: secretKey.baseDecoded.data)
     return Signature(signature: signature.bytes, publicKey: publicKey)
   }

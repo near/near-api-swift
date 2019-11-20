@@ -16,6 +16,10 @@ import AwaitKit
 internal struct MergeKeyStore {
   /// First keystore gets all write calls, read calls are attempted from start to end of array
   private(set) var keyStores: [KeyStore]
+
+  init(keyStores: [KeyStore] = []) {
+    self.keyStores = keyStores
+  }
 }
 
 extension MergeKeyStore: KeyStore {
@@ -25,8 +29,7 @@ extension MergeKeyStore: KeyStore {
 
   func getKey(networkId: String, accountId: String) -> Promise<KeyPair?> {
     for keyStore in keyStores {
-      let keyPair = try? await(keyStore.getKey(networkId: networkId, accountId: accountId))
-      if keyPair != nil {
+      if let keyPair = try? await(keyStore.getKey(networkId: networkId, accountId: accountId)) {
         return .value(keyPair)
       }
     }
@@ -34,44 +37,26 @@ extension MergeKeyStore: KeyStore {
   }
 
   func removeKey(networkId: String, accountId: String) -> Promise<Void> {
-    async {
-      for keyStore in self.keyStores {
-        try await(keyStore.removeKey(networkId: networkId, accountId: accountId))
-      }
-    }
-    return .value(())
+    let promises = keyStores.map { $0.removeKey(networkId: networkId, accountId: accountId) }
+    return when(resolved: promises).asVoid()
   }
 
   func clear() -> Promise<Void> {
-    async {
-      for keyStore in self.keyStores {
-        try await(keyStore.clear())
-      }
-    }
-    return .value(())
+    let promises = keyStores.map { $0.clear() }
+    return when(resolved: promises).asVoid()
   }
 
   func getNetworks() -> Promise<[String]> {
-    var result = Set<String>()
-    async {
-      for keyStore in self.keyStores {
-        for network in try await(keyStore.getNetworks()) {
-          result.insert(network)
-        }
-      }
-    }
-    return .value(Array(result))
+    return when(fulfilled: keyStores.map {$0.getNetworks()})
+      .map {$0.reduce([], +)}
+      .map(Set.init)
+      .map(Array.init)
   }
 
   func getAccounts(networkId: String) -> Promise<[String]> {
-    var result = Set<String>()
-    async {
-      for keyStore in self.keyStores {
-        for account in try await(keyStore.getAccounts(networkId: networkId)) {
-          result.insert(account)
-        }
-      }
-    }
-    return .value(Array(result))
+    return when(fulfilled: keyStores.map {$0.getAccounts(networkId: networkId)})
+      .map {$0.reduce([], +)}
+      .map(Set.init)
+      .map(Array.init)
   }
 }

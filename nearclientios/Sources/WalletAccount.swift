@@ -36,10 +36,18 @@ internal final class WalletAccount {
   private let _keyStore: KeyStore
   private var _authData: AuthDataProtocol
   private let _networkId: String
+
+  init(_walletBaseUrl: String, _authDataKey: String, _keyStore: KeyStore, _authData: AuthDataProtocol, _networkId: String) {
+    self._walletBaseUrl = _walletBaseUrl
+    self._authDataKey = _authDataKey
+    self._keyStore = _keyStore
+    self._authData = _authData
+    self._networkId = _networkId
+  }
 }
 
 extension WalletAccount {
-  init(near: Near, appKeyPrefix: String?) throws {
+  convenience init(near: Near, appKeyPrefix: String?) throws {
     let keyPrefix = appKeyPrefix ?? (near.config.contractName ?? "default")
     let authDataKey = keyPrefix + LOCAL_STORAGE_KEY_SUFFIX
     guard let keyStore = (near.connection.signer as? InMemorySigner)?.keyStore else {throw WalletAccountError.noKeyStore}
@@ -104,6 +112,7 @@ extension WalletAccount {
                                  keyPair: accessKey))
 //    TODO: ??
 //    window.location.assign(newUrlComponents?.url)
+    return .value(())
   }
 
   /**

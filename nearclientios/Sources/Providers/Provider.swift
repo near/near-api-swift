@@ -27,7 +27,7 @@ internal struct NodeStatusResult: Codable {
 }
 
 internal typealias BlockHash = String
-internal typealias BlockHeight = Int
+internal typealias BlockHeight = Number
 //typealias BlockId = BlockHash | BlockHeight
 // TODO find correct representation way for this
 internal typealias BlockId = BlockHash
@@ -38,34 +38,34 @@ internal enum ExecutionStatusBasic: String {
   case failure = "Failure"
 }
 
-internal protocol ExecutionStatus {
-  var SuccessValue: String? {get}
-  var SuccessReceiptId: String? {get}
-  var Failure: ExecutionError? {get}
+internal struct ExecutionStatus: Codable {
+  let SuccessValue: String?
+  let SuccessReceiptId: String?
+  let Failure: ExecutionError?
 }
 
-internal enum FinalExecutionStatusBasic: String {
-    case notStarted = "NotStarted"
-    case started = "Started"
-    case failure = "Failure"
+internal enum FinalExecutionStatusBasic: String, Codable {
+  case notStarted = "NotStarted"
+  case started = "Started"
+  case failure = "Failure"
 }
 
-internal struct ExecutionError {
-  var error_message: String
-  var error_type: String
+internal struct ExecutionError: Codable {
+  let error_message: String
+  let error_type: String
 }
 
-internal enum FinalExecutionStatus {
-  case SuccessValue(String?)
-  case Failure(ExecutionError)
+internal struct FinalExecutionStatus: Codable {
+  let SuccessValue: String?
+  let Failure: ExecutionError?
 }
 
-internal struct ExecutionOutcomeWithId {
+internal struct ExecutionOutcomeWithId: Codable {
   let id: String
   let outcome: ExecutionOutcome
 }
 
-internal struct ExecutionOutcome {
+internal struct ExecutionOutcome: Codable {
 // TODO find correct representation way for this
 //  var status: ExecutionStatus | ExecutionStatusBasic
   let status: ExecutionStatus
@@ -74,7 +74,7 @@ internal struct ExecutionOutcome {
   let gas_burnt: Number
 }
 
-internal struct FinalExecutionOutcome {
+internal struct FinalExecutionOutcome: Codable {
   // TODO find correct representation way for this
 //    status: FinalExecutionStatus | FinalExecutionStatusBasic
   let status: FinalExecutionStatus
@@ -82,20 +82,20 @@ internal struct FinalExecutionOutcome {
   let receipts: [ExecutionOutcomeWithId]
 }
 
-internal protocol TotalWeight {
-  var num: Number {get}
+internal struct TotalWeight: Codable {
+  let num: Number
 }
 
-internal protocol BlockHeader {
-  var approval_mask: String {get}
-  var approval_sigs: String {get}
-  var hash: String {get}
-  var height: Number {get}
-  var prev_hash: String {get}
-  var prev_state_root: String {get}
-  var timestamp: Number {get}
-  var total_weight: TotalWeight {get}
-  var tx_root: String {get}
+internal struct BlockHeader: Codable {
+  let approval_mask: String
+  let approval_sigs: String
+  let hash: String
+  let height: Number
+  let prev_hash: String
+  let prev_state_root: String
+  let timestamp: Number
+  let total_weight: TotalWeight
+  let tx_root: String
 }
 
 internal typealias ChunkHash = String
@@ -107,91 +107,49 @@ internal typealias BlockShardId = [BlockId]
 //internal typealias ChunkId = ChunkHash | BlockShardId
 internal typealias ChunkId = ChunkHash
 
-internal protocol ChunkHeader {
-  var balance_burnt: String {get}
-  var chunk_hash: ChunkHash {get}
-  var encoded_length: Number {get}
-  var encoded_merkle_root: String {get}
-  var gas_limit: Number {get}
-  var gas_used: Number {get}
-  var height_created: Number {get}
-  var height_included: Number {get}
-  var outgoing_receipts_root: String {get}
-  var prev_block_hash: String {get}
-  var prev_state_num_parts: Number {get}
-  var prev_state_root_hash: String {get}
-  var rent_paid: String {get}
-  var shard_id: Number {get}
-  var signature: String {get}
-  var tx_root: String {get}
-  var validator_proposals: [Any] {get}
-  var validator_reward: String {get}
+internal struct ValidatorProposal: Codable {}
+
+internal struct ChunkHeader: Codable {
+  let balance_burnt: String
+  let chunk_hash: ChunkHash
+  let encoded_length: Number
+  let encoded_merkle_root: String
+  let gas_limit: Number
+  let gas_used: Number
+  let height_created: Number
+  let height_included: Number
+  let outgoing_receipts_root: String
+  let prev_block_hash: String
+  let prev_state_num_parts: Number
+  let prev_state_root_hash: String
+  let rent_paid: String
+  let shard_id: Number
+  let signature: String
+  let tx_root: String
+  let validator_proposals: [ValidatorProposal]
+  let validator_reward: String
 }
 
-internal protocol ChunkResult {
-  var header: ChunkHeader {get}
-  var receipts: [Any] {get}
-  var transactions: [Transaction] {get}
+internal struct Receipt: Codable {}
+
+internal struct ChunkResult: Codable {
+  let header: ChunkHeader
+  let receipts: [Receipt]
+  let transactions: [Transaction]
 }
 
-internal protocol Transaction {
-  var hash: String {get}
-  var public_key: String {get}
-  var signature: String {get}
-  var body: Any {get}
+internal struct TransactionBody: Codable {}
+
+internal struct Transaction: Codable {
+  let hash: String
+  let public_key: String
+  let signature: String
+  let body: TransactionBody
 }
 
-internal protocol BlockResult {
-  var header: BlockHeader {get}
-  var transactions: [Transaction] {get}
-}
-
-func adaptTransactionResult(txResult: Data) -> FinalExecutionOutcome {
-    // Fixing legacy transaction result
-//    if ('transactions' in txResult) {
-//        txResult = txResult as LegacyFinalTransactionResult;
-//        let status;
-//        if (txResult.status === LegacyFinalTransactionStatus.Unknown) {
-//            status = FinalExecutionStatusBasic.NotStarted;
-//        } else if (txResult.status === LegacyFinalTransactionStatus.Started) {
-//            status = FinalExecutionStatusBasic.Started;
-//        } else if (txResult.status === LegacyFinalTransactionStatus.Failed) {
-//            status = FinalExecutionStatusBasic.Failure;
-//        } else if (txResult.status === LegacyFinalTransactionStatus.Completed) {
-//            let result = '';
-//            for (let i = txResult.transactions.length - 1; i >= 0; --i) {
-//                const r = txResult.transactions[i];
-//                if (r.result && r.result.result && r.result.result.length > 0) {
-//                    result = r.result.result;
-//                    break;
-//                }
-//            }
-//            status = {
-//                SuccessValue: result,
-//            };
-//        }
-//        txResult = {
-//            status,
-//            transaction: mapLegacyTransactionLog(txResult.transactions.splice(0, 1)[0]),
-//            receipts: txResult.transactions.map(mapLegacyTransactionLog),
-//        };
-//    }
-//
-//    // Adapting from old error handling.
-//    txResult.transaction = fixLegacyBasicExecutionOutcomeFailure(txResult.transaction);
-//    txResult.receipts = txResult.receipts.map(fixLegacyBasicExecutionOutcomeFailure);
-//
-//    // Fixing master error status
-//    if (txResult.status === FinalExecutionStatusBasic.Failure) {
-//        const err = ([txResult.transaction, ...txResult.receipts]
-//            .find(t => typeof t.outcome.status === 'object' && typeof t.outcome.status.Failure === 'object')
-//            .outcome.status as ExecutionStatus).Failure;
-//        txResult.status = {
-//            Failure: err
-//        };
-//    }
-
-//    return txResult;
+internal struct BlockResult: Codable {
+  let header: BlockHeader
+  let transactions: [Transaction]
 }
 
 internal enum ProviderType {
@@ -199,24 +157,18 @@ internal enum ProviderType {
 }
 
 internal protocol Provider {
-  func getNetwork() -> Promise<Network>
-  func status() -> Promise<NodeStatusResult>
-
-  func sendTransaction(signedTransaction: SignedTransaction) -> Promise<FinalExecutionOutcome>
-  func txStatus(txHash: [UInt8], accountId: String) -> Promise<FinalExecutionOutcome>
-  func query<T: Codable>(path: String, data: String) -> Promise<T>
-  func block(blockId: BlockId) -> Promise<BlockResult>
-  func chunk(chunkId: ChunkId) -> Promise<ChunkResult>
+  func getNetwork() throws -> Promise<Network>
+  func status() throws -> Promise<NodeStatusResult>
+  func sendTransaction(signedTransaction: SignedTransaction) throws -> Promise<FinalExecutionOutcome>
+  func txStatus(txHash: [UInt8], accountId: String) throws -> Promise<FinalExecutionOutcome>
+  func query<T: Codable>(path: String, data: String) throws -> Promise<T>
+  func block(blockId: BlockId) throws -> Promise<BlockResult>
+  func chunk(chunkId: ChunkId) throws -> Promise<ChunkResult>
 }
 
 internal func getTransactionLastResult(txResult: FinalExecutionOutcome) -> Any? {
-//    if (typeof txResult.status === 'object' && typeof txResult.status.SuccessValue === 'string') {
-//        const value = Buffer.from(txResult.status.SuccessValue, 'base64').toString();
-//        try {
-//            return JSON.parse(value)
-//        } catch (e) {
-//            return value;
-//        }
-//    }
-    return nil
+  if let success = txResult.status.SuccessValue, let data = Data(base64Encoded: success) {
+    return try? JSONSerialization.jsonObject(with: data, options: [])
+  }
+  return nil
 }

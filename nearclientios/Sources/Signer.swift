@@ -42,7 +42,7 @@ internal protocol Signer {
       - accountId: accountId to use for signing.
       - networkId: network for this accontId.
    */
-  func signHash(hash: [UInt8], accountId: String, networkId: String) throws -> Promise<GeneralSignature>
+  func signHash(hash: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol>
 
   /**
    Signs given message, by first hashing with sha256.
@@ -51,11 +51,11 @@ internal protocol Signer {
       - accountId: accountId to use for signing.
       - networkId: network for this accontId.
    */
-  func signMessage(message: [UInt8], accountId: String, networkId: String) throws -> Promise<GeneralSignature>
+  func signMessage(message: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol>
 }
 
 extension Signer {
-  func signMessage(message: [UInt8], accountId: String, networkId: String) throws -> Promise<GeneralSignature> {
+  func signMessage(message: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol> {
     return try signHash(hash: message.digest, accountId: accountId, networkId: networkId)
   }
 }
@@ -83,7 +83,7 @@ extension InMemorySigner: Signer {
     return keyPair.map {$0?.getPublicKey()}
   }
 
-  func signHash(hash: [UInt8], accountId: String, networkId: String) throws -> Promise<GeneralSignature> {
+  func signHash(hash: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol> {
     guard let keyPair = try await(keyStore.getKey(networkId: networkId, accountId: accountId)) else {
       throw InMemorySignerError.notFound("Key for \(accountId) not found in \(networkId)")
     }

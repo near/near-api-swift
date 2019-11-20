@@ -12,12 +12,16 @@ import KeychainAccess
 let KEYCHAIN_STORAGE_SERVICE = "nearlib.keystore"
 
 internal struct KeychainKeyStore {
-  private let keychain: Keychain = .init(service: KEYCHAIN_STORAGE_SERVICE)
+  private let keychain: Keychain
+
+  init(keychain: Keychain = .init(service: KEYCHAIN_STORAGE_SERVICE)) {
+    self.keychain = keychain
+  }
 }
 
 extension KeychainKeyStore: KeyStore {
   func setKey(networkId: String, accountId: String, keyPair: KeyPair) -> Promise<Void> {
-    keychain[keyPair.toString()] = storageKeyForSecretKey(networkId: networkId, accountId: accountId)
+    keychain[storageKeyForSecretKey(networkId: networkId, accountId: accountId)] = keyPair.toString()
     return .value(())
   }
 

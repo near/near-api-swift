@@ -1,45 +1,23 @@
-#
-# Be sure to run `pod lib lint nearclientios.podspec' to ensure this is a
-# valid spec before submitting.
-#
-# Any lines starting with a # are optional, but their use is encouraged
-# To learn more about a Podspec see https://guides.cocoapods.org/syntax/podspec.html
-#
-
 Pod::Spec.new do |s|
   s.name             = 'nearclientios'
   s.version          = '0.1.0'
-  s.summary          = 'A short description of nearclientios.'
-
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!
+  s.summary          = 'Swift SDK to interact with NEAR Protocol'
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
-                       DESC
-
+    near-client-ios is a SWIFT library for development of DApps on NEAR platform.
+                        DESC
   s.homepage         = 'https://github.com/nearprotocol/near-client-ios'
-  # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'dmitrykurochka' => 'v.i.p.dimak@gmail.com' }
   s.source           = { :git => 'https://github.com/nearprotocol/near-client-ios.git', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+  s.social_media_url = 'https://twitter.com/nearprotocol'
 
   s.ios.deployment_target = '9.3'
 
   s.source_files = 'nearclientios/Sources/**/*'
-  
-  # s.resource_bundles = {
-  #   'nearclientios' => ['nearclientios/Assets/*.png']
-  # }
 
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-   s.dependency 'AwaitKit', '~> 5.0'
-   s.dependency 'TweetNacl', '~> 1.0'
-   s.dependency 'BigInt', '~> 5.0'
-   s.dependency 'KeychainAccess', '~> 4.1.0'
+  s.dependency 'AwaitKit', '~> 5.0'
+  s.dependency 'TweetNacl', '~> 1.0'
+  s.dependency 'BigInt', '~> 5.0'
+  s.dependency 'KeychainAccess', '~> 4.1.0'
 end

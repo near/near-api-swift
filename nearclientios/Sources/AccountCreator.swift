@@ -22,8 +22,7 @@ internal struct LocalAccountCreator {
 
 extension LocalAccountCreator: AccountCreator {
   func createAccount(newAccountId: String, publicKey: PublicKey) throws -> Promise<Void> {
-    try await(masterAccount.createAccount(newAccountId: newAccountId, publicKey: publicKey, amount: initialBalance))
-    return .value(())
+    return try masterAccount.createAccount(newAccountId: newAccountId, publicKey: publicKey, amount: initialBalance).asVoid()
   }
 }
 
