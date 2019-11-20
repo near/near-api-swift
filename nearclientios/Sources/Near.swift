@@ -55,7 +55,7 @@ extension Near {
     var accountCreator: AccountCreator?
     if let masterAccount = config.masterAccount {
       // TODO: figure out better way of specifiying initial balance.
-      let initialBalance = config.initialBalance ?? BigInt(1000 * 1000 * 1000 * 1000)
+      let initialBalance = config.initialBalance ?? BigInt("+1000000000000")
       let masterAccount = Account(connection: connection, accountId: masterAccount)
       accountCreator = LocalAccountCreator(masterAccount: masterAccount, initialBalance: initialBalance)
     } else if let url = config.helperUrl {
