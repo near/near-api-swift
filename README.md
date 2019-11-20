@@ -1,6 +1,6 @@
 # nearclientios
 
-[![CI Status](https://img.shields.io/travis/dmitrykurochka/nearclientios.svg?style=flat)](https://travis-ci.com/nearprotocol/near-client-ios.svg?branch=master)
+[![Build Status](https://travis-ci.com/nearprotocol/near-client-ios.svg?branch=master)](https://travis-ci.com/nearprotocol/near-client-ios)
 [![Version](https://img.shields.io/cocoapods/v/nearclientios.svg?style=flat)](https://cocoapods.org/pods/nearclientios)
 [![License](https://img.shields.io/cocoapods/l/nearclientios.svg?style=flat)](https://cocoapods.org/pods/nearclientios)
 [![Platform](https://img.shields.io/cocoapods/p/nearclientios.svg?style=flat)](https://cocoapods.org/pods/nearclientios)
