@@ -1,11 +1,9 @@
 PODS:
   - AwaitKit (5.2.0):
     - PromiseKit (~> 6)
-  - BigInt (5.0.0)
   - KeychainAccess (4.1.0)
   - nearclientios (0.1.0):
     - AwaitKit (~> 5.0)
-    - BigInt (~> 5.0)
     - KeychainAccess (~> 4.1.0)
     - TweetNacl (~> 1.0)
   - PromiseKit (6.11.0):
@@ -25,7 +23,6 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - AwaitKit
-    - BigInt
     - KeychainAccess
     - PromiseKit
     - TweetNacl
@@ -36,12 +33,11 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AwaitKit: 512626cd12c82b1fbffddc8f414d0364cb456004
-  BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
   KeychainAccess: 445e28864fe6d3458b41fa211bcdc39890e8bd5a
-  nearclientios: d882f05c68a39ed33d0086f2ca4f80907129375b
+  nearclientios: f2961e598f87367c10dd53f99f7d420e0f34d5bf
   PromiseKit: e4863d06976e7dee5e41c04fc7371c16b3600292
   TweetNacl: 3abf4d1d2082b0114e7a67410e300892448951e6
 
-PODFILE CHECKSUM: dbd51b1b344329e8ef1a2fb0411c86b8bcef68c7
+PODFILE CHECKSUM: bf2ede311928de0026e7155c3c779a7c3a7fed9d
 
 COCOAPODS: 1.8.4

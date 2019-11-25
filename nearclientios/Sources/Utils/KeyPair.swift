@@ -43,7 +43,7 @@ internal enum PublicKeyDecodeError: Error {
   case unknowKeyType
 }
 
-internal struct PublicKeyPayload: FixedLengthByteArray, BorshCodable {
+internal struct PublicKeyPayload: FixedLengthByteArray, Decodable, BorshCodable {
   static let fixedLength: UInt32 = 32
   let bytes: [UInt8]
 }
@@ -51,7 +51,7 @@ internal struct PublicKeyPayload: FixedLengthByteArray, BorshCodable {
 /**
  * PublicKey representation that has type and bytes of the key.
  */
-internal struct PublicKey {
+internal struct PublicKey: Decodable {
   private let keyType: KeyType
   internal let data: PublicKeyPayload
 

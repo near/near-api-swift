@@ -1,3 +1,6 @@
+import Foundation
+import Accelerate.vecLib
+
 public typealias Int1X = FixedWidthInteger & BinaryInteger & SignedInteger & Codable
 
 public struct Int2X<Word:UInt1X>: Hashable, Codable {

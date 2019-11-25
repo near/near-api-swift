@@ -1,3 +1,6 @@
+import Foundation
+import Accelerate.vecLib
+
 public typealias UInt1X = FixedWidthInteger & BinaryInteger & UnsignedInteger & Codable
 
 public struct UInt2X<Word:UInt1X>: Hashable, Codable {
@@ -102,7 +105,7 @@ extension UInt2X : Numeric {
     public func addingReportingOverflow(_ other: UInt2X) -> (partialValue: UInt2X, overflow: Bool) {
         guard self  != 0 else { return (other, false) }
         guard other != 0 else { return (self,  false) }
-        #if os(macOS) || os(iOS)
+        #if os(macOS)
         if Int2XConfig.useAccelerate {
             //print("line \(#line):Accelerated! \(UInt2X.self)(\(self)).addingReportingOverflow(\(other))")
             switch self {
@@ -167,7 +170,7 @@ extension UInt2X : Numeric {
         guard self  != other else { return (0,  false) }
         guard self  != 0 else { return (-other, false) }
         guard other != 0 else { return (+self,  false) }
-        #if os(macOS) || os(iOS)
+        #if os(macOS)
         if Int2XConfig.useAccelerate {
             // print("line \(#line):Accelerated! \(UInt2X.self)(\(self)).subtractingReportingOverflow(\(other))")
             switch self {
@@ -235,7 +238,7 @@ extension UInt2X : Numeric {
     public func multipliedFullWidth(by other: UInt2X) -> (high: UInt2X, low: Magnitude) {
         guard self  != 0 else { return (0, 0) }
         guard other != 0 else { return (0, 0) }
-        #if os(macOS) || os(iOS)
+        #if os(macOS)
         if Int2XConfig.useAccelerate {
             // print("line \(#line):Accelerated! \(UInt2X.self)(\(self)).multipliedFullWidth(by:\(other))")
             switch self {
@@ -315,7 +318,7 @@ extension UInt2X {
         if width <  0 { return self.lShifted(-width) }
         if width == 0 { return self }
         if width == Word.bitWidth     { return UInt2X(hi:0, lo:self.hi) }
-        #if os(macOS) || os(iOS)
+        #if os(macOS)
         if Int2XConfig.useAccelerate {
             // print("line \(#line):Accelerated! \(UInt2X.self)(\(self)).rShifted(\(other))")
             switch self {
@@ -357,7 +360,7 @@ extension UInt2X {
         if width <  0 { return self.rShifted(-width) }
         if width == 0 { return self }
         if width == Word.bitWidth     { return UInt2X(hi:self.lo, lo:0) }
-        #if os(macOS) || os(iOS)
+        #if os(macOS)
         if Int2XConfig.useAccelerate {
             // print("line \(#line):Accelerated! \(UInt2X.self)(\(self)).lShifted(\(other))")
             switch self {
@@ -422,7 +425,7 @@ extension UInt2X {
         guard other.hi != 0 else {
             return self.quotientAndRemainder(dividingBy: other.lo)
         }
-        #if os(macOS) || os(iOS)
+        #if os(macOS)
         if Int2XConfig.useAccelerate {
             // print("line \(#line):Accelerated! \(UInt2X.self)(\(self)).quotientAndRemainder(dividingBy:\(other))")
             switch self {
@@ -505,7 +508,7 @@ extension UInt2X {
     public func dividingFullWidth(_ dividend: (high: UInt2X, low: Magnitude)) -> (quotient: UInt2X, remainder: UInt2X) {
         precondition(self != 0, "division by zero!")
         guard dividend.high != 0 else { return dividend.low.quotientAndRemainder(dividingBy: self) }
-        #if os(macOS) || os(iOS)
+        #if os(macOS)
         if Int2XConfig.useAccelerate {
             // print("line \(#line):Accelerated! \(UInt2X.self)(\(self)).dividingFullWidth(\(dividend))")
             switch self {

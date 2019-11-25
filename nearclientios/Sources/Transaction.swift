@@ -13,7 +13,7 @@ import AwaitKit
 //TODO complete this part
 
 internal struct FunctionCallPermission {
-  let allowance: BigUInt?
+  let allowance: UInt128?
   let receiverId: String
   let methodNames: [String]
 }
@@ -54,6 +54,13 @@ internal enum AccessKeyPermission {
   }
 }
 
+extension AccessKeyPermission: Decodable {
+  init(from decoder: Decoder) throws {
+    // TODO actually implement
+    self = .fullAccess(FullAccessPermission())
+  }
+}
+
 extension AccessKeyPermission: BorshCodable {
   func serialize(to writer: inout Data) throws {
     try rawValue.serialize(to: &writer)
@@ -73,7 +80,7 @@ extension AccessKeyPermission: BorshCodable {
   }
 }
 
-internal struct AccessKey {
+internal struct AccessKey: Decodable {
   let nonce: UInt64
   let permission: AccessKeyPermission
 }
@@ -96,7 +103,7 @@ internal func fullAccessKey() -> AccessKey {
   return AccessKey(nonce: 0, permission: permission)
 }
 
-internal func functionCallAccessKey(receiverId: String, methodNames: [String], allowance: BigUInt?) -> AccessKey {
+internal func functionCallAccessKey(receiverId: String, methodNames: [String], allowance: UInt128?) -> AccessKey {
   let callPermission = FunctionCallPermission(allowance: allowance, receiverId: receiverId, methodNames: methodNames)
   let permission = AccessKeyPermission.functionCall(callPermission)
   return AccessKey( nonce: 0, permission: permission)
@@ -133,7 +140,7 @@ internal struct FunctionCall: IAction {
   let methodName: String
   let args: [UInt8]
   let gas: Number
-  let deposit: BigUInt
+  let deposit: UInt128
 }
 
 extension FunctionCall: BorshCodable {
@@ -153,7 +160,7 @@ extension FunctionCall: BorshCodable {
 }
 
 internal struct Transfer: IAction {
-  let deposit: BigUInt
+  let deposit: UInt128
 }
 
 extension Transfer: BorshCodable {
@@ -167,7 +174,7 @@ extension Transfer: BorshCodable {
 }
 
 internal struct Stake: IAction {
-  let stake: BigUInt
+  let stake: UInt128
   let publicKey: PublicKey
 }
 
@@ -236,15 +243,15 @@ func deployContract(code: [UInt8]) -> Action {
   return .deployContract(DeployContract(code: code))
 }
 
-func functionCall(methodName: String, args: [UInt8], gas: Number, deposit: BigUInt) -> Action {
+func functionCall(methodName: String, args: [UInt8], gas: Number, deposit: UInt128) -> Action {
   return .functionCall(FunctionCall(methodName: methodName, args: args, gas: gas, deposit: deposit))
 }
 
-func transfer(deposit: BigUInt) -> Action {
+func transfer(deposit: UInt128) -> Action {
   return .transfer(Transfer(deposit: deposit))
 }
 
-func stake(stake: BigUInt, publicKey: PublicKey) -> Action {
+func stake(stake: UInt128, publicKey: PublicKey) -> Action {
   return .stake(Stake(stake: stake, publicKey: publicKey))
 }
 
@@ -260,13 +267,30 @@ func deleteAccount(beneficiaryId: String) -> Action {
   return .deleteAccount(DeleteAccount(beneficiaryId: beneficiaryId))
 }
 
+internal struct SignaturePayload: FixedLengthByteArray, BorshCodable {
+  static let fixedLength: UInt32 = 64
+  let bytes: [UInt8]
+}
+
 internal struct CodableSignature {
   let keyType: KeyType
-  let data: [UInt8]
+  let data: SignaturePayload
 
   init(signature: [UInt8]) {
     self.keyType = KeyType.ED25519
-    self.data = signature
+    self.data = SignaturePayload(bytes: signature)
+  }
+}
+
+extension CodableSignature: BorshCodable {
+  func serialize(to writer: inout Data) throws {
+    try keyType.serialize(to: &writer)
+    try data.serialize(to: &writer)
+  }
+
+  init(from reader: inout BinaryReader) throws {
+    self.keyType = try .init(from: &reader)
+    self.data = try .init(from: &reader)
   }
 }
 
@@ -307,6 +331,18 @@ extension CodableTransaction: BorshCodable {
 internal struct SignedTransaction {
   let transaction: CodableTransaction
   let signature: CodableSignature
+}
+
+extension SignedTransaction: BorshCodable {
+  func serialize(to writer: inout Data) throws {
+    try transaction.serialize(to: &writer)
+    try signature.serialize(to: &writer)
+  }
+
+  init(from reader: inout BinaryReader) throws {
+    self.transaction = try .init(from: &reader)
+    self.signature = try .init(from: &reader)
+  }
 }
 
 internal enum Action {

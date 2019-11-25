@@ -52,8 +52,8 @@ extension JSONRPCProvider: Provider {
   }
 
   func sendTransaction(signedTransaction: SignedTransaction) throws -> Promise<FinalExecutionOutcome> {
-    let bytes = signedTransaction.encode()
-    let params = [Data(bytes: bytes, count: bytes.count).base64EncodedString()]
+    let data = try BorshEncoder().encode(signedTransaction)
+    let params = [data.base64EncodedString()]
     return try sendJsonRpc(method: "broadcast_tx_commit", params: params)
   }
 

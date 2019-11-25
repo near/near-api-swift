@@ -161,7 +161,7 @@ internal protocol Provider {
   func status() throws -> Promise<NodeStatusResult>
   func sendTransaction(signedTransaction: SignedTransaction) throws -> Promise<FinalExecutionOutcome>
   func txStatus(txHash: [UInt8], accountId: String) throws -> Promise<FinalExecutionOutcome>
-  func query<T: Codable>(path: String, data: String) throws -> Promise<T>
+  func query<T: Decodable>(path: String, data: String) throws -> Promise<T>
   func block(blockId: BlockId) throws -> Promise<BlockResult>
   func chunk(chunkId: ChunkId) throws -> Promise<ChunkResult>
 }

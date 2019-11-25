@@ -41,7 +41,7 @@ internal struct AccountState: Codable {
   let code_hash: String
 }
 
-internal struct KeyBox: Codable {
+internal struct KeyBox: Decodable {
   let access_key: AccessKey
   let public_key: PublicKey
 }
@@ -153,7 +153,7 @@ internal final class Account {
   }
 
   private func createAndDeployContract(contractId: String, publicKey: PublicKey,
-                                       data: [UInt8], amount: BigUInt) throws -> Promise<Account> {
+                                       data: [UInt8], amount: UInt128) throws -> Promise<Account> {
     let accessKey = fullAccessKey()
     let actions = [nearclientios.createAccount(),
                    nearclientios.transfer(deposit: amount),
@@ -164,7 +164,7 @@ internal final class Account {
     return .value(contractAccount)
   }
 
-  func sendMoney(receiverId: String, amount: BigUInt) throws -> Promise<FinalExecutionOutcome> {
+  func sendMoney(receiverId: String, amount: UInt128) throws -> Promise<FinalExecutionOutcome> {
     return try signAndSendTransaction(receiverId: receiverId, actions: [nearclientios.transfer(deposit: amount)])
   }
 
@@ -187,7 +187,7 @@ internal final class Account {
   }
 
   private func functionCall(contractId: String, methodName: String, args: [String: Any] = [:],
-                            gas: Number = DEFAULT_FUNC_CALL_AMOUNT, amount: BigUInt) throws -> Promise<FinalExecutionOutcome> {
+                            gas: Number = DEFAULT_FUNC_CALL_AMOUNT, amount: UInt128) throws -> Promise<FinalExecutionOutcome> {
     let actions = [nearclientios.functionCall(methodName: methodName, args: Data(json: args).bytes, gas: gas, deposit: amount)]
     return try signAndSendTransaction(receiverId: contractId, actions: actions)
   }
@@ -209,7 +209,7 @@ internal final class Account {
     return try signAndSendTransaction(receiverId: accountId, actions: [nearclientios.deleteKey(publicKey: publicKey)])
   }
 
-  private func stake(publicKey: PublicKey, amount: BigUInt) throws -> Promise<FinalExecutionOutcome> {
+  private func stake(publicKey: PublicKey, amount: UInt128) throws -> Promise<FinalExecutionOutcome> {
     return try signAndSendTransaction(receiverId: accountId,
                                       actions: [nearclientios.stake(stake: amount, publicKey: publicKey)])
   }
