@@ -29,10 +29,12 @@ extension UInt8: BorshDeserializable {}
 extension UInt16: BorshDeserializable {}
 extension UInt32: BorshDeserializable {}
 extension UInt64: BorshDeserializable {}
+extension UInt128: BorshDeserializable {}
 extension Int8: BorshDeserializable {}
 extension Int16: BorshDeserializable {}
 extension Int32: BorshDeserializable {}
 extension Int64: BorshDeserializable {}
+extension Int128: BorshDeserializable {}
 
 extension Float32: BorshDeserializable {
   init(from reader: inout BinaryReader) throws {

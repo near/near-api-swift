@@ -9,7 +9,6 @@
 import Foundation
 import PromiseKit
 import AwaitKit
-import BigInt
 
 internal protocol AccountCreator {
   func createAccount(newAccountId: String, publicKey: PublicKey) throws -> Promise<Void>
@@ -17,7 +16,7 @@ internal protocol AccountCreator {
 
 internal struct LocalAccountCreator {
   let masterAccount: Account
-  let initialBalance: BigInt
+  let initialBalance: UInt128
 }
 
 extension LocalAccountCreator: AccountCreator {

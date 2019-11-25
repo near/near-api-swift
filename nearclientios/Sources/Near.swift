@@ -9,8 +9,6 @@
 import Foundation
 import PromiseKit
 import AwaitKit
-import BigInt
-import os
 
 internal protocol NearConfigProtocol: ConnectionConfigProtocol {
   var networkId: String {get}
@@ -18,7 +16,7 @@ internal protocol NearConfigProtocol: ConnectionConfigProtocol {
   var masterAccount: String? {get set}
   var keyPath: String? {get}
   var helperUrl: URL? {get}
-  var initialBalance: BigInt? {get}
+  var initialBalance: UInt128? {get}
   var keyStore: KeyStore? {get set}
   var contractName: String? {get}
   var walletUrl: String {get}
@@ -30,7 +28,7 @@ internal struct NearConfig: NearConfigProtocol {
   var masterAccount: String?
   let keyPath: String?
   let helperUrl: URL?
-  let initialBalance: BigInt?
+  let initialBalance: UInt128?
   let providerType: ProviderType
   let signerType: SignerType
   var keyStore: KeyStore?
@@ -55,7 +53,7 @@ extension Near {
     var accountCreator: AccountCreator?
     if let masterAccount = config.masterAccount {
       // TODO: figure out better way of specifiying initial balance.
-      let initialBalance = config.initialBalance ?? BigInt("+1000000000000")
+      let initialBalance = config.initialBalance ?? UInt128(1000000000000)
       let masterAccount = Account(connection: connection, accountId: masterAccount)
       accountCreator = LocalAccountCreator(masterAccount: masterAccount, initialBalance: initialBalance)
     } else if let url = config.helperUrl {
@@ -103,7 +101,7 @@ extension Near {
       - receiver: receiver
    */
   @available(*, deprecated, renamed: "yourAccount.sendMoney", message: "Backwards compatibility method. Use `yourAccount.sendMoney` instead")
-  private func sendTokens(amount: BigInt, originator: String, receiver: String) throws -> Promise<String> {
+  private func sendTokens(amount: UInt128, originator: String, receiver: String) throws -> Promise<String> {
     print("near.sendTokens is deprecated. Use `yourAccount.sendMoney` instead.")
     let account = Account(connection: connection, accountId: originator)
     let result = try await(account.sendMoney(receiverId: receiver, amount: amount))

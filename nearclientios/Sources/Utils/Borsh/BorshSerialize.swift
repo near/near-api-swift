@@ -15,10 +15,12 @@ extension UInt8: BorshSerializable {}
 extension UInt16: BorshSerializable {}
 extension UInt32: BorshSerializable {}
 extension UInt64: BorshSerializable {}
+extension UInt128: BorshSerializable {}
 extension Int8: BorshSerializable {}
 extension Int16: BorshSerializable {}
 extension Int32: BorshSerializable {}
 extension Int64: BorshSerializable {}
+extension Int128: BorshSerializable {}
 
 internal extension FixedWidthInteger {
   func serialize(to writer: inout Data) throws {

@@ -9,7 +9,6 @@
 import Foundation
 import PromiseKit
 import AwaitKit
-import BigInt
 
 //TODO complete this part
 
@@ -28,7 +27,7 @@ let TX_STATUS_RETRY_WAIT: Double = 500
 let TX_STATUS_RETRY_WAIT_BACKOFF = 1.5
 
 // Sleep given number of millis.
-func sleep(millis: Double) -> Promise<Void> {
+internal func sleep(millis: Double) -> Promise<Void> {
   let sec = millis / 1000
   return Promise<Void> { seal in
     DispatchQueue.main.asyncAfter(deadline: .now() + sec) {seal.fulfill(())}
@@ -47,7 +46,7 @@ internal struct KeyBox: Codable {
   let public_key: PublicKey
 }
 
-typealias KeyBoxes = [KeyBox]
+internal typealias KeyBoxes = [KeyBox]
 
 internal enum AccountError: Error {
   case noAccessKey(String)
@@ -74,7 +73,7 @@ internal final class Account {
   }
 
   private func fetchState() throws -> Promise<Void> {
-    _state = try await(connection.provider.query(path: "account/${this.accountId}", data: ""))
+    _state = try await(connection.provider.query(path: "account/\(accountId)", data: ""))
     guard let publicKey = try await(connection.signer.getPublicKey(accountId: accountId,
                                                                    networkId: connection.networkId)) else {
                                                                     print("Missing public key for \(accountId) in \(connection.networkId)")
@@ -154,26 +153,26 @@ internal final class Account {
   }
 
   private func createAndDeployContract(contractId: String, publicKey: PublicKey,
-                                       data: [UInt8], amount: BigInt) throws -> Promise<Account> {
+                                       data: [UInt8], amount: BigUInt) throws -> Promise<Account> {
     let accessKey = fullAccessKey()
-    let actions: [Action] = [nearclientios.createAccount(),
-                             transfer(deposit: amount),
-                             nearclientios.addKey(publicKey: publicKey, accessKey: accessKey),
-                             nearclientios.deployContract(code: data)]
+    let actions = [nearclientios.createAccount(),
+                   nearclientios.transfer(deposit: amount),
+                   nearclientios.addKey(publicKey: publicKey, accessKey: accessKey),
+                   nearclientios.deployContract(code: data)]
     try await(signAndSendTransaction(receiverId: contractId, actions: actions))
     let contractAccount = Account(connection: connection, accountId: contractId)
     return .value(contractAccount)
   }
 
-  func sendMoney(receiverId: String, amount: BigInt) throws -> Promise<FinalExecutionOutcome> {
-    return try signAndSendTransaction(receiverId: receiverId, actions: [transfer(deposit: amount)])
+  func sendMoney(receiverId: String, amount: BigUInt) throws -> Promise<FinalExecutionOutcome> {
+    return try signAndSendTransaction(receiverId: receiverId, actions: [nearclientios.transfer(deposit: amount)])
   }
 
   func createAccount(newAccountId: String, publicKey: PublicKey,
-                             amount: BigInt) throws -> Promise<FinalExecutionOutcome> {
+                             amount: UInt128) throws -> Promise<FinalExecutionOutcome> {
     let accessKey = fullAccessKey()
     let actions = [nearclientios.createAccount(),
-                   transfer(deposit: amount),
+                   nearclientios.transfer(deposit: amount),
                    nearclientios.addKey(publicKey: publicKey, accessKey: accessKey)]
     return try signAndSendTransaction(receiverId: newAccountId, actions: actions)
   }
@@ -188,14 +187,14 @@ internal final class Account {
   }
 
   private func functionCall(contractId: String, methodName: String, args: [String: Any] = [:],
-                            gas: Number = DEFAULT_FUNC_CALL_AMOUNT, amount: BigInt) throws -> Promise<FinalExecutionOutcome> {
+                            gas: Number = DEFAULT_FUNC_CALL_AMOUNT, amount: BigUInt) throws -> Promise<FinalExecutionOutcome> {
     let actions = [nearclientios.functionCall(methodName: methodName, args: Data(json: args).bytes, gas: gas, deposit: amount)]
     return try signAndSendTransaction(receiverId: contractId, actions: actions)
   }
 
   // TODO: expand this API to support more options.
   private func addKey(publicKey: PublicKey, contractId: String?, methodName: String?,
-                      amount: BigInt?) throws -> Promise<FinalExecutionOutcome> {
+                      amount: UInt128?) throws -> Promise<FinalExecutionOutcome> {
     let accessKey: AccessKey
     if let contractId = contractId, !contractId.isEmpty {
       let methodNames = methodName.flatMap {[$0]} ?? []
@@ -210,7 +209,7 @@ internal final class Account {
     return try signAndSendTransaction(receiverId: accountId, actions: [nearclientios.deleteKey(publicKey: publicKey)])
   }
 
-  private func stake(publicKey: PublicKey, amount: BigInt) throws -> Promise<FinalExecutionOutcome> {
+  private func stake(publicKey: PublicKey, amount: BigUInt) throws -> Promise<FinalExecutionOutcome> {
     return try signAndSendTransaction(receiverId: accountId,
                                       actions: [nearclientios.stake(stake: amount, publicKey: publicKey)])
   }

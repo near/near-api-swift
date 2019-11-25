@@ -20,8 +20,22 @@ internal struct Signature: SignatureProtocol {
 }
 
 /** All supported key types */
-internal enum KeyType: String, Codable {
-    case ED25519 = "ed25519"
+internal enum KeyType: String, Codable, BorshCodable {
+  case ED25519 = "ed25519"
+
+  func serialize(to writer: inout Data) throws {
+    switch self {
+    case .ED25519: return try UInt8(0).serialize(to: &writer)
+    }
+  }
+
+  init(from reader: inout BinaryReader) throws {
+    let value = try UInt8(from: &reader)
+    switch value {
+    case 0: self = .ED25519
+    default: throw BorshDecodingError.unknownData
+    }
+  }
 }
 
 internal enum PublicKeyDecodeError: Error {
@@ -29,16 +43,21 @@ internal enum PublicKeyDecodeError: Error {
   case unknowKeyType
 }
 
+internal struct PublicKeyPayload: FixedLengthByteArray, BorshCodable {
+  static let fixedLength: UInt32 = 32
+  let bytes: [UInt8]
+}
+
 /**
  * PublicKey representation that has type and bytes of the key.
  */
-internal struct PublicKey: Codable {
+internal struct PublicKey {
   private let keyType: KeyType
-  internal let data: [UInt8]
+  internal let data: PublicKeyPayload
 
   init(keyType: KeyType, data: [UInt8]) {
     self.keyType = keyType
-    self.data = data
+    self.data = PublicKeyPayload(bytes: data)
   }
 
   static func fromString(encodedKey: String) throws -> PublicKey {
@@ -54,7 +73,19 @@ internal struct PublicKey: Codable {
   }
 
   func toString() -> String {
-    return "\(keyType):\(data.baseEncoded)"
+    return "\(keyType):\(data.bytes.baseEncoded)"
+  }
+}
+
+extension PublicKey: BorshCodable {
+  func serialize(to writer: inout Data) throws {
+    try keyType.serialize(to: &writer)
+    try data.serialize(to: &writer)
+  }
+
+  init(from reader: inout BinaryReader) throws {
+    self.keyType = try .init(from: &reader)
+    self.data = try .init(from: &reader)
   }
 }
 
@@ -137,7 +168,7 @@ extension KeyPairEd25519: KeyPair {
   }
 
   func verify(message: [UInt8], signature: [UInt8]) throws -> Bool {
-    return try NaclSign.signDetachedVerify(message: message.data, sig: signature.data, publicKey: publicKey.data.data)
+    return try NaclSign.signDetachedVerify(message: message.data, sig: signature.data, publicKey: publicKey.data.bytes.data)
   }
 
   func toString() -> String {
