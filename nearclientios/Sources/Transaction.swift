@@ -10,8 +10,6 @@ import Foundation
 import PromiseKit
 import AwaitKit
 
-//TODO complete this part
-
 internal struct FunctionCallPermission {
   let allowance: UInt128?
   let receiverId: String

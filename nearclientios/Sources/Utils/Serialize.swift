@@ -8,8 +8,6 @@
 
 import Foundation
 
-//TODO complete this part
-
 internal extension String {
   var baseDecoded: [UInt8] {
     return []
