@@ -24,12 +24,12 @@ internal struct MergeKeyStore {
 
 extension MergeKeyStore: KeyStore {
   func setKey(networkId: String, accountId: String, keyPair: KeyPair) -> Promise<Void> {
-    keyStores[0].setKey(networkId: networkId, accountId: accountId, keyPair: keyPair)
+    return keyStores[0].setKey(networkId: networkId, accountId: accountId, keyPair: keyPair)
   }
 
   func getKey(networkId: String, accountId: String) -> Promise<KeyPair?> {
     for keyStore in keyStores {
-      if let keyPair = try? await(keyStore.getKey(networkId: networkId, accountId: accountId)) {
+      if let keyPair = try! await(keyStore.getKey(networkId: networkId, accountId: accountId)) {
         return .value(keyPair)
       }
     }
@@ -46,17 +46,25 @@ extension MergeKeyStore: KeyStore {
     return when(resolved: promises).asVoid()
   }
 
-  func getNetworks() -> Promise<[String]> {
-    return when(fulfilled: keyStores.map {$0.getNetworks()})
-      .map {$0.reduce([], +)}
-      .map(Set.init)
-      .map(Array.init)
+  func getNetworks() throws -> Promise<[String]> {
+    var result = Set<String>()
+    for keyStore in keyStores {
+      let networks = try await(keyStore.getNetworks())
+      for network in networks {
+        result.insert(network)
+      }
+    }
+    return .value(Array(result))
   }
 
-  func getAccounts(networkId: String) -> Promise<[String]> {
-    return when(fulfilled: keyStores.map {$0.getAccounts(networkId: networkId)})
-      .map {$0.reduce([], +)}
-      .map(Set.init)
-      .map(Array.init)
+  func getAccounts(networkId: String) throws -> Promise<[String]> {
+    var result = Set<String>()
+    for keyStore in keyStores {
+      let accounts = try await(keyStore.getAccounts(networkId: networkId))
+      for account in accounts {
+        result.insert(account)
+      }
+    }
+    return .value(Array(result))
   }
 }

@@ -20,4 +20,5 @@ Pod::Spec.new do |s|
   s.dependency 'AwaitKit', '~> 5.0'
   s.dependency 'TweetNacl', '~> 1.0'
   s.dependency 'KeychainAccess', '~> 4.1.0'
+  s.dependency 'Base58Swift', '~> 2.1.7'
 end

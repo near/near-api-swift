@@ -41,7 +41,7 @@ extension InMemoryKeyStore: KeyStore {
     return .value(())
   }
 
-  func getNetworks() -> Promise<[String]> {
+  func getNetworks() throws -> Promise<[String]> {
     var result = Set<String>()
     keys.keys.forEach {key in
       let parts = key.split(separator: ":")
@@ -50,7 +50,7 @@ extension InMemoryKeyStore: KeyStore {
     return .value(Array(result))
   }
 
-  func getAccounts(networkId: String) -> Promise<[String]> {
+  func getAccounts(networkId: String) throws -> Promise<[String]> {
     var result = [String]()
     keys.keys.forEach {key in
       let parts = key.split(separator: ":").map {String($0)}

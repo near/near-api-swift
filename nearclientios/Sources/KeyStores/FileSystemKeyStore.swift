@@ -82,20 +82,15 @@ extension UnencryptedFileSystemKeyStore: KeyStore {
 
   func clear() -> Promise<Void> {
     do {
-      let networks = try await(getNetworks())
-      try networks.forEach { networkId in
-        let accounts = try await(getAccounts(networkId: networkId))
-        try accounts.forEach { accountId in
-          try await(removeKey(networkId: networkId, accountId: accountId))
-        }
-      }
+      let networksPath = manager.targetDirectory.appendingPathComponent(keyDir).path
+      try manager.removeItem(atPath: networksPath)
       return .value(())
     } catch let error {
       return .init(error: error)
     }
   }
 
-  func getNetworks() -> Promise<[String]> {
+  func getNetworks() throws -> Promise<[String]> {
     let networksPath = manager.targetDirectory.appendingPathComponent(keyDir).path
     do {
       let files = try manager.contentsOfDirectory(atPath: networksPath)
@@ -105,7 +100,7 @@ extension UnencryptedFileSystemKeyStore: KeyStore {
     }
   }
 
-  func getAccounts(networkId: String) -> Promise<[String]> {
+  func getAccounts(networkId: String) throws -> Promise<[String]> {
     let networkPath = "\(keyDir)/\(networkId)"
     let fullNetworkPath = manager.targetDirectory.appendingPathComponent(networkPath).path
     guard manager.fileExists(atPath: fullNetworkPath) else {return .value([])}

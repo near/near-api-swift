@@ -17,6 +17,6 @@ internal protocol KeyStore {
   func getKey(networkId: String, accountId: String) -> Promise<KeyPair?>
   func removeKey(networkId: String, accountId: String) -> Promise<Void>
   func clear() -> Promise<Void>
-  func getNetworks() -> Promise<[String]>
-  func getAccounts(networkId: String) -> Promise<[String]>
+  func getNetworks() throws -> Promise<[String]>
+  func getAccounts(networkId: String) throws -> Promise<[String]>
 }

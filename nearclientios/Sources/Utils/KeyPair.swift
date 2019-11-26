@@ -20,7 +20,7 @@ internal struct Signature: SignatureProtocol {
 }
 
 /** All supported key types */
-internal enum KeyType: String, Codable, BorshCodable {
+internal enum KeyType: String, Codable, Equatable, BorshCodable {
   case ED25519 = "ed25519"
 
   func serialize(to writer: inout Data) throws {
@@ -43,7 +43,7 @@ internal enum PublicKeyDecodeError: Error {
   case unknowKeyType
 }
 
-internal struct PublicKeyPayload: FixedLengthByteArray, Decodable, BorshCodable {
+internal struct PublicKeyPayload: FixedLengthByteArray, Equatable, Decodable, BorshCodable {
   static let fixedLength: UInt32 = 32
   let bytes: [UInt8]
 }
@@ -51,7 +51,7 @@ internal struct PublicKeyPayload: FixedLengthByteArray, Decodable, BorshCodable 
 /**
  * PublicKey representation that has type and bytes of the key.
  */
-internal struct PublicKey: Decodable {
+internal struct PublicKey: Decodable, Equatable {
   private let keyType: KeyType
   internal let data: PublicKeyPayload
 
@@ -73,7 +73,7 @@ internal struct PublicKey: Decodable {
   }
 
   func toString() -> String {
-    return "\(keyType):\(data.bytes.baseEncoded)"
+    return "\(keyType.rawValue):\(data.bytes.baseEncoded)"
   }
 }
 
@@ -101,7 +101,7 @@ internal protocol KeyPair {
   func getPublicKey() -> PublicKey
 }
 
-func keyPairFromRandom(curve: KeyType) throws -> KeyPair{
+func keyPairFromRandom(curve: KeyType = .ED25519) throws -> KeyPair{
   switch curve {
   case .ED25519: return try KeyPairEd25519.fromRandom()
   }
@@ -127,7 +127,7 @@ func keyPairFromString(encodedKey: String) throws -> KeyPair {
 * This struct provides key pair functionality for Ed25519 curve:
 * generating key pairs, encoding key pairs, signing and verifying.
 */
-internal struct KeyPairEd25519 {
+internal struct KeyPairEd25519: Equatable {
   private let publicKey: PublicKey
   private let secretKey: String
 
@@ -138,8 +138,8 @@ internal struct KeyPairEd25519 {
    */
   init(secretKey: String) throws {
     let keyPair = try NaclSign.KeyPair.keyPair(fromSecretKey: secretKey.baseDecoded.data)
-    self.publicKey = PublicKey(keyType: .ED25519, data: keyPair.publicKey.bytes);
-    self.secretKey = secretKey;
+    self.publicKey = PublicKey(keyType: .ED25519, data: keyPair.publicKey.bytes)
+    self.secretKey = secretKey
   }
 
   /**

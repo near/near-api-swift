@@ -7,12 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3204AD15238DB91700D3E07F /* MergeKeyStoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3204AD14238DB91700D3E07F /* MergeKeyStoreSpec.swift */; };
+		324FD2C2238D21E500950035 /* FileSystemKeyStoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324FD2BE238D20C000950035 /* FileSystemKeyStoreSpec.swift */; };
+		324FD2C3238D21E800950035 /* KeystoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324FD2C0238D21DA00950035 /* KeystoreSpec.swift */; };
+		324FD2C5238DB6FC00950035 /* KeychainKeystoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324FD2C4238DB6FC00950035 /* KeychainKeystoreSpec.swift */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
-		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
+		607FACEC1AFB9204008FA782 /* InMemoryKeystoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* InMemoryKeystoreSpec.swift */; };
 		B17C034D3808655474DCB66B /* Pods_nearclientios_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4DDB45CBDE24B4160D74230 /* Pods_nearclientios_Tests.framework */; };
 		D53FD32ACC638A15BE265C9C /* Pods_nearclientios_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1CAE1E7BE5E33A01D056CB26 /* Pods_nearclientios_Example.framework */; };
 /* End PBXBuildFile section */
@@ -29,6 +33,10 @@
 
 /* Begin PBXFileReference section */
 		1CAE1E7BE5E33A01D056CB26 /* Pods_nearclientios_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_nearclientios_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3204AD14238DB91700D3E07F /* MergeKeyStoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeKeyStoreSpec.swift; sourceTree = "<group>"; };
+		324FD2BE238D20C000950035 /* FileSystemKeyStoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemKeyStoreSpec.swift; sourceTree = "<group>"; };
+		324FD2C0238D21DA00950035 /* KeystoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeystoreSpec.swift; sourceTree = "<group>"; };
+		324FD2C4238DB6FC00950035 /* KeychainKeystoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainKeystoreSpec.swift; sourceTree = "<group>"; };
 		5BFEC3AC95424DFAAA7966C1 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		5C76F055C5E305BEF0697F4E /* Pods-nearclientios_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-nearclientios_Example.debug.xcconfig"; path = "Target Support Files/Pods-nearclientios_Example/Pods-nearclientios_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		5DED125CCF48DC18090EB82D /* nearclientios.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = nearclientios.podspec; path = ../nearclientios.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
@@ -41,7 +49,7 @@
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		607FACE51AFB9204008FA782 /* nearclientios_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = nearclientios_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
+		607FACEB1AFB9204008FA782 /* InMemoryKeystoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryKeystoreSpec.swift; sourceTree = "<group>"; };
 		8F012876A69C852C097B4BFD /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		CFCAECB67C9192AB083592B4 /* Pods-nearclientios_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-nearclientios_Tests.release.xcconfig"; path = "Target Support Files/Pods-nearclientios_Tests/Pods-nearclientios_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		D4B9A03936E199633849CEEE /* Pods-nearclientios_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-nearclientios_Tests.debug.xcconfig"; path = "Target Support Files/Pods-nearclientios_Tests/Pods-nearclientios_Tests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -69,6 +77,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		324FD2BD238D1E8E00950035 /* KeyStores */ = {
+			isa = PBXGroup;
+			children = (
+				324FD2BE238D20C000950035 /* FileSystemKeyStoreSpec.swift */,
+				607FACEB1AFB9204008FA782 /* InMemoryKeystoreSpec.swift */,
+				324FD2C4238DB6FC00950035 /* KeychainKeystoreSpec.swift */,
+				324FD2C0238D21DA00950035 /* KeystoreSpec.swift */,
+				3204AD14238DB91700D3E07F /* MergeKeyStoreSpec.swift */,
+			);
+			name = KeyStores;
+			sourceTree = "<group>";
+		};
 		607FACC71AFB9204008FA782 = {
 			isa = PBXGroup;
 			children = (
@@ -115,7 +135,7 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				607FACEB1AFB9204008FA782 /* Tests.swift */,
+				324FD2BD238D1E8E00950035 /* KeyStores */,
 				607FACE91AFB9204008FA782 /* Supporting Files */,
 			);
 			path = Tests;
@@ -189,6 +209,7 @@
 				607FACE11AFB9204008FA782 /* Sources */,
 				607FACE21AFB9204008FA782 /* Frameworks */,
 				607FACE31AFB9204008FA782 /* Resources */,
+				086DE58AF4249573DCED28CB /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -263,6 +284,26 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		086DE58AF4249573DCED28CB /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-nearclientios_Tests/Pods-nearclientios_Tests-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Nimble/Nimble.framework",
+				"${BUILT_PRODUCTS_DIR}/Quick/Quick.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Nimble.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Quick.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-nearclientios_Tests/Pods-nearclientios_Tests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		71DBCE529C658AC9B250FEF7 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -293,16 +334,22 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-nearclientios_Example/Pods-nearclientios_Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/AwaitKit/AwaitKit.framework",
+				"${BUILT_PRODUCTS_DIR}/Base58Swift/Base58Swift.framework",
+				"${BUILT_PRODUCTS_DIR}/BigInt/BigInt.framework",
 				"${BUILT_PRODUCTS_DIR}/KeychainAccess/KeychainAccess.framework",
 				"${BUILT_PRODUCTS_DIR}/PromiseKit/PromiseKit.framework",
+				"${BUILT_PRODUCTS_DIR}/SipHash/SipHash.framework",
 				"${BUILT_PRODUCTS_DIR}/TweetNacl/TweetNacl.framework",
 				"${BUILT_PRODUCTS_DIR}/nearclientios/nearclientios.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AwaitKit.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Base58Swift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BigInt.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/KeychainAccess.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PromiseKit.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SipHash.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TweetNacl.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nearclientios.framework",
 			);
@@ -349,7 +396,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				607FACEC1AFB9204008FA782 /* Tests.swift in Sources */,
+				324FD2C5238DB6FC00950035 /* KeychainKeystoreSpec.swift in Sources */,
+				324FD2C2238D21E500950035 /* FileSystemKeyStoreSpec.swift in Sources */,
+				324FD2C3238D21E800950035 /* KeystoreSpec.swift in Sources */,
+				3204AD15238DB91700D3E07F /* MergeKeyStoreSpec.swift in Sources */,
+				607FACEC1AFB9204008FA782 /* InMemoryKeystoreSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

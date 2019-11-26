@@ -7,16 +7,17 @@
 //
 
 import Foundation
+import Base58Swift
 
 internal extension String {
   var baseDecoded: [UInt8] {
-    return []
+    return Base58.base58Decode(self) ?? []
   }
 }
 
 internal extension Data {
   var baseEncoded: String {
-    return String(data: self, encoding: .utf8) ?? ""
+    return Base58.base58Encode(bytes)
   }
 
   var bytes: [UInt8] {
@@ -37,11 +38,10 @@ internal extension Data {
 
 internal extension Collection where Element == UInt8 {
   var baseEncoded: String {
-    return String(bytes: self, encoding: .utf8) ?? ""
+    return data.baseEncoded
   }
 
   var data: Data {
-    var values = self
-    return Data(bytes: &values, count: self.count)
+    return Data(self)
   }
 }

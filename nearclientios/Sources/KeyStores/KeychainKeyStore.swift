@@ -42,7 +42,7 @@ extension KeychainKeyStore: KeyStore {
     return .value(())
   }
 
-  func getNetworks() -> Promise<[String]> {
+  func getNetworks() throws -> Promise<[String]> {
     var result = Set<String>()
     for key in storageKeys() {
       if let networkId = key.components(separatedBy: ":").last {
@@ -52,7 +52,7 @@ extension KeychainKeyStore: KeyStore {
     return .value(Array(result))
   }
 
-  func getAccounts(networkId: String) -> Promise<[String]> {
+  func getAccounts(networkId: String) throws -> Promise<[String]> {
     var result = [String]()
     for key in storageKeys() {
       let components = key.components(separatedBy: ":")
