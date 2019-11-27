@@ -79,8 +79,8 @@ extension InMemorySigner: Signer {
   }
 
   func getPublicKey(accountId: String, networkId: String) throws -> Promise<PublicKey?> {
-    let keyPair = keyStore.getKey(networkId: networkId, accountId: accountId)
-    return keyPair.map {$0?.getPublicKey()}
+    let keyPair = try await(keyStore.getKey(networkId: networkId, accountId: accountId))
+    return .value(keyPair?.getPublicKey())
   }
 
   func signHash(hash: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol> {

@@ -26,6 +26,12 @@ internal extension Data {
 }
 
 internal extension Data {
+  var hexString: String {
+      return map { String(format: "%02x", UInt8($0)) }.joined()
+  }
+}
+
+internal extension Data {
   var json: [String: Any]? {
     return try? JSONSerialization.jsonObject(with: self, options: []) as? [String: Any]
   }

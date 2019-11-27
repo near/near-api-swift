@@ -178,4 +178,8 @@ extension KeyPairEd25519: KeyPair {
   func getPublicKey() -> PublicKey {
     return publicKey
   }
+
+  func getSecretKey() -> String {
+    return secretKey
+  }
 }

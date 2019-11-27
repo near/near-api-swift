@@ -38,10 +38,16 @@ internal enum ExecutionStatusBasic: String {
   case failure = "Failure"
 }
 
-internal struct ExecutionStatus: Codable {
+internal struct ExecutionStatus: Codable, Equatable {
   let SuccessValue: String?
   let SuccessReceiptId: String?
   let Failure: ExecutionError?
+
+  init(SuccessValue: String? = nil, SuccessReceiptId: String? = nil, Failure: ExecutionError? = nil) {
+    self.SuccessValue = SuccessValue
+    self.SuccessReceiptId = SuccessReceiptId
+    self.Failure = Failure
+  }
 }
 
 internal enum FinalExecutionStatusBasic: String, Codable {
@@ -50,22 +56,32 @@ internal enum FinalExecutionStatusBasic: String, Codable {
   case failure = "Failure"
 }
 
-internal struct ExecutionError: Codable {
-  let error_message: String
-  let error_type: String
+internal struct ExecutionError: Codable, Equatable{
+  let error_message: String?
+  let error_type: String?
+
+  init(error_message: String? = nil, error_type: String? = nil) {
+    self.error_message = error_message
+    self.error_type = error_type
+  }
 }
 
-internal struct FinalExecutionStatus: Codable {
+internal struct FinalExecutionStatus: Codable, Equatable {
   let SuccessValue: String?
   let Failure: ExecutionError?
+
+  init(SuccessValue: String? = nil, Failure: ExecutionError? = nil) {
+    self.SuccessValue = SuccessValue
+    self.Failure = Failure
+  }
 }
 
-internal struct ExecutionOutcomeWithId: Codable {
+internal struct ExecutionOutcomeWithId: Codable, Equatable {
   let id: String
   let outcome: ExecutionOutcome
 }
 
-internal struct ExecutionOutcome: Codable {
+internal struct ExecutionOutcome: Codable, Equatable {
 // TODO find correct representation way for this
 //  var status: ExecutionStatus | ExecutionStatusBasic
   let status: ExecutionStatus
@@ -74,7 +90,7 @@ internal struct ExecutionOutcome: Codable {
   let gas_burnt: Number
 }
 
-internal struct FinalExecutionOutcome: Codable {
+internal struct FinalExecutionOutcome: Codable, Equatable {
   // TODO find correct representation way for this
 //    status: FinalExecutionStatus | FinalExecutionStatusBasic
   let status: FinalExecutionStatus

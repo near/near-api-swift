@@ -27,7 +27,7 @@ private func fetch(url: URL, params: [String: Any]?) -> Promise<Data> {
   let session = URLSession(configuration: .default, delegate: nil, delegateQueue: .main)
   var request = URLRequest(url: url)
   request.httpMethod = params.flatMap {_ in "POST"} ?? "GET"
-  request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-type")
+  request.addValue("application/json", forHTTPHeaderField: "Content-Type")
   request.httpBody = params.flatMap { try? JSONSerialization.data(withJSONObject: $0, options: []) }
   return Promise.init { seal in
     let task = session.dataTask(with: request) { data, response, error in

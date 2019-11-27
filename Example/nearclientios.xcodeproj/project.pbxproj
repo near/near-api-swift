@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		3204AD15238DB91700D3E07F /* MergeKeyStoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3204AD14238DB91700D3E07F /* MergeKeyStoreSpec.swift */; };
+		3204AD18238DD8B200D3E07F /* KeyPairSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3204AD17238DD8B200D3E07F /* KeyPairSpec.swift */; };
+		3204AD1A238E8E7C00D3E07F /* ProviderSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3204AD19238E8E7C00D3E07F /* ProviderSpec.swift */; };
+		3204AD1C238E90F200D3E07F /* EnviromentConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3204AD1B238E90F200D3E07F /* EnviromentConfig.swift */; };
+		324C548C238F00670097E566 /* SerializeSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324C5488238EE6D00097E566 /* SerializeSpec.swift */; };
+		324C548F238F31E40097E566 /* Transaction.json in Resources */ = {isa = PBXBuildFile; fileRef = 324C548D238F316F0097E566 /* Transaction.json */; };
 		324FD2C2238D21E500950035 /* FileSystemKeyStoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324FD2BE238D20C000950035 /* FileSystemKeyStoreSpec.swift */; };
 		324FD2C3238D21E800950035 /* KeystoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324FD2C0238D21DA00950035 /* KeystoreSpec.swift */; };
 		324FD2C5238DB6FC00950035 /* KeychainKeystoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324FD2C4238DB6FC00950035 /* KeychainKeystoreSpec.swift */; };
@@ -34,6 +39,11 @@
 /* Begin PBXFileReference section */
 		1CAE1E7BE5E33A01D056CB26 /* Pods_nearclientios_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_nearclientios_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3204AD14238DB91700D3E07F /* MergeKeyStoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeKeyStoreSpec.swift; sourceTree = "<group>"; };
+		3204AD17238DD8B200D3E07F /* KeyPairSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyPairSpec.swift; sourceTree = "<group>"; };
+		3204AD19238E8E7C00D3E07F /* ProviderSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderSpec.swift; sourceTree = "<group>"; };
+		3204AD1B238E90F200D3E07F /* EnviromentConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnviromentConfig.swift; sourceTree = "<group>"; };
+		324C5488238EE6D00097E566 /* SerializeSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerializeSpec.swift; sourceTree = "<group>"; };
+		324C548D238F316F0097E566 /* Transaction.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Transaction.json; sourceTree = "<group>"; };
 		324FD2BE238D20C000950035 /* FileSystemKeyStoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemKeyStoreSpec.swift; sourceTree = "<group>"; };
 		324FD2C0238D21DA00950035 /* KeystoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeystoreSpec.swift; sourceTree = "<group>"; };
 		324FD2C4238DB6FC00950035 /* KeychainKeystoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainKeystoreSpec.swift; sourceTree = "<group>"; };
@@ -77,6 +87,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3204AD16238DD89300D3E07F /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				3204AD17238DD8B200D3E07F /* KeyPairSpec.swift */,
+				3204AD19238E8E7C00D3E07F /* ProviderSpec.swift */,
+				3204AD1B238E90F200D3E07F /* EnviromentConfig.swift */,
+				324C5488238EE6D00097E566 /* SerializeSpec.swift */,
+			);
+			name = Utils;
+			sourceTree = "<group>";
+		};
 		324FD2BD238D1E8E00950035 /* KeyStores */ = {
 			isa = PBXGroup;
 			children = (
@@ -136,6 +157,7 @@
 			isa = PBXGroup;
 			children = (
 				324FD2BD238D1E8E00950035 /* KeyStores */,
+				3204AD16238DD89300D3E07F /* Utils */,
 				607FACE91AFB9204008FA782 /* Supporting Files */,
 			);
 			path = Tests;
@@ -145,6 +167,7 @@
 			isa = PBXGroup;
 			children = (
 				607FACEA1AFB9204008FA782 /* Info.plist */,
+				324C548D238F316F0097E566 /* Transaction.json */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -278,6 +301,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				324C548F238F31E40097E566 /* Transaction.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -396,10 +420,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3204AD18238DD8B200D3E07F /* KeyPairSpec.swift in Sources */,
 				324FD2C5238DB6FC00950035 /* KeychainKeystoreSpec.swift in Sources */,
 				324FD2C2238D21E500950035 /* FileSystemKeyStoreSpec.swift in Sources */,
+				324C548C238F00670097E566 /* SerializeSpec.swift in Sources */,
 				324FD2C3238D21E800950035 /* KeystoreSpec.swift in Sources */,
+				3204AD1A238E8E7C00D3E07F /* ProviderSpec.swift in Sources */,
 				3204AD15238DB91700D3E07F /* MergeKeyStoreSpec.swift in Sources */,
+				3204AD1C238E90F200D3E07F /* EnviromentConfig.swift in Sources */,
 				607FACEC1AFB9204008FA782 /* InMemoryKeystoreSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -575,6 +603,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D4B9A03936E199633849CEEE /* Pods-nearclientios_Tests.debug.xcconfig */;
 			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = S5X543C2F7;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
@@ -598,6 +627,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CFCAECB67C9192AB083592B4 /* Pods-nearclientios_Tests.release.xcconfig */;
 			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = S5X543C2F7;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
