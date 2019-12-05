@@ -47,13 +47,13 @@ internal final class WalletAccount {
 }
 
 extension WalletAccount {
-  convenience init(near: Near, appKeyPrefix: String?) throws {
+  convenience init(near: Near, appKeyPrefix: String? = nil) throws {
     let keyPrefix = appKeyPrefix ?? (near.config.contractName ?? "default")
     let authDataKey = keyPrefix + LOCAL_STORAGE_KEY_SUFFIX
     guard let keyStore = (near.connection.signer as? InMemorySigner)?.keyStore else {throw WalletAccountError.noKeyStore}
     //TODO: change
 //    this._authData = JSON.parse(window.localStorage.getItem(this._authDataKey) || '{}');
-    let authData = AuthData(accountId: "")
+    let authData = AuthData(accountId: nil)
     self.init(_walletBaseUrl: near.config.walletUrl, _authDataKey: authDataKey,
                 _keyStore: keyStore, _authData: authData, _networkId: near.config.networkId)
   }
@@ -65,7 +65,7 @@ extension WalletAccount {
         walletAccount.isSignedIn()
    - Returns: Returns true, if this WalletAccount is authorized with the wallet.
    */
-  private func isSignedIn() -> Bool {
+  func isSignedIn() -> Bool {
       return _authData.accountId != nil
   }
 
@@ -86,7 +86,7 @@ extension WalletAccount {
         - networkId: successUrl url to redirect on success
         - failureUrl: failureUrl url to redirect on failure
    */
-  private func requestSignIn(contractId: String, title: String,
+  func requestSignIn(contractId: String, title: String,
                              successUrl: String, failureUrl: String) throws -> Promise<Void> {
     if try await(_keyStore.getKey(networkId: _networkId, accountId: getAccountId())) != nil {
       return .value(())
@@ -118,7 +118,7 @@ extension WalletAccount {
   /**
       Complete sign in for a given account id and public key. To be invoked by the app when getting a callback from the wallet.
    */
-  private func _completeSignInWithAccessKey() {
+  func _completeSignInWithAccessKey() throws {
     // TODO??
     //      let currentUrl = URL(window.location.href)
 //    let currentUrl = URL(string: "")
@@ -127,7 +127,7 @@ extension WalletAccount {
 //      _authData = AuthData(accountId: accountId)
       //TODO ??
 //      window.localStorage.setItem(this._authDataKey, JSON.stringify(this._authData))
-//      try await(_moveKeyFromTempToPermanent(accountId, publicKey))
+//      try await(_moveKeyFromTempToPermanent(accountId: accountId, publicKey: publicKey))
 //    }
 //    currentUrl.searchParams.delete("public_key")
 //    currentUrl.searchParams.delete("account_id")

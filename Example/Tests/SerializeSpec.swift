@@ -26,7 +26,7 @@ extension Test: BorshCodable {
     try z.serialize(to: &writer)
     try q.serialize(to: &writer)
   }
-  
+
   init(from reader: inout BinaryReader) throws {
     self.x = try .init(from: &reader)
     self.y = try .init(from: &reader)
@@ -37,7 +37,7 @@ extension Test: BorshCodable {
 
 class SerializeSpec: QuickSpec {
   private var provider: Provider!
-  
+
   override func spec() {
     describe("SerializeSpec") {
       it("should serialize object") {
@@ -52,7 +52,7 @@ class SerializeSpec: QuickSpec {
         expect(new_value.z).to(equal("123"))
         expect(new_value.q).to(equal([1, 2, 3]))
       }
-      
+
       it("should serialize and sign multi-action tx") {
         let keyStore = InMemoryKeyStore()
         let keyPair = try! keyPairFromString(encodedKey: "ed25519:2wyRcSwSuHtRVmkMCGjPwnzZmQLeXLzLLyED1NDMt4BjnKgQL6tF85yBx6Jr26D2dUNeC716RBoTxntVHsegogYw") as! KeyPairEd25519
@@ -79,7 +79,7 @@ class SerializeSpec: QuickSpec {
                                                    networkId: "test"))
         expect(hash.baseEncoded).to(equal("Fo3MJ9XzKjnKuDuQKhDAC6fra5H2UWawRejFSEpPNk3Y"))
       }
-      
+
       it("should serialize transfer tx") {
         let actions = [transfer(deposit: 1)]
         let blockHash = "244ZQ9cgj3CQ6bWBdytfrJMuMQ1jdXLFGnr4HhvtCTnM".baseDecoded
@@ -92,18 +92,18 @@ class SerializeSpec: QuickSpec {
         let serialized = try! BorshEncoder().encode(transaction)
         expect(serialized.hexString)
           .to(equal("09000000746573742e6e65617200917b3d268d4b58f7fec1b150bd68d69be3ee5d4cc39855e341538465bb77860d01000000000000000d00000077686174657665722e6e6561720fa473fd26901df296be6adc4cc4df34d040efa2435224b6986910e630c2fef6010000000301000000000000000000000000000000"))
-        
+
         let deserialized = try! BorshDecoder().decode(CodableTransaction.self, from: serialized)
         let roundTripped = try! BorshEncoder().encode(deserialized)
         expect(roundTripped).to(equal(serialized))
       }
-      
+
       it("serialize and sign transfer tx") {
         let keyStore = InMemoryKeyStore()
         let keyPair = try! keyPairFromString(encodedKey: "ed25519:3hoMW1HvnRLSFCLZnvPzWeoGwtdHzke34B2cTHM8rhcbG3TbuLKtShTv3DvyejnXKXKBiV7YPkLeqUHN1ghnqpFv") as! KeyPairEd25519
         try! await(keyStore.setKey(networkId: "test", accountId: "test.near", keyPair: keyPair))
         let actions = [transfer(deposit: 1)]
-        let blockHash = "244ZQ9cgj3CQ6bWBdytfrJMuMQ1jdXLFGnr4HhvtCTnM".baseDecoded
+        let blockHash = "244ZQ9cgj3CQ6bWBdytfrJMuMQ1jdXLFGnr4Hhv tCTnM".baseDecoded
         let (_, signedTx) = try! await(signTransaction(receiverId: "whatever.near",
                                                        nonce: 1,
                                                        actions: actions,
@@ -117,12 +117,14 @@ class SerializeSpec: QuickSpec {
         let serialized = try! BorshEncoder().encode(signedTx)
         expect(serialized.hexString).to(equal( "09000000746573742e6e65617200917b3d268d4b58f7fec1b150bd68d69be3ee5d4cc39855e341538465bb77860d01000000000000000d00000077686174657665722e6e6561720fa473fd26901df296be6adc4cc4df34d040efa2435224b6986910e630c2fef601000000030100000000000000000000000000000000969a83332186ee9755e4839325525806e189a3d2d2bb4b4760e94443e97e1c4f22deeef0059a8e9713100eda6e19144da7e8a0ef7e539b20708ba1d8d021bd01"))
       }
-      
+
       it("serialize pass roundtrip test") {
         let json: [String: String] = loadJSON(name: "Transaction")!
-        let data = json["data"].flatMap {Data(hexString: $0)}
+        let data = json["data"].flatMap {Data(fromHexEncodedString: $0)}
+        print(data!.bytes)
         let deserialized = try! BorshDecoder().decode(CodableTransaction.self, from: data!)
         let serialized = try! BorshEncoder().encode(deserialized)
+        print(serialized.bytes)
         expect(serialized).to(equal(data))
       }
     }
@@ -134,29 +136,51 @@ func loadJSON<T>(name: String) -> T? {
   guard let filePath = Bundle(for: BundleTargetingClass.self).url(forResource: name, withExtension: "json") else {
     return nil
   }
-  guard let jsonData = try? Data(contentsOf: filePath, options: .mappedIfSafe) else {
+  guard let jsonData = try? Data(contentsOf: filePath, options: []) else {
     return nil
   }
-  guard let json = try? JSONSerialization.jsonObject(with: jsonData, options: .allowFragments) else {
+  guard let json = try? JSONSerialization.jsonObject(with: jsonData, options: []) else {
     return nil
   }
   return json as? T
 }
 
 extension Data {
-  init?(hexString: String) {
-    let len = hexString.count / 2
-    var data = Data(capacity: len)
-    for i in 0..<len {
-      let j = hexString.index(hexString.startIndex, offsetBy: i*2)
-      let k = hexString.index(j, offsetBy: 2)
-      let bytes = hexString[j..<k]
-      if var num = UInt8(bytes, radix: 16) {
-        data.append(&num, count: 1)
-      } else {
-        return nil
-      }
+
+    // Convert 0 ... 9, a ... f, A ...F to their decimal value,
+    // return nil for all other input characters
+    fileprivate func decodeNibble(_ u: UInt16) -> UInt8? {
+        switch(u) {
+        case 0x30 ... 0x39:
+            return UInt8(u - 0x30)
+        case 0x41 ... 0x46:
+            return UInt8(u - 0x41 + 10)
+        case 0x61 ... 0x66:
+            return UInt8(u - 0x61 + 10)
+        default:
+            return nil
+        }
     }
-    self = data
-  }
+
+    init?(fromHexEncodedString string: String) {
+        var str = string
+        if str.count%2 != 0 {
+            // insert 0 to get even number of chars
+            str.insert("0", at: str.startIndex)
+        }
+
+        let utf16 = str.utf16
+        self.init(capacity: utf16.count/2)
+
+        var i = utf16.startIndex
+        while i != str.utf16.endIndex {
+            guard let hi = decodeNibble(utf16[i]),
+                let lo = decodeNibble(utf16[utf16.index(i, offsetBy: 1, limitedBy: utf16.endIndex)!]) else {
+                    return nil
+            }
+            var value = hi << 4 + lo
+            self.append(&value, count: 1)
+            i = utf16.index(i, offsetBy: 2, limitedBy: utf16.endIndex)!
+        }
+    }
 }

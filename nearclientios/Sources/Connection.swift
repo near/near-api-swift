@@ -20,7 +20,7 @@ internal struct ConnectionConfig: ConnectionConfigProtocol {
   let signerType: SignerType
 }
 
-extension ConnectionConfigProtocol {
+internal extension ConnectionConfigProtocol {
   func provider() -> Provider {
     switch providerType {
     case .jsonRPC(let url): return JSONRPCProvider(url: url)
@@ -28,7 +28,7 @@ extension ConnectionConfigProtocol {
   }
 }
 
-extension ConnectionConfigProtocol {
+internal extension ConnectionConfigProtocol {
   func signer() -> Signer {
     switch signerType {
     case .inMemory(let keyStore): return InMemorySigner(keyStore: keyStore)
@@ -42,7 +42,7 @@ internal struct Connection {
   let signer: Signer
 }
 
-extension Connection {
+internal extension Connection {
   static func fromConfig(config: ConnectionConfigProtocol) throws -> Connection {
     let provider = config.provider()
     let signer = config.signer()

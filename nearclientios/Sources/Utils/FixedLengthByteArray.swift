@@ -15,10 +15,10 @@ internal protocol FixedLengthByteArray {
 
 extension FixedLengthByteArray {
   func serialize(to writer: inout Data) throws {
-    writer.append(bytes, count: Int(PublicKeyPayload.fixedLength))
+    writer.append(bytes, count: Int(Self.fixedLength))
   }
 
   init(from reader: inout BinaryReader) throws {
-    try self.init(bytes: reader.read(count: PublicKeyPayload.fixedLength))
+    try self.init(bytes: reader.read(count: Self.fixedLength))
   }
 }

@@ -30,7 +30,7 @@ extension FunctionCallPermission: BorshCodable {
   }
 }
 
-internal struct FullAccessPermission {}
+internal struct FullAccessPermission: Equatable {}
 
 extension FullAccessPermission: BorshCodable {
   func serialize(to writer: inout Data) throws {}
@@ -52,10 +52,18 @@ internal enum AccessKeyPermission {
   }
 }
 
+internal enum DecodingError: Error {
+  case notExpected
+}
+
 extension AccessKeyPermission: Decodable {
   init(from decoder: Decoder) throws {
-    // TODO actually implement
-    self = .fullAccess(FullAccessPermission())
+    let value = try decoder.singleValueContainer().decode(String.self)
+    if value == "FullAccess" {
+      self = .fullAccess(FullAccessPermission())
+    } else {
+      throw DecodingError.notExpected
+    }
   }
 }
 
@@ -79,7 +87,7 @@ extension AccessKeyPermission: BorshCodable {
 }
 
 internal struct AccessKey: Decodable {
-  let nonce: UInt64
+  var nonce: UInt64
   let permission: AccessKeyPermission
 }
 
@@ -104,7 +112,7 @@ internal func fullAccessKey() -> AccessKey {
 internal func functionCallAccessKey(receiverId: String, methodNames: [String], allowance: UInt128?) -> AccessKey {
   let callPermission = FunctionCallPermission(allowance: allowance, receiverId: receiverId, methodNames: methodNames)
   let permission = AccessKeyPermission.functionCall(callPermission)
-  return AccessKey( nonce: 0, permission: permission)
+  return AccessKey(nonce: 0, permission: permission)
 }
 
 internal protocol IAction {}
@@ -138,7 +146,7 @@ internal struct FunctionCall: IAction {
   let methodName: String
   let args: [UInt8]
   let gas: Number
-  let deposit: UInt128
+  let deposit: UInt128?
 }
 
 extension FunctionCall: BorshCodable {
@@ -241,7 +249,7 @@ func deployContract(code: [UInt8]) -> Action {
   return .deployContract(DeployContract(code: code))
 }
 
-func functionCall(methodName: String, args: [UInt8], gas: Number, deposit: UInt128) -> Action {
+func functionCall(methodName: String, args: [UInt8], gas: Number, deposit: UInt128?) -> Action {
   return .functionCall(FunctionCall(methodName: methodName, args: args, gas: gas, deposit: deposit))
 }
 

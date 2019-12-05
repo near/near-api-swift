@@ -19,11 +19,13 @@ internal struct SyncInfo: Codable {
   let syncing: Bool
 }
 
+internal struct Validator: Codable {}
+
 internal struct NodeStatusResult: Codable {
   let chain_id: String
-  let rpc_addr: Number
+  let rpc_addr: String
   let sync_info: SyncInfo
-  let validators: [String]
+  let validators: [Validator]
 }
 
 internal typealias BlockHash = String
@@ -32,21 +34,43 @@ internal typealias BlockHeight = Number
 // TODO find correct representation way for this
 internal typealias BlockId = BlockHash
 
-internal enum ExecutionStatusBasic: String {
+internal enum ExecutionStatusBasic: String, Decodable {
   case unknown = "Unknown"
   case pending = "Pending"
   case failure = "Failure"
 }
 
-internal struct ExecutionStatus: Codable, Equatable {
-  let SuccessValue: String?
-  let SuccessReceiptId: String?
-  let Failure: ExecutionError?
+internal enum ExecutionStatus: Decodable, Equatable {
+  case successValue(String)
+  case basic(ExecutionStatusBasic)
+  case successReceiptId(String)
+  case failure(ExecutionError)
 
-  init(SuccessValue: String? = nil, SuccessReceiptId: String? = nil, Failure: ExecutionError? = nil) {
-    self.SuccessValue = SuccessValue
-    self.SuccessReceiptId = SuccessReceiptId
-    self.Failure = Failure
+  private enum CodingKeys: String, CodingKey {
+    case successValue = "SuccessValue"
+    case failure = "Failure"
+    case successReceiptId = "SuccessReceiptId"
+  }
+
+  init(from decoder: Decoder) throws {
+    if let container = try? decoder.singleValueContainer(), let status = try? container.decode(ExecutionStatusBasic.self) {
+      self = .basic(status)
+      return
+    }
+    let container = try? decoder.container(keyedBy: CodingKeys.self)
+    if let value = try? container?.decode(String.self, forKey: .successValue) {
+      self = .successValue(value)
+      return
+    }
+    if let value = try? container?.decode(String.self, forKey: .successReceiptId) {
+      self = .successReceiptId(value)
+      return
+    }
+    if let value = try? container?.decode(ExecutionError.self, forKey: .failure) {
+      self = .failure(value)
+      return
+    }
+    throw DecodingError.notExpected
   }
 }
 
@@ -66,33 +90,47 @@ internal struct ExecutionError: Codable, Equatable{
   }
 }
 
-internal struct FinalExecutionStatus: Codable, Equatable {
-  let SuccessValue: String?
-  let Failure: ExecutionError?
+internal enum FinalExecutionStatus: Decodable, Equatable {
+  case successValue(String)
+  case basic(ExecutionStatusBasic)
+  case failure(ExecutionError)
 
-  init(SuccessValue: String? = nil, Failure: ExecutionError? = nil) {
-    self.SuccessValue = SuccessValue
-    self.Failure = Failure
+  private enum CodingKeys: String, CodingKey {
+    case successValue = "SuccessValue"
+    case failure = "Failure"
+  }
+
+  init(from decoder: Decoder) throws {
+    if let container = try? decoder.singleValueContainer(), let status = try? container.decode(ExecutionStatusBasic.self) {
+      self = .basic(status)
+      return
+    }
+    let container = try? decoder.container(keyedBy: CodingKeys.self)
+    if let value = try? container?.decode(String.self, forKey: .successValue) {
+      self = .successValue(value)
+      return
+    }
+    if let value = try? container?.decode(ExecutionError.self, forKey: .failure) {
+      self = .failure(value)
+      return
+    }
+    throw DecodingError.notExpected
   }
 }
 
-internal struct ExecutionOutcomeWithId: Codable, Equatable {
+internal struct ExecutionOutcomeWithId: Decodable, Equatable {
   let id: String
   let outcome: ExecutionOutcome
 }
 
-internal struct ExecutionOutcome: Codable, Equatable {
-// TODO find correct representation way for this
-//  var status: ExecutionStatus | ExecutionStatusBasic
+internal struct ExecutionOutcome: Decodable, Equatable {
   let status: ExecutionStatus
   let logs: [String]
   let receipt_ids: [String]
   let gas_burnt: Number
 }
 
-internal struct FinalExecutionOutcome: Codable, Equatable {
-  // TODO find correct representation way for this
-//    status: FinalExecutionStatus | FinalExecutionStatusBasic
+internal struct FinalExecutionOutcome: Decodable, Equatable {
   let status: FinalExecutionStatus
   let transaction: ExecutionOutcomeWithId
   let receipts: [ExecutionOutcomeWithId]
@@ -183,7 +221,7 @@ internal protocol Provider {
 }
 
 internal func getTransactionLastResult(txResult: FinalExecutionOutcome) -> Any? {
-  if let success = txResult.status.SuccessValue, let data = Data(base64Encoded: success) {
+  if case .successValue(let value) = txResult.status, let data = Data(base64Encoded: value) {
     return try? JSONSerialization.jsonObject(with: data, options: [])
   }
   return nil

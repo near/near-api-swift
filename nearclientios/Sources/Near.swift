@@ -63,8 +63,8 @@ extension Near {
   }
 }
 
-extension Near {
-  private func account(accountId: String) throws -> Promise<Account> {
+internal extension Near {
+  func account(accountId: String) throws -> Promise<Account> {
     let account = Account(connection: connection, accountId: accountId)
     try await(account.state())
     return .value(account)

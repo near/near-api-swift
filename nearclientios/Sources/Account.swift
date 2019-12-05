@@ -35,15 +35,18 @@ internal func sleep(millis: Double) -> Promise<Void> {
 }
 
 internal struct AccountState: Codable {
-  let account_id: String
+  let account_id: String?
+  let staked: String?
+  let locked: String
   let amount: String
-  let staked: String
   let code_hash: String
+  let storage_paid_at: Number
+  let storage_usage: Number
 }
 
 internal struct KeyBox: Decodable {
   let access_key: AccessKey
-  let public_key: PublicKey
+  let public_key: String
 }
 
 internal typealias KeyBoxes = [KeyBox]
@@ -53,9 +56,20 @@ internal enum AccountError: Error {
   case noResult
 }
 
+internal struct AuthorizedApp: Equatable, Codable {
+  let contractId: String
+  let amount: UInt128
+  let publicKey: String
+}
+
+internal struct AccountDetails: Equatable, Codable {
+  let authorizedApps: [AuthorizedApp]
+  let transactions: [String]
+}
+
 internal final class Account {
-  private let connection: Connection
-  private let accountId: String
+  let connection: Connection
+  let accountId: String
   private var _state: AccountState?
   private var _accessKey: AccessKey?
 
@@ -72,7 +86,7 @@ internal final class Account {
     self.accountId = accountId;
   }
 
-  private func fetchState() throws -> Promise<Void> {
+  func fetchState() throws -> Promise<Void> {
     _state = try await(connection.provider.query(path: "account/\(accountId)", data: ""))
     guard let publicKey = try await(connection.signer.getPublicKey(accountId: accountId,
                                                                    networkId: connection.networkId)) else {
@@ -110,17 +124,16 @@ internal final class Account {
 
   private func signAndSendTransaction(receiverId: String, actions: [Action]) throws -> Promise<FinalExecutionOutcome> {
     try await(ready)
-    guard let accessKey = _accessKey else {
-      throw TypedError.error(type: "Can not sign transactions, initialize account with available public key in Signer.",
-                       message: "KeyNotFound")
+    guard _accessKey != nil else {
+      throw TypedError.error(type: "Can not sign transactions, initialize account with available public key in Signer.", message: "KeyNotFound")
     }
 
     let status = try await(connection.provider.status())
 
-    let nonce = accessKey.nonce + 1
+    _accessKey!.nonce += 1
     let blockHash = status.sync_info.latest_block_hash.baseDecoded
     let (txHash, signedTx) = try await(signTransaction(receiverId: receiverId,
-                                                       nonce: nonce,
+                                                       nonce: _accessKey!.nonce,
                                                        actions: actions,
                                                        blockHash: blockHash,
                                                        signer: connection.signer,
@@ -143,8 +156,8 @@ internal final class Account {
     let flatLogs = ([result.transaction] + result.receipts).reduce([], {$0 + $1.outcome.logs})
     printLogs(contractId: signedTx.transaction.receiverId, logs: flatLogs)
 
-    if let error = result.status.Failure {
-      throw TypedError.error(type: "Transaction \(result.transaction.id) failed. \(error.error_message)",
+    if case .failure(let error) = result.status {
+      throw TypedError.error(type: "Transaction \(result.transaction.id) failed. \(error.error_message ?? "")",
         message: error.error_type)
     }
     // TODO: if Tx is Unknown or Started.
@@ -152,7 +165,7 @@ internal final class Account {
     return .value(result)
   }
 
-  private func createAndDeployContract(contractId: String, publicKey: PublicKey,
+  func createAndDeployContract(contractId: String, publicKey: PublicKey,
                                        data: [UInt8], amount: UInt128) throws -> Promise<Account> {
     let accessKey = fullAccessKey()
     let actions = [nearclientios.createAccount(),
@@ -177,7 +190,7 @@ internal final class Account {
     return try signAndSendTransaction(receiverId: newAccountId, actions: actions)
   }
 
-  private func deleteAccount(beneficiaryId: String) throws -> Promise<FinalExecutionOutcome> {
+  func deleteAccount(beneficiaryId: String) throws -> Promise<FinalExecutionOutcome> {
     return try signAndSendTransaction(receiverId: accountId,
                                       actions: [nearclientios.deleteAccount(beneficiaryId: beneficiaryId)])
   }
@@ -186,14 +199,16 @@ internal final class Account {
     return try signAndSendTransaction(receiverId: accountId, actions: [nearclientios.deployContract(code: data)])
   }
 
-  private func functionCall(contractId: String, methodName: String, args: [String: Any] = [:],
-                            gas: Number = DEFAULT_FUNC_CALL_AMOUNT, amount: UInt128) throws -> Promise<FinalExecutionOutcome> {
-    let actions = [nearclientios.functionCall(methodName: methodName, args: Data(json: args).bytes, gas: gas, deposit: amount)]
+  func functionCall(contractId: String, methodName: ChangeMethod, args: [String: Any] = [:],
+                            gas: Number?, amount: UInt128?) throws -> Promise<FinalExecutionOutcome> {
+    let gasValue = gas ?? DEFAULT_FUNC_CALL_AMOUNT
+    let actions = [nearclientios.functionCall(methodName: methodName, args: Data(json: args).bytes,
+                                              gas: gasValue, deposit: amount)]
     return try signAndSendTransaction(receiverId: contractId, actions: actions)
   }
 
   // TODO: expand this API to support more options.
-  private func addKey(publicKey: PublicKey, contractId: String?, methodName: String?,
+  func addKey(publicKey: PublicKey, contractId: String?, methodName: String?,
                       amount: UInt128?) throws -> Promise<FinalExecutionOutcome> {
     let accessKey: AccessKey
     if let contractId = contractId, !contractId.isEmpty {
@@ -205,7 +220,7 @@ internal final class Account {
     return try signAndSendTransaction(receiverId: accountId, actions: [nearclientios.addKey(publicKey: publicKey, accessKey: accessKey)])
   }
 
-  private func deleteKey(publicKey: PublicKey) throws -> Promise<FinalExecutionOutcome> {
+  func deleteKey(publicKey: PublicKey) throws -> Promise<FinalExecutionOutcome> {
     return try signAndSendTransaction(receiverId: accountId, actions: [nearclientios.deleteKey(publicKey: publicKey)])
   }
 
@@ -214,7 +229,7 @@ internal final class Account {
                                       actions: [nearclientios.stake(stake: amount, publicKey: publicKey)])
   }
 
-  private func viewFunction<T: Codable>(contractId: String, methodName: String, args: [String: Any] = [:]) throws -> Promise<T> {
+  func viewFunction<T: Codable>(contractId: String, methodName: String, args: [String: Any] = [:]) throws -> Promise<T> {
     let data = String(data: Data(json: args), encoding: .utf8) ?? ""
     let result: T = try await(connection.provider.query(path: "call/\(contractId)/\(methodName)", data: data))
     return .value(result)
@@ -226,27 +241,24 @@ internal final class Account {
   }
 
   /// Returns array of {access_key: AccessKey, public_key: PublicKey} items.
-  private func getAccessKeys() throws -> Promise<KeyBoxes> {
+  func getAccessKeys() throws -> Promise<KeyBoxes> {
     let response: KeyBoxes = try await(connection.provider.query(path: "access_key/\(accountId)", data: ""))
     return .value(response)
   }
 
-  private func getAccountDetails() throws -> Promise<Any> {
+  func getAccountDetails() throws -> Promise<AccountDetails> {
     // TODO: update the response value to return all the different keys, not just app keys.
     // Also if we need this function, or getAccessKeys is good enough.
     let accessKeys = try await(getAccessKeys())
-    var result: [String: [Any]] = ["authorizedApps": [], "transactions": []]
+    var authorizedApps: [AuthorizedApp] = []
     accessKeys.forEach { item in
       if case AccessKeyPermission.functionCall(let permission) = item.access_key.permission {
-        var authorizedApps = result["authorizedApps"] ?? []
-        authorizedApps.append([
-          "contractId": permission.receiverId,
-          "amount": permission.allowance ?? 0,
-          "publicKey": item.public_key
-        ])
-        result["authorizedApps"] = authorizedApps
+        authorizedApps.append(AuthorizedApp(contractId: permission.receiverId,
+                                            amount: permission.allowance ?? 0,
+                                            publicKey: item.public_key))
       }
     }
+    let result = AccountDetails(authorizedApps: authorizedApps, transactions: [])
     return .value(result)
   }
 }

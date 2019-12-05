@@ -23,7 +23,6 @@ class ProviderSpec: QuickSpec {
         self.provider = JSONRPCProvider(url: url)
       }
 
-// TODO Fix or ask guys
 //      it("should fetch node status") {
 //        let response = try! await(self.provider.status())
 //        expect(response.chain_id).to(contain("test-chain"))
@@ -50,44 +49,44 @@ class ProviderSpec: QuickSpec {
 //      }
 
       it("should have correct final tx result") {
-        let outcome = ExecutionOutcome(status: ExecutionStatus(SuccessReceiptId: "11112"),
+        let outcome = ExecutionOutcome(status: .successReceiptId("11112"),
                                        logs: [],
                                        receipt_ids: ["11112"],
                                        gas_burnt: 1)
         let transaction = ExecutionOutcomeWithId(id: "11111", outcome: outcome)
-        let firstRecipientOutcome = ExecutionOutcome(status: ExecutionStatus(SuccessValue: "e30="),
+        let firstRecipientOutcome = ExecutionOutcome(status: .successValue("e30="),
                                                      logs: [],
                                                      receipt_ids: ["11112"],
                                                      gas_burnt: 9001)
-        let secondRecipientOutcome = ExecutionOutcome(status: ExecutionStatus(SuccessValue: ""),
+        let secondRecipientOutcome = ExecutionOutcome(status: .successValue(""),
                                                       logs: [],
                                                       receipt_ids: [],
                                                       gas_burnt: 0)
         let receipts = [ExecutionOutcomeWithId(id: "11112", outcome: firstRecipientOutcome),
                         ExecutionOutcomeWithId(id: "11113", outcome: secondRecipientOutcome)]
-        let result = FinalExecutionOutcome(status: FinalExecutionStatus(SuccessValue: "e30="),
+        let result = FinalExecutionOutcome(status: .successValue("e30="),
                                            transaction: transaction,
                                            receipts: receipts)
         expect(getTransactionLastResult(txResult: result)).notTo(beNil())
       }
 
       it("should have final tx result with nil") {
-        let outcome = ExecutionOutcome(status: ExecutionStatus(SuccessReceiptId: "11112"),
+        let outcome = ExecutionOutcome(status: .successReceiptId("11112"),
                                        logs: [],
                                        receipt_ids: ["11112"],
                                        gas_burnt: 1)
         let transaction = ExecutionOutcomeWithId(id: "11111", outcome: outcome)
-        let firstRecipientOutcome = ExecutionOutcome(status: ExecutionStatus(Failure: ExecutionError()),
+        let firstRecipientOutcome = ExecutionOutcome(status: .failure(ExecutionError()),
                                                      logs: [],
                                                      receipt_ids: ["11112"],
                                                      gas_burnt: 9001)
-        let secondRecipientOutcome = ExecutionOutcome(status: ExecutionStatus(SuccessValue: ""),
+        let secondRecipientOutcome = ExecutionOutcome(status: .successValue(""),
                                                       logs: [],
                                                       receipt_ids: [],
                                                       gas_burnt: 0)
         let receipts = [ExecutionOutcomeWithId(id: "11112", outcome: firstRecipientOutcome),
                         ExecutionOutcomeWithId(id: "11113", outcome: secondRecipientOutcome)]
-        let result = FinalExecutionOutcome(status: FinalExecutionStatus(Failure: ExecutionError()),
+        let result = FinalExecutionOutcome(status: .failure(ExecutionError()),
                                            transaction: transaction,
                                            receipts: receipts)
         expect(getTransactionLastResult(txResult: result)).to(beNil())

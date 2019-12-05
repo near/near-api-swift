@@ -36,8 +36,13 @@ extension JSONRPCProvider {
                                   "params": params,
                                   "id": getId(),
                                   "jsonrpc": "2.0"]
-    return fetchJson(connection: connection, json: request)
-      .map {try JSONDecoder().decode(T.self, from: $0)}
+    let json = try await(fetchJson(connection: connection, json: request))
+    let data = try JSONSerialization.data(withJSONObject: json, options: [])
+    debugPrint("=====================")
+    debugPrint(json)
+    debugPrint("=====================")
+    let decoded = try JSONDecoder().decode(T.self, from: data)
+    return .value(decoded)
   }
 }
 
