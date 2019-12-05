@@ -15,7 +15,7 @@ import AwaitKit
 /// Default amount of tokens to be send with the function calls. Used to pay for the fees
 /// incurred while running the contract execution. The unused amount will be refunded back to
 /// the originator.
-let DEFAULT_FUNC_CALL_AMOUNT = 2000000
+let DEFAULT_FUNC_CALL_AMOUNT: UInt64 = 2000000
 
 /// Default number of retries before giving up on a transactioin.
 let TX_STATUS_RETRY_NUMBER = 10
@@ -200,7 +200,7 @@ internal final class Account {
   }
 
   func functionCall(contractId: String, methodName: ChangeMethod, args: [String: Any] = [:],
-                            gas: Number?, amount: UInt128?) throws -> Promise<FinalExecutionOutcome> {
+                            gas: UInt64?, amount: UInt128) throws -> Promise<FinalExecutionOutcome> {
     let gasValue = gas ?? DEFAULT_FUNC_CALL_AMOUNT
     let actions = [nearclientios.functionCall(methodName: methodName, args: Data(json: args).bytes,
                                               gas: gasValue, deposit: amount)]

@@ -127,7 +127,7 @@ class AccountSpec: QuickSpec {
                                                                    methodName: "setValue",
                                                                    args: ["value": setCallValue],
                                                                    gas: nil,
-                                                                   amount: nil))
+                                                                   amount: 0))
           expect(getTransactionLastResult(txResult: result2) as? String).to(equal(setCallValue))
           let testSetCallValue: String = try await(self.workingAccount.viewFunction(contractId: contractId,
                                                                                     methodName: "getValue",

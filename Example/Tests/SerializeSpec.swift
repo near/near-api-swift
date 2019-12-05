@@ -121,10 +121,8 @@ class SerializeSpec: QuickSpec {
       it("serialize pass roundtrip test") {
         let json: [String: String] = loadJSON(name: "Transaction")!
         let data = json["data"].flatMap {Data(fromHexEncodedString: $0)}
-        print(data!.bytes)
         let deserialized = try! BorshDecoder().decode(CodableTransaction.self, from: data!)
         let serialized = try! BorshEncoder().encode(deserialized)
-        print(serialized.bytes)
         expect(serialized).to(equal(data))
       }
     }

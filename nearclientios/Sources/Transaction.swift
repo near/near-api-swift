@@ -145,8 +145,8 @@ extension DeployContract: BorshCodable {
 internal struct FunctionCall: IAction {
   let methodName: String
   let args: [UInt8]
-  let gas: Number
-  let deposit: UInt128?
+  let gas: UInt64
+  let deposit: UInt128
 }
 
 extension FunctionCall: BorshCodable {
@@ -249,7 +249,7 @@ func deployContract(code: [UInt8]) -> Action {
   return .deployContract(DeployContract(code: code))
 }
 
-func functionCall(methodName: String, args: [UInt8], gas: Number, deposit: UInt128?) -> Action {
+func functionCall(methodName: String, args: [UInt8], gas: UInt64, deposit: UInt128) -> Action {
   return .functionCall(FunctionCall(methodName: methodName, args: args, gas: gas, deposit: deposit))
 }
 
