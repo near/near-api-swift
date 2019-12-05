@@ -103,7 +103,7 @@ class SerializeSpec: QuickSpec {
         let keyPair = try! keyPairFromString(encodedKey: "ed25519:3hoMW1HvnRLSFCLZnvPzWeoGwtdHzke34B2cTHM8rhcbG3TbuLKtShTv3DvyejnXKXKBiV7YPkLeqUHN1ghnqpFv") as! KeyPairEd25519
         try! await(keyStore.setKey(networkId: "test", accountId: "test.near", keyPair: keyPair))
         let actions = [transfer(deposit: 1)]
-        let blockHash = "244ZQ9cgj3CQ6bWBdytfrJMuMQ1jdXLFGnr4Hhv tCTnM".baseDecoded
+        let blockHash = "244ZQ9cgj3CQ6bWBdytfrJMuMQ1jdXLFGnr4HhvtCTnM".baseDecoded
         let (_, signedTx) = try! await(signTransaction(receiverId: "whatever.near",
                                                        nonce: 1,
                                                        actions: actions,
