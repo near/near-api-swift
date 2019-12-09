@@ -24,6 +24,7 @@ enum HTTPError: Error {
 }
 
 private func fetch(url: URL, params: [String: Any]?) -> Promise<Any> {
+
   let session = URLSession.shared
   var request = URLRequest(url: url)
   request.httpMethod = params.flatMap {_ in "POST"} ?? "GET"

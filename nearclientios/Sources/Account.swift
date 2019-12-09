@@ -67,6 +67,11 @@ internal struct AccountDetails: Equatable, Codable {
   let transactions: [String]
 }
 
+internal struct QueryResult: Equatable, Decodable {
+  let logs: [String]
+  let result: [UInt8]
+}
+
 internal final class Account {
   let connection: Connection
   let accountId: String
@@ -212,7 +217,7 @@ internal final class Account {
                       amount: UInt128?) throws -> Promise<FinalExecutionOutcome> {
     let accessKey: AccessKey
     if let contractId = contractId, !contractId.isEmpty {
-      let methodNames = methodName.flatMap {[$0]} ?? []
+      let methodNames = methodName.flatMap {[$0].filter {!$0.isEmpty}} ?? []
       accessKey = functionCallAccessKey(receiverId: contractId, methodNames: methodNames, allowance: amount)
     } else {
       accessKey = fullAccessKey()
@@ -229,15 +234,14 @@ internal final class Account {
                                       actions: [nearclientios.stake(stake: amount, publicKey: publicKey)])
   }
 
-  func viewFunction<T: Codable>(contractId: String, methodName: String, args: [String: Any] = [:]) throws -> Promise<T> {
-    let data = String(data: Data(json: args), encoding: .utf8) ?? ""
-    let result: T = try await(connection.provider.query(path: "call/\(contractId)/\(methodName)", data: data))
-    return .value(result)
-    //TODO: don't get it
-//    if result.logs {
-//      printLogs(contractId, result.logs)
-//    }
-//    return result.result && result.result.length > 0 && JSON.parse(Buffer.from(result.result).toString());
+  func viewFunction<T: Decodable>(contractId: String, methodName: String, args: [String: Any] = [:]) throws -> Promise<T> {
+    let data = Data(json: args).baseEncoded
+    let result: QueryResult = try await(connection.provider.query(path: "call/\(contractId)/\(methodName)", data: data))
+    if !result.logs.isEmpty {
+      printLogs(contractId: contractId, logs: result.logs)
+    }
+    let decodedResult = try JSONDecoder().decode(T.self, from: result.result.data)
+    return .value(decodedResult)
   }
 
   /// Returns array of {access_key: AccessKey, public_key: PublicKey} items.

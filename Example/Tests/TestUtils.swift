@@ -52,7 +52,7 @@ extension TestUtils {
     return .value(Account(connection: masterAccount.connection, accountId: newAccountName))
   }
 
-  static func deployContract(workingAccount: Account, contractId: String, amount: UInt128 = INITIAL_BALANCE) throws -> Promise<Contract> {
+  static func deployContract(workingAccount: Account, contractId: String, amount: UInt128 = UInt128(10000000)) throws -> Promise<Contract> {
     let newPublicKey = try await(workingAccount.connection.signer.createKey(accountId: contractId, networkId: networkId))
     let data = Wasm().data
     try await(workingAccount.createAndDeployContract(contractId: contractId,

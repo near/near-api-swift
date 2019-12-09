@@ -222,7 +222,12 @@ internal protocol Provider {
 
 internal func getTransactionLastResult(txResult: FinalExecutionOutcome) -> Any? {
   if case .successValue(let value) = txResult.status, let data = Data(base64Encoded: value) {
-    return try? JSONSerialization.jsonObject(with: data, options: [])
+    do {
+      return try JSONSerialization.jsonObject(with: data, options: [])
+    } catch {
+      return String(data: data,
+                    encoding: .utf8)?.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+    }
   }
   return nil
 }

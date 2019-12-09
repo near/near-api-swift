@@ -16,6 +16,19 @@ internal struct FunctionCallPermission {
   let methodNames: [String]
 }
 
+extension FunctionCallPermission: Decodable {
+  private enum CodingKeys: String, CodingKey {
+    case allowance, receiverId = "receiver_id", methodNames = "method_names"
+  }
+
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    allowance = UInt128(stringLiteral: try container.decode(String.self, forKey: .allowance))
+    receiverId = try container.decode(String.self, forKey: .receiverId)
+    methodNames = try container.decode([String].self, forKey: .methodNames)
+  }
+}
+
 extension FunctionCallPermission: BorshCodable {
   func serialize(to writer: inout Data) throws {
     try allowance.serialize(to: &writer)
@@ -57,10 +70,21 @@ internal enum DecodingError: Error {
 }
 
 extension AccessKeyPermission: Decodable {
+  private enum CodingKeys: String, CodingKey {
+    case functionCall = "FunctionCall"
+  }
+
   init(from decoder: Decoder) throws {
-    let value = try decoder.singleValueContainer().decode(String.self)
-    if value == "FullAccess" {
-      self = .fullAccess(FullAccessPermission())
+    if let container = try? decoder.singleValueContainer() {
+      let value = try? container.decode(String.self)
+      if value == "FullAccess" {
+        self = .fullAccess(FullAccessPermission())
+        return
+      }
+    }
+    if let container = try? decoder.container(keyedBy: CodingKeys.self) {
+      let permission = try container.decode(FunctionCallPermission.self, forKey: .functionCall)
+      self = .functionCall(permission)
     } else {
       throw DecodingError.notExpected
     }

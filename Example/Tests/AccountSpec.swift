@@ -82,13 +82,9 @@ class AccountSpec: QuickSpec {
 
     describe("errors") {
       it("while creating existing account") {
-        do {
-          try expect(self.workingAccount.createAccount(newAccountId: self.workingAccount.accountId,
-                                                       publicKey: PublicKey.fromString(encodedKey: "9AhWenZ3JddamBoyMqnTbp7yVbRuvqAv3zwfrWgfVRJE"),
-                                                       amount: 100)).to(throwError())
-        } catch let error {
-          fail("\(error)")
-        }
+        try! expect(self.workingAccount.createAccount(newAccountId: self.workingAccount.accountId,
+                                                     publicKey: PublicKey.fromString(encodedKey: "9AhWenZ3JddamBoyMqnTbp7yVbRuvqAv3zwfrWgfVRJE"),
+                                                     amount: 100)).to(throwError())
       }
     }
 
@@ -144,7 +140,7 @@ class AccountSpec: QuickSpec {
           expect(result).to(equal("hello trex"))
 
           let setCallValue = TestUtils.generateUniqueString(prefix: "setCallPrefix")
-          let result2 = try await(contract.change(methodName: .hello, args: ["value": setCallValue])) as? String
+          let result2 = try await(contract.change(methodName: .setValue, args: ["value": setCallValue])) as? String
           expect(result2).to(equal(setCallValue))
           let testSetCallValue: String = try await(contract.view(methodName: .getValue))
           expect(testSetCallValue).to(equal(setCallValue))
@@ -159,7 +155,7 @@ class AccountSpec: QuickSpec {
           expect(result).to(equal("hello trex"))
 
           let setCallValue = TestUtils.generateUniqueString(prefix: "setCallPrefix")
-          let result2 = try await(contract.change(methodName: .hello, args: ["value": setCallValue], gas: 100000)) as? String
+          let result2 = try await(contract.change(methodName: .setValue, args: ["value": setCallValue], gas: 100000)) as? String
           expect(result2).to(equal(setCallValue))
           let testSetCallValue: String = try await(contract.view(methodName: .getValue))
           expect(testSetCallValue).to(equal(setCallValue))
@@ -188,13 +184,9 @@ class AccountSpec: QuickSpec {
       }
 
       it("can get assert message from method result") {
-        do {
-          try expect(contract.change(methodName: .triggerAssert)).to(throwError())
+          try! expect(contract.change(methodName: .triggerAssert)).to(throwError())
           //          expect(logs[0]).toEqual(`[${contractId}]: LOG: log before assert`);
           //          expect(logs[1]).toMatch(new RegExp(`^\\[${contractId}\\]: ABORT: "?expected to fail"?,? filename: "assembly/main.ts" line: \\d+ col: \\d+$`));
-        } catch let error {
-          fail("\(error)")
-        }
       }
 
       it("test set/remove") {

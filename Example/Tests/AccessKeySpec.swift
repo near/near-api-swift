@@ -47,15 +47,16 @@ class AccessKeySpec: QuickSpec {
       it("should make function call using access key") {
         do {
           let keyPair = try keyPairFromRandom()
-          try await(self.workingAccount.addKey(publicKey: keyPair.getPublicKey(),
+          let publicKey = keyPair.getPublicKey()
+          try await(self.workingAccount.addKey(publicKey: publicKey,
                                                contractId: self.contractId,
                                                methodName: "",
                                                amount: UInt128(10000000)))
           // Override in the key store the workingAccount key to the given access key.
-          try await((self.near.connection.signer as! InMemorySigner)
-            .keyStore.setKey(networkId: networkId,
-                             accountId: self.workingAccount.accountId,
-                             keyPair: keyPair))
+          let signer = self.near.connection.signer as! InMemorySigner
+          try await(signer.keyStore.setKey(networkId: networkId,
+                                           accountId: self.workingAccount.accountId,
+                                           keyPair: keyPair))
           let setCallValue = TestUtils.generateUniqueString(prefix: "setCallPrefix")
           try await(self.contract.change(methodName: .setValue, args: ["value": setCallValue]))
           let testValue: String = try await(self.contract.view(methodName: .getValue))

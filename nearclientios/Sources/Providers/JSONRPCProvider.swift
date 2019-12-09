@@ -38,9 +38,9 @@ extension JSONRPCProvider {
                                   "jsonrpc": "2.0"]
     let json = try await(fetchJson(connection: connection, json: request))
     let data = try JSONSerialization.data(withJSONObject: json, options: [])
-    debugPrint("=====================")
-    debugPrint(json)
-    debugPrint("=====================")
+//    debugPrint("=====================")
+//    debugPrint(json)
+//    debugPrint("=====================")
     let decoded = try JSONDecoder().decode(T.self, from: data)
     return .value(decoded)
   }
@@ -59,6 +59,7 @@ extension JSONRPCProvider: Provider {
   func sendTransaction(signedTransaction: SignedTransaction) throws -> Promise<FinalExecutionOutcome> {
     let data = try BorshEncoder().encode(signedTransaction)
     let params = [data.base64EncodedString()]
+//    debugPrint("params \(params)")
     return try sendJsonRpc(method: "broadcast_tx_commit", params: params)
   }
 
