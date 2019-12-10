@@ -29,11 +29,11 @@ private func fetch(url: URL, params: [String: Any]?) -> Promise<Any> {
   var request = URLRequest(url: url)
   request.httpMethod = params.flatMap {_ in "POST"} ?? "GET"
   request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-  request.httpBody = params.flatMap { try? JSONSerialization.data(withJSONObject: $0, options: []) }
+  request.httpBody = params.flatMap { try? $0.toData() }
   return Promise.init { seal in
     let task = session.dataTask(with: request) { data, response, error in
       if let error = error { return seal.reject(error) }
-      let result = data.flatMap {try? JSONSerialization.jsonObject(with: $0, options: []) as? [String: Any]}
+      let result = data.flatMap {try? $0.toDictionary()}
       if let json = result?["result"] {
         seal.fulfill(json)
       } else if let httpResponse = response as? HTTPURLResponse {

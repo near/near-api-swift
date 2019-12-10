@@ -40,7 +40,7 @@ extension TestUtils {
 
   // Generate some unique string with a given prefix using the alice nonce.
   static func generateUniqueString(prefix: String) -> String {
-    return prefix + "\(Int(Date().timeIntervalSince1970))" + "\(Int.random(in: 0..<1000))"
+    return prefix + "\(Int(Date().timeIntervalSince1970 * 1000))" + "\(Int.random(in: 0..<1000))"
   }
 
   static func createAccount(masterAccount: Account, amount: UInt128 = INITIAL_BALANCE, trials: UInt32 = 5) throws -> Promise<Account> {

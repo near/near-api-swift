@@ -33,11 +33,11 @@ internal extension Data {
 
 internal extension Data {
   var json: [String: Any]? {
-    return try? JSONSerialization.jsonObject(with: self, options: []) as? [String: Any]
+    return try? toDictionary()
   }
 
   init(json: [String: Any]) {
-    let data = try? JSONSerialization.data(withJSONObject: json, options: [])
+    let data = try? json.toData()
     self.init(bytes: data?.bytes ?? [], count: data?.bytes.count ?? 0)
   }
 }
@@ -49,5 +49,50 @@ internal extension Collection where Element == UInt8 {
 
   var data: Data {
     return Data(self)
+  }
+}
+
+internal struct CastingError: Error {
+  let fromType: Any.Type
+  let toType: Any.Type
+  init<FromType, ToType>(fromType: FromType.Type, toType: ToType.Type) {
+    self.fromType = fromType
+    self.toType = toType
+  }
+}
+
+extension CastingError: LocalizedError {
+  var localizedDescription: String { return "Can not cast from \(fromType) to \(toType)" }
+}
+
+extension CastingError: CustomStringConvertible { var description: String { return localizedDescription } }
+
+internal extension Data {
+  func toDictionary(options: JSONSerialization.ReadingOptions = []) throws -> [String: Any] {
+    return try to(type: [String: Any].self, options: options)
+  }
+
+  func to<T>(type: T.Type, options: JSONSerialization.ReadingOptions = []) throws -> T {
+    guard let result = try JSONSerialization.jsonObject(with: self, options: options) as? T else {
+      throw CastingError(fromType: type, toType: T.self)
+    }
+    return result
+  }
+}
+
+internal extension String {
+  func asJSON<T>(to type: T.Type, using encoding: String.Encoding = .utf8) throws -> T {
+    guard let data = data(using: encoding) else { throw CastingError(fromType: type, toType: T.self) }
+    return try data.to(type: T.self)
+  }
+
+  func asJSONToDictionary(using encoding: String.Encoding = .utf8) throws -> [String: Any] {
+    return try asJSON(to: [String: Any].self, using: encoding)
+  }
+}
+
+internal extension Dictionary {
+  func toData(options: JSONSerialization.WritingOptions = []) throws -> Data {
+    return try JSONSerialization.data(withJSONObject: self, options: options)
   }
 }

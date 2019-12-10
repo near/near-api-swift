@@ -59,7 +59,7 @@ internal extension Contract {
 }
 
 internal extension Contract {
-  func view<T: Codable>(methodName: ChangeMethod, args: [String: Any] = [:]) throws -> Promise<T> {
+  func view<T: Decodable>(methodName: ChangeMethod, args: [String: Any] = [:]) throws -> Promise<T> {
     return try account.viewFunction(contractId: contractId, methodName: methodName, args: args)
   }
 }

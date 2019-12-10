@@ -11,7 +11,7 @@
 		3204AD18238DD8B200D3E07F /* KeyPairSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3204AD17238DD8B200D3E07F /* KeyPairSpec.swift */; };
 		3204AD1A238E8E7C00D3E07F /* ProviderSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3204AD19238E8E7C00D3E07F /* ProviderSpec.swift */; };
 		3204AD1C238E90F200D3E07F /* EnviromentConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3204AD1B238E90F200D3E07F /* EnviromentConfig.swift */; };
-		32300C7C2397171900CEE803 /* main.wasm in Resources */ = {isa = PBXBuildFile; fileRef = 32300C7B2397171800CEE803 /* main.wasm */; };
+		3225A1EE239EE03200CE1358 /* PromisesSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3225A1ED239EE03200CE1358 /* PromisesSpec.swift */; };
 		32300C842397A89100CEE803 /* Wasm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32300C832397A89100CEE803 /* Wasm.swift */; };
 		324C548C238F00670097E566 /* SerializeSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324C5488238EE6D00097E566 /* SerializeSpec.swift */; };
 		324C548F238F31E40097E566 /* Transaction.json in Resources */ = {isa = PBXBuildFile; fileRef = 324C548D238F316F0097E566 /* Transaction.json */; };
@@ -23,6 +23,7 @@
 		324FD2C3238D21E800950035 /* KeystoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324FD2C0238D21DA00950035 /* KeystoreSpec.swift */; };
 		324FD2C5238DB6FC00950035 /* KeychainKeystoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324FD2C4238DB6FC00950035 /* KeychainKeystoreSpec.swift */; };
 		32929BB123950B9F00BE56B5 /* AccessKeySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32929BB023950B9F00BE56B5 /* AccessKeySpec.swift */; };
+		32E06210239ECED100E8DB49 /* main.wasm in Resources */ = {isa = PBXBuildFile; fileRef = 32E0620F239ECED100E8DB49 /* main.wasm */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
@@ -49,7 +50,7 @@
 		3204AD17238DD8B200D3E07F /* KeyPairSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyPairSpec.swift; sourceTree = "<group>"; };
 		3204AD19238E8E7C00D3E07F /* ProviderSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderSpec.swift; sourceTree = "<group>"; };
 		3204AD1B238E90F200D3E07F /* EnviromentConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnviromentConfig.swift; sourceTree = "<group>"; };
-		32300C7B2397171800CEE803 /* main.wasm */ = {isa = PBXFileReference; lastKnownFileType = file; name = main.wasm; path = "../../../near-hello/node_modules/near-hello/dist/main.wasm"; sourceTree = "<group>"; };
+		3225A1ED239EE03200CE1358 /* PromisesSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromisesSpec.swift; sourceTree = "<group>"; };
 		32300C832397A89100CEE803 /* Wasm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wasm.swift; sourceTree = "<group>"; };
 		324C5488238EE6D00097E566 /* SerializeSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerializeSpec.swift; sourceTree = "<group>"; };
 		324C548D238F316F0097E566 /* Transaction.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Transaction.json; sourceTree = "<group>"; };
@@ -61,6 +62,7 @@
 		324FD2C0238D21DA00950035 /* KeystoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeystoreSpec.swift; sourceTree = "<group>"; };
 		324FD2C4238DB6FC00950035 /* KeychainKeystoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainKeystoreSpec.swift; sourceTree = "<group>"; };
 		32929BB023950B9F00BE56B5 /* AccessKeySpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessKeySpec.swift; sourceTree = "<group>"; };
+		32E0620F239ECED100E8DB49 /* main.wasm */ = {isa = PBXFileReference; lastKnownFileType = file; path = main.wasm; sourceTree = "<group>"; };
 		5BFEC3AC95424DFAAA7966C1 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		5C76F055C5E305BEF0697F4E /* Pods-nearclientios_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-nearclientios_Example.debug.xcconfig"; path = "Target Support Files/Pods-nearclientios_Example/Pods-nearclientios_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		5DED125CCF48DC18090EB82D /* nearclientios.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = nearclientios.podspec; path = ../nearclientios.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
@@ -177,6 +179,7 @@
 				324C549623900EB90097E566 /* AccountSpec.swift */,
 				32929BB023950B9F00BE56B5 /* AccessKeySpec.swift */,
 				324C5490238FB8230097E566 /* SignerSpec.swift */,
+				3225A1ED239EE03200CE1358 /* PromisesSpec.swift */,
 				324C5494238FCC110097E566 /* WalletAccountSpec.swift */,
 				607FACE91AFB9204008FA782 /* Supporting Files */,
 			);
@@ -187,7 +190,7 @@
 			isa = PBXGroup;
 			children = (
 				607FACEA1AFB9204008FA782 /* Info.plist */,
-				32300C7B2397171800CEE803 /* main.wasm */,
+				32E0620F239ECED100E8DB49 /* main.wasm */,
 				324C548D238F316F0097E566 /* Transaction.json */,
 			);
 			name = "Supporting Files";
@@ -322,7 +325,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				32300C7C2397171900CEE803 /* main.wasm in Resources */,
+				32E06210239ECED100E8DB49 /* main.wasm in Resources */,
 				324C548F238F31E40097E566 /* Transaction.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -452,6 +455,7 @@
 				3204AD1A238E8E7C00D3E07F /* ProviderSpec.swift in Sources */,
 				324C5495238FCC110097E566 /* WalletAccountSpec.swift in Sources */,
 				32929BB123950B9F00BE56B5 /* AccessKeySpec.swift in Sources */,
+				3225A1EE239EE03200CE1358 /* PromisesSpec.swift in Sources */,
 				324C5493238FC6C00097E566 /* TestUtils.swift in Sources */,
 				3204AD15238DB91700D3E07F /* MergeKeyStoreSpec.swift in Sources */,
 				3204AD1C238E90F200D3E07F /* EnviromentConfig.swift in Sources */,
