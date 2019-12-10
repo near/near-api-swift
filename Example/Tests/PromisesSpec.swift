@@ -68,14 +68,13 @@ class PromiseSpec: QuickSpec {
           do {
             let args: [String: Any] = ["receiver": contractName1,
                                        "methodName": "callbackWithName",
-                                       "args": NSNull(),
                                        "gas": 300000,
                                        "balance": 0,
-                                       "callback": NSNull(),
-                                       "callbackArgs": NSNull(),
                                        "callbackBalance": 0,
                                        "callbackGas": 0]
-            let realResult = try await(contract.change(methodName: .callPromise, args: args)) as? Result
+            let realResultDictionary = try await(contract.change(methodName: .callPromise,
+                                                                 args: ["args": args])) as! [String: Any]
+            let realResult = try JSONDecoder().decode(Result.self, from: try realResultDictionary.toData())
             let lastResult: Result = try await(contract1.view(methodName: .getLastResult))
             expect(lastResult).to(equal(Result(rs: [], n: contractName1)))
             expect(realResult).to(equal(lastResult))
@@ -88,14 +87,14 @@ class PromiseSpec: QuickSpec {
           do {
             let args: [String: Any] = ["receiver": contractName1,
                                        "methodName": "callbackWithName",
-                                       "args": NSNull(),
                                        "gas": 300000,
                                        "balance": 0,
                                        "callback": "callbackWithName",
-                                       "callbackArgs": NSNull(),
                                        "callbackBalance": 0,
                                        "callbackGas": 200000]
-            let realResult = try await(contract.change(methodName: .callPromise, args: args)) as? Result
+            let realResultDictionary = try await(contract.change(methodName: .callPromise,
+                                                                 args: ["args": args])) as! [String: Any]
+            let realResult = try JSONDecoder().decode(Result.self, from: try realResultDictionary.toData())
             let lastResult1: Result = try await(contract1.view(methodName: .getLastResult))
             expect(lastResult1).to(equal(Result(rs: [], n: contractName1)))
             let lastResult: Result = try await(contract.view(methodName: .getLastResult))
@@ -110,11 +109,8 @@ class PromiseSpec: QuickSpec {
           do {
             let callPromiseArgs: [String: Any] = ["receiver": contractName2,
                                                   "methodName": "callbackWithName",
-                                                  "args": NSNull(),
                                                   "gas": 400000,
                                                   "balance": 0,
-                                                  "callback": NSNull(),
-                                                  "callbackArgs": NSNull(),
                                                   "callbackBalance": 0,
                                                   "callbackGas": 200000]
             let args: [String: Any] = ["receiver": contractName1,
@@ -122,11 +118,11 @@ class PromiseSpec: QuickSpec {
                                        "args": callPromiseArgs,
                                        "gas": 600000,
                                        "balance": 0,
-                                       "callback": NSNull(),
-                                       "callbackArgs": NSNull(),
                                        "callbackBalance": 0,
                                        "callbackGas": 600000]
-            let realResult = try await(contract.change(methodName: .callPromise, args: args)) as? Result
+            let realResultDictionary = try await(contract.change(methodName: .callPromise,
+                                                                 args: ["args": args])) as! [String: Any]
+            let realResult = try JSONDecoder().decode(Result.self, from: try realResultDictionary.toData())
             let lastResult2: Result = try await(contract2.view(methodName: .getLastResult))
             expect(lastResult2).to(equal(Result(rs: [], n: contractName2)))
             expect(realResult).to(equal(lastResult2))
@@ -139,11 +135,9 @@ class PromiseSpec: QuickSpec {
           do {
             let callPromiseArgs: [String: Any] = ["receiver": contractName2,
                                                   "methodName": "callbackWithName",
-                                                  "args": NSNull(),
                                                   "gas": 400000,
                                                   "balance": 0,
                                                   "callback": "callbackWithName",
-                                                  "callbackArgs": NSNull(),
                                                   "callbackBalance": 0,
                                                   "callbackGas": 200000]
             let args: [String: Any] = ["receiver": contractName1,
@@ -152,14 +146,15 @@ class PromiseSpec: QuickSpec {
                                        "gas": 1000000,
                                        "balance": 0,
                                        "callback": "callbackWithName",
-                                       "callbackArgs": NSNull(),
                                        "callbackBalance": 0,
                                        "callbackGas": 300000]
-            let realResult = try await(contract.change(methodName: .callPromise, args: args)) as? Result
+            let realResultDictionary = try await(contract.change(methodName: .callPromise,
+                                                                 args: ["args": args])) as! [String: Any]
+            let realResult = try JSONDecoder().decode(Result.self, from: try realResultDictionary.toData())
             let lastResult2: Result = try await(contract2.view(methodName: .getLastResult))
             expect(lastResult2).to(equal(Result(rs: [], n: contractName2)))
             let lastResult1: Result = try await(contract1.view(methodName: .getLastResult))
-            expect(lastResult2).to(equal(Result(rs: [RSResult(ok: true, r: lastResult2)], n: contractName1)))
+            expect(lastResult1).to(equal(Result(rs: [RSResult(ok: true, r: lastResult2)], n: contractName1)))
             let lastResult: Result = try await(contract.view(methodName: .getLastResult))
             expect(lastResult).to(equal(Result(rs: [RSResult(ok: true, r: lastResult1)], n: contractName)))
             expect(realResult).to(equal(lastResult))
@@ -172,11 +167,9 @@ class PromiseSpec: QuickSpec {
           do {
             let callPromiseArgs: [String: Any] = ["receiver": contractName,
                                                   "methodName": "callbackWithName",
-                                                  "args": NSNull(),
                                                   "gas": 400000,
                                                   "balance": 0,
                                                   "callback": "callbackWithName",
-                                                  "callbackArgs": NSNull(),
                                                   "callbackBalance": 0,
                                                   "callbackGas": 400000]
             let args: [String: Any] = ["receiver": contractName1,
@@ -185,10 +178,11 @@ class PromiseSpec: QuickSpec {
                                        "gas": 1000000,
                                        "balance": 0,
                                        "callback": "callbackWithName",
-                                       "callbackArgs": NSNull(),
                                        "callbackBalance": 0,
                                        "callbackGas": 300000]
-            let realResult = try await(contract.change(methodName: .callPromise, args: args)) as? Result
+            let realResultDictionary = try await(contract.change(methodName: .callPromise,
+                                                                 args: ["args": args])) as! [String: Any]
+            let realResult = try JSONDecoder().decode(Result.self, from: try realResultDictionary.toData())
             let lastResult1: Result = try await(contract1.view(methodName: .getLastResult))
             expect(lastResult1).to(equal(Result(rs: [RSResult(ok: true,
                                                               r: Result(rs: [], n: contractName))], n: contractName1)))
@@ -204,11 +198,8 @@ class PromiseSpec: QuickSpec {
           do {
             let callPromiseArgs: [String: Any] = ["receiver": contractName2,
                                                   "methodName": "callbackWithName",
-                                                  "args": NSNull(),
                                                   "gas": 200000,
                                                   "balance": 0,
-                                                  "callback": NSNull(),
-                                                  "callbackArgs": NSNull(),
                                                   "callbackBalance": 0,
                                                   "callbackGas": 200000]
             let args: [String: Any] = ["receiver": contractName1,
@@ -217,10 +208,11 @@ class PromiseSpec: QuickSpec {
                                        "gas": 500000,
                                        "balance": 0,
                                        "callback": "callbackWithName",
-                                       "callbackArgs": NSNull(),
                                        "callbackBalance": 0,
                                        "callbackGas": 300000]
-            let realResult = try await(contract.change(methodName: .callPromise, args: args)) as? Result
+            let realResultDictionary = try await(contract.change(methodName: .callPromise,
+                                                                 args: ["args": args])) as! [String: Any]
+            let realResult = try JSONDecoder().decode(Result.self, from: try realResultDictionary.toData())
             let lastResult2: Result = try await(contract2.view(methodName: .getLastResult))
             expect(lastResult2).to(equal(Result(rs: [], n: contractName2)))
             let lastResult: Result = try await(contract.view(methodName: .getLastResult))
@@ -235,11 +227,9 @@ class PromiseSpec: QuickSpec {
           do {
             let callPromiseArgs: [String: Any] = ["receiver": contractName2,
                                                   "methodName": "callbackWithName",
-                                                  "args": NSNull(),
                                                   "gas": 400000,
                                                   "balance": 0,
                                                   "callback": "callbackWithName",
-                                                  "callbackArgs": NSNull(),
                                                   "callbackBalance": 0,
                                                   "callbackGas": 400000]
             let args: [String: Any] = ["receiver": contractName1,
@@ -247,11 +237,11 @@ class PromiseSpec: QuickSpec {
                                        "args": callPromiseArgs,
                                        "gas": 1000000,
                                        "balance": 0,
-                                       "callback": NSNull(),
-                                       "callbackArgs": NSNull(),
                                        "callbackBalance": 0,
                                        "callbackGas": 0]
-            let realResult = try await(contract.change(methodName: .callPromise, args: args)) as? Result
+            let realResultDictionary = try await(contract.change(methodName: .callPromise,
+                                                                 args: ["args": args])) as! [String: Any]
+            let realResult = try JSONDecoder().decode(Result.self, from: try realResultDictionary.toData())
             let lastResult2: Result = try await(contract2.view(methodName: .getLastResult))
             expect(lastResult2).to(equal(Result(rs: [], n: contractName2)))
             let lastResult1: Result = try await(contract1.view(methodName: .getLastResult))

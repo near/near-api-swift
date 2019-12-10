@@ -10,8 +10,6 @@ import Foundation
 import PromiseKit
 import AwaitKit
 
-//TODO complete this part
-
 /// Default amount of tokens to be send with the function calls. Used to pay for the fees
 /// incurred while running the contract execution. The unused amount will be refunded back to
 /// the originator.
@@ -240,7 +238,14 @@ internal final class Account {
     if !result.logs.isEmpty {
       printLogs(contractId: contractId, logs: result.logs)
     }
-    let decodedResult = try JSONDecoder().decode(T.self, from: result.result.data)
+    var rawData: Data
+    do {
+      let dictionary = try result.result.data.toDictionary()
+      rawData = try dictionary.toData()
+    } catch {
+      rawData = result.result.data
+    }
+    let decodedResult = try JSONDecoder().decode(T.self, from: rawData)
     return .value(decodedResult)
   }
 

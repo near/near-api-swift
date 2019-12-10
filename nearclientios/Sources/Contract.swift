@@ -9,7 +9,6 @@
 import Foundation
 import PromiseKit
 import AwaitKit
-//TODO complete this part
 
 internal protocol ContractOptionsProtocol {
   var viewMethods: [ViewMethod] {get}
