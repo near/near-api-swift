@@ -11,7 +11,7 @@ import KeychainAccess
 
 let KEYCHAIN_STORAGE_SERVICE = "nearlib.keystore"
 
-internal struct KeychainKeyStore {
+public struct KeychainKeyStore {
   private let keychain: Keychain
 
   init(keychain: Keychain = .init(service: KEYCHAIN_STORAGE_SERVICE)) {
@@ -20,29 +20,29 @@ internal struct KeychainKeyStore {
 }
 
 extension KeychainKeyStore: KeyStore {
-  func setKey(networkId: String, accountId: String, keyPair: KeyPair) -> Promise<Void> {
+  public func setKey(networkId: String, accountId: String, keyPair: KeyPair) -> Promise<Void> {
     keychain[storageKeyForSecretKey(networkId: networkId, accountId: accountId)] = keyPair.toString()
     return .value(())
   }
 
-  func getKey(networkId: String, accountId: String) -> Promise<KeyPair?> {
+  public func getKey(networkId: String, accountId: String) -> Promise<KeyPair?> {
     guard let value = keychain[storageKeyForSecretKey(networkId: networkId, accountId: accountId)] else {
       return .value(nil)
     }
     return .value(try? keyPairFromString(encodedKey: value))
   }
 
-  func removeKey(networkId: String, accountId: String) -> Promise<Void> {
+  public func removeKey(networkId: String, accountId: String) -> Promise<Void> {
     keychain[storageKeyForSecretKey(networkId: networkId, accountId: accountId)] = nil
     return .value(())
   }
 
-  func clear() -> Promise<Void> {
+  public func clear() -> Promise<Void> {
     try? keychain.removeAll()
     return .value(())
   }
 
-  func getNetworks() throws -> Promise<[String]> {
+  public func getNetworks() throws -> Promise<[String]> {
     var result = Set<String>()
     for key in storageKeys() {
       if let networkId = key.components(separatedBy: ":").last {
@@ -52,7 +52,7 @@ extension KeychainKeyStore: KeyStore {
     return .value(Array(result))
   }
 
-  func getAccounts(networkId: String) throws -> Promise<[String]> {
+  public func getAccounts(networkId: String) throws -> Promise<[String]> {
     var result = [String]()
     for key in storageKeys() {
       let components = key.components(separatedBy: ":")

@@ -10,14 +10,14 @@ import Foundation
 import PromiseKit
 import AwaitKit
 
-internal enum SignerType {
+public enum SignerType {
   case inMemory(KeyStore)
 }
 
 /**
  General signing interface, can be used for in memory signing, RPC singing, external wallet, HSM, etc.
  */
-internal protocol Signer {
+public protocol Signer {
 
   /**
    Creates new key and returns public key.
@@ -55,7 +55,7 @@ internal protocol Signer {
 }
 
 extension Signer {
-  func signMessage(message: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol> {
+  public func signMessage(message: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol> {
     return try signHash(hash: message.digest, accountId: accountId, networkId: networkId)
   }
 }
@@ -63,27 +63,27 @@ extension Signer {
 /**
  * Signs using in memory key store.
  */
-internal struct InMemorySigner {
+public struct InMemorySigner {
   let keyStore: KeyStore
 }
 
-internal enum InMemorySignerError: Error {
+public enum InMemorySignerError: Error {
   case notFound(String)
 }
 
 extension InMemorySigner: Signer {
-  func createKey(accountId: String, networkId: String) throws -> Promise<PublicKey> {
+  public func createKey(accountId: String, networkId: String) throws -> Promise<PublicKey> {
     let keyPair = try keyPairFromRandom(curve: .ED25519)
     try await(keyStore.setKey(networkId: networkId, accountId: accountId, keyPair: keyPair))
     return .value(keyPair.getPublicKey())
   }
 
-  func getPublicKey(accountId: String, networkId: String) throws -> Promise<PublicKey?> {
+  public func getPublicKey(accountId: String, networkId: String) throws -> Promise<PublicKey?> {
     let keyPair = try await(keyStore.getKey(networkId: networkId, accountId: accountId))
     return .value(keyPair?.getPublicKey())
   }
 
-  func signHash(hash: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol> {
+  public func signHash(hash: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol> {
     guard let keyPair = try await(keyStore.getKey(networkId: networkId, accountId: accountId)) else {
       throw InMemorySignerError.notFound("Key for \(accountId) not found in \(networkId)")
     }

@@ -9,7 +9,7 @@
 import Foundation
 import PromiseKit
 
-internal struct ConnectionInfo {
+public struct ConnectionInfo {
   let url: URL
   let user: String? = nil
   let password: String? = nil
@@ -48,7 +48,7 @@ private func fetch(url: URL, params: [String: Any]?) -> Promise<Any> {
   }
 }
 
-internal func fetchJson(connection: ConnectionInfo, json: [String: Any]?) -> Promise<Any> {
+public func fetchJson(connection: ConnectionInfo, json: [String: Any]?) -> Promise<Any> {
   let url = connection.url
   return fetch(url: url, params: json)
 }

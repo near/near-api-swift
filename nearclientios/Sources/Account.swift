@@ -25,54 +25,54 @@ let TX_STATUS_RETRY_WAIT: Double = 500
 let TX_STATUS_RETRY_WAIT_BACKOFF = 1.5
 
 // Sleep given number of millis.
-internal func sleep(millis: Double) -> Promise<Void> {
+public func sleep(millis: Double) -> Promise<Void> {
   let sec = millis / 1000
   return Promise<Void> { seal in
     DispatchQueue.main.asyncAfter(deadline: .now() + sec) {seal.fulfill(())}
   }
 }
 
-internal struct AccountState: Codable {
-  let account_id: String?
-  let staked: String?
-  let locked: String
-  let amount: String
-  let code_hash: String
-  let storage_paid_at: Number
-  let storage_usage: Number
+public struct AccountState: Codable {
+  public let account_id: String?
+  public let staked: String?
+  public let locked: String
+  public let amount: String
+  public let code_hash: String
+  public let storage_paid_at: Number
+  public let storage_usage: Number
 }
 
-internal struct KeyBox: Decodable {
+public struct KeyBox: Decodable {
   let access_key: AccessKey
   let public_key: String
 }
 
-internal typealias KeyBoxes = [KeyBox]
+public typealias KeyBoxes = [KeyBox]
 
-internal enum AccountError: Error {
+public enum AccountError: Error {
   case noAccessKey(String)
   case noResult
 }
 
-internal struct AuthorizedApp: Equatable, Codable {
+public struct AuthorizedApp: Equatable, Codable {
   let contractId: String
   let amount: UInt128
   let publicKey: String
 }
 
-internal struct AccountDetails: Equatable, Codable {
+public struct AccountDetails: Equatable, Codable {
   let authorizedApps: [AuthorizedApp]
   let transactions: [String]
 }
 
-internal struct QueryResult: Equatable, Decodable {
+public struct QueryResult: Equatable, Decodable {
   let logs: [String]
   let result: [UInt8]
 }
 
-internal final class Account {
+public final class Account {
   let connection: Connection
-  let accountId: String
+  public let accountId: String
   private var _state: AccountState?
   private var _accessKey: AccessKey?
 
@@ -103,7 +103,7 @@ internal final class Account {
     return .value(())
   }
 
-  func state() throws -> Promise<AccountState> {
+  public func state() throws -> Promise<AccountState> {
     try await(ready)
     return .value(_state!)
   }

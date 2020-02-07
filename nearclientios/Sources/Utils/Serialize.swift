@@ -9,13 +9,13 @@
 import Foundation
 import Base58Swift
 
-internal extension String {
+public extension String {
   var baseDecoded: [UInt8] {
     return Base58.base58Decode(self) ?? []
   }
 }
 
-internal extension Data {
+public extension Data {
   var baseEncoded: String {
     return Base58.base58Encode(bytes)
   }
@@ -25,13 +25,13 @@ internal extension Data {
   }
 }
 
-internal extension Data {
+public extension Data {
   var hexString: String {
       return map { String(format: "%02x", UInt8($0)) }.joined()
   }
 }
 
-internal extension Data {
+public extension Data {
   var json: [String: Any]? {
     return try? toDictionary()
   }
@@ -42,7 +42,7 @@ internal extension Data {
   }
 }
 
-internal extension Collection where Element == UInt8 {
+public extension Collection where Element == UInt8 {
   var baseEncoded: String {
     return data.baseEncoded
   }
@@ -52,7 +52,7 @@ internal extension Collection where Element == UInt8 {
   }
 }
 
-internal struct CastingError: Error {
+public struct CastingError: Error {
   let fromType: Any.Type
   let toType: Any.Type
   init<FromType, ToType>(fromType: FromType.Type, toType: ToType.Type) {
@@ -65,9 +65,9 @@ extension CastingError: LocalizedError {
   var localizedDescription: String { return "Can not cast from \(fromType) to \(toType)" }
 }
 
-extension CastingError: CustomStringConvertible { var description: String { return localizedDescription } }
+extension CastingError: CustomStringConvertible { public var description: String { return localizedDescription } }
 
-internal extension Data {
+public extension Data {
   func toDictionary(options: JSONSerialization.ReadingOptions = []) throws -> [String: Any] {
     return try to(type: [String: Any].self, options: options)
   }
@@ -80,7 +80,7 @@ internal extension Data {
   }
 }
 
-internal extension String {
+public extension String {
   func asJSON<T>(to type: T.Type, using encoding: String.Encoding = .utf8) throws -> T {
     guard let data = data(using: encoding) else { throw CastingError(fromType: type, toType: T.self) }
     return try data.to(type: T.self)

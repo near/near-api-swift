@@ -10,7 +10,7 @@ import Foundation
 import PromiseKit
 import AwaitKit
 
-internal protocol NearConfigProtocol: ConnectionConfigProtocol {
+public protocol NearConfigProtocol: ConnectionConfigProtocol {
   var networkId: String {get}
   var nodeUrl: URL {get}
   var masterAccount: String? {get set}
@@ -22,33 +22,47 @@ internal protocol NearConfigProtocol: ConnectionConfigProtocol {
   var walletUrl: String {get}
 }
 
-internal struct NearConfig: NearConfigProtocol {
-  let networkId: String
-  let nodeUrl: URL
-  var masterAccount: String?
-  let keyPath: String?
-  let helperUrl: URL?
-  let initialBalance: UInt128?
-  let providerType: ProviderType
-  let signerType: SignerType
-  var keyStore: KeyStore?
-  let contractName: String?
-  let walletUrl: String
+public struct NearConfig: NearConfigProtocol {
+  public let networkId: String
+  public let nodeUrl: URL
+  public var masterAccount: String?
+  public let keyPath: String?
+  public let helperUrl: URL?
+  public let initialBalance: UInt128?
+  public let providerType: ProviderType
+  public let signerType: SignerType
+  public var keyStore: KeyStore?
+  public let contractName: String?
+  public let walletUrl: String
+  
+  public init(networkId: String, nodeUrl: URL, masterAccount: String?, keyPath: String?, helperUrl: URL?, initialBalance: UInt128?, providerType: ProviderType, signerType: SignerType, keyStore: KeyStore?, contractName: String?, walletUrl: String) {
+    self.networkId = networkId
+    self.nodeUrl = nodeUrl
+    self.masterAccount = masterAccount
+    self.keyPath = keyPath
+    self.helperUrl = helperUrl
+    self.initialBalance = initialBalance
+    self.providerType = providerType
+    self.signerType = signerType
+    self.keyStore = keyStore
+    self.contractName = contractName
+    self.walletUrl = walletUrl
+  }
 }
 
-internal struct Near {
+public struct Near {
   let config: NearConfigProtocol
   let connection: Connection
   private let accountCreator: AccountCreator?
 }
 
-internal enum NearError: Error {
+public enum NearError: Error {
   case noAccountCreator(String)
   case noAccountId
 }
 
 extension Near {
-  init(config: NearConfigProtocol) throws {
+  public init(config: NearConfigProtocol) throws {
     let connection = try Connection.fromConfig(config: config)
     var accountCreator: AccountCreator?
     if let masterAccount = config.masterAccount {
@@ -63,7 +77,7 @@ extension Near {
   }
 }
 
-internal extension Near {
+public extension Near {
   func account(accountId: String) throws -> Promise<Account> {
     let account = Account(connection: connection, accountId: accountId)
     try await(account.state())

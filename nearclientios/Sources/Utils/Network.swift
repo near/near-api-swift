@@ -8,14 +8,14 @@
 
 import Foundation
 
-internal protocol NetworkProtocol {
+public protocol NetworkProtocol {
   var name: String {get}
   var chainId: String {get}
   var _defaultProvider: ((_ providers: Any) -> Any)? {get}
 }
 
-internal struct Network: NetworkProtocol {
-  let name: String
-  let chainId: String
-  var _defaultProvider: ((_ providers: Any) -> Any)?
+public struct Network: NetworkProtocol {
+  public let name: String
+  public let chainId: String
+  public var _defaultProvider: ((_ providers: Any) -> Any)?
 }

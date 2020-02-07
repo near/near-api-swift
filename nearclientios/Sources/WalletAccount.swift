@@ -18,15 +18,15 @@ let LOCAL_STORAGE_KEY_SUFFIX = "_wallet_auth_key"
 /// storage key for a pending access key (i.e. key has been generated but we are not sure it was added yet)
 let PENDING_ACCESS_KEY_PREFIX = "pending_key"
 
-internal protocol AuthDataProtocol {
+public protocol AuthDataProtocol {
   var accountId: String? {get}
 }
 
-internal struct AuthData: AuthDataProtocol {
-  let accountId: String?
+public struct AuthData: AuthDataProtocol {
+  public let accountId: String?
 }
 
-internal enum WalletAccountError: Error {
+public enum WalletAccountError: Error {
   case noKeyStore
   case noKeyPair
   case noRegisteredURLSchemes
@@ -35,21 +35,21 @@ internal enum WalletAccountError: Error {
   case callbackUrlParamsNotValid
 }
 
-internal protocol WalletStorage: class {
+public protocol WalletStorage: class {
   subscript(key: String) -> String? {get set}
 }
 
-let WALLET_STORAGE_SERVICE = "nearlib.wallet"
+public let WALLET_STORAGE_SERVICE = "nearlib.wallet"
 
 extension Keychain: WalletStorage {}
 
-internal protocol ExternalAuthService {
+public protocol ExternalAuthService {
   func openURL(_ url: URL) -> Bool
 }
 
 extension UIApplication: ExternalAuthService {}
 
-internal struct WalletAccount {
+public struct WalletAccount {
   private let _walletBaseUrl: String
   private let _authDataKey: String
   private let _keyStore: KeyStore
@@ -59,7 +59,7 @@ internal struct WalletAccount {
   private let authService: ExternalAuthService
 }
 
-extension WalletAccount {
+public extension WalletAccount {
   init(near: Near, appKeyPrefix: String? = nil,
        storage: WalletStorage = Keychain(service: WALLET_STORAGE_SERVICE),
        authService: ExternalAuthService = UIApplication.shared) throws {
@@ -79,7 +79,7 @@ extension WalletAccount {
         walletAccount.isSignedIn()
    - Returns: Returns true, if this WalletAccount is authorized with the wallet.
    */
-  func isSignedIn() -> Bool {
+  public func isSignedIn() -> Bool {
       return _authData.accountId != nil
   }
 
@@ -88,7 +88,7 @@ extension WalletAccount {
         walletAccount.getAccountId()
     - Returns: Authorized Account ID.
    */
-  func getAccountId() -> String {
+  public func getAccountId() -> String {
       return _authData.accountId ?? ""
   }
 
@@ -100,7 +100,7 @@ extension WalletAccount {
         - networkId: successUrl url to redirect on success
         - failureUrl: failureUrl url to redirect on failure
    */
-  func requestSignIn(contractId: String, title: String,
+  public func requestSignIn(contractId: String, title: String,
                      successUrl: URL? = nil, failureUrl: URL? = nil, appUrl: URL? = nil) throws -> Promise<Bool> {
     guard getAccountId().isEmpty else {return .value(true)}
     guard try await(_keyStore.getKey(networkId: _networkId, accountId: getAccountId())) == nil else {return .value(true)}
@@ -142,7 +142,7 @@ extension WalletAccount {
   /**
       Complete sign in for a given account id and public key. To be invoked by the app when getting a callback from the wallet.
    */
-  mutating func completeSignIn(_ app: UIApplication,
+  mutating public func completeSignIn(_ app: UIApplication,
                       open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) throws -> Promise<Void> {
     guard let params = url.queryParameters else {throw WalletAccountError.callbackUrlParamsNotValid}
     if let publicKey = params["public_key"], let accountId = params["account_id"] {
@@ -165,7 +165,7 @@ extension WalletAccount {
   /**
     Sign out from the current account
    */
-  private mutating func signOut() {
+  public mutating func signOut() {
     _authData = AuthData(accountId: nil)
     storage[_authDataKey] = nil
   }

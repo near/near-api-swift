@@ -13,19 +13,19 @@ import AwaitKit
 /**
 // Format of the account stored on disk.
 */
-internal protocol AccountInfoProtocol {
+public protocol AccountInfoProtocol {
   var account_id: String {get}
   var private_key: String? {get}
   var secret_key: String? {get}
 }
 
-internal struct AccountInfo: AccountInfoProtocol, Codable {
-  let account_id: String
-  let private_key: String?
-  let secret_key: String?
+public struct AccountInfo: AccountInfoProtocol, Codable {
+  public let account_id: String
+  public let private_key: String?
+  public let secret_key: String?
 }
 
-internal struct UnencryptedFileSystemKeyStore {
+public struct UnencryptedFileSystemKeyStore {
   let keyDir: String
   let manager: FileManager
 
@@ -35,12 +35,12 @@ internal struct UnencryptedFileSystemKeyStore {
   }
 }
 
-internal enum UnencryptedFileSystemKeyStoreError: Error {
+public enum UnencryptedFileSystemKeyStoreError: Error {
   case noPrivateKey
 }
 
 extension UnencryptedFileSystemKeyStore: KeyStore {
-  func setKey(networkId: String, accountId: String, keyPair: KeyPair) -> Promise<Void> {
+  public func setKey(networkId: String, accountId: String, keyPair: KeyPair) -> Promise<Void> {
     do {
       let networkPath = "\(keyDir)/\(networkId)"
       let fullNetworkPath = manager.targetDirectory.appendingPathComponent(networkPath).path
@@ -56,7 +56,7 @@ extension UnencryptedFileSystemKeyStore: KeyStore {
   }
 
   /// Find key / account id.
-  func getKey(networkId: String, accountId: String) -> Promise<KeyPair?> {
+  public func getKey(networkId: String, accountId: String) -> Promise<KeyPair?> {
     let networkPath = "\(keyDir)/\(networkId)"
     let path = getKeyFileUrl(networkPath: networkPath, accountId: accountId).path
     guard manager.fileExists(atPath: path) else {return .value(nil)}
@@ -68,7 +68,7 @@ extension UnencryptedFileSystemKeyStore: KeyStore {
     }
   }
 
-  func removeKey(networkId: String, accountId: String) -> Promise<Void> {
+  public func removeKey(networkId: String, accountId: String) -> Promise<Void> {
     let networkPath = "\(keyDir)/\(networkId)"
     let path = getKeyFileUrl(networkPath: networkPath, accountId: accountId).path
     guard manager.fileExists(atPath: path) else {return .value(())}
@@ -80,7 +80,7 @@ extension UnencryptedFileSystemKeyStore: KeyStore {
     }
   }
 
-  func clear() -> Promise<Void> {
+  public func clear() -> Promise<Void> {
     do {
       let networksPath = manager.targetDirectory.appendingPathComponent(keyDir).path
       try manager.removeItem(atPath: networksPath)
@@ -90,7 +90,7 @@ extension UnencryptedFileSystemKeyStore: KeyStore {
     }
   }
 
-  func getNetworks() throws -> Promise<[String]> {
+  public func getNetworks() throws -> Promise<[String]> {
     let networksPath = manager.targetDirectory.appendingPathComponent(keyDir).path
     do {
       let files = try manager.contentsOfDirectory(atPath: networksPath)
@@ -100,7 +100,7 @@ extension UnencryptedFileSystemKeyStore: KeyStore {
     }
   }
 
-  func getAccounts(networkId: String) throws -> Promise<[String]> {
+  public func getAccounts(networkId: String) throws -> Promise<[String]> {
     let networkPath = "\(keyDir)/\(networkId)"
     let fullNetworkPath = manager.targetDirectory.appendingPathComponent(networkPath).path
     guard manager.fileExists(atPath: fullNetworkPath) else {return .value([])}

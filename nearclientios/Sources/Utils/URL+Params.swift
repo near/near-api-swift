@@ -7,7 +7,7 @@
 
 import Foundation
 
-internal extension URL {
+public extension URL {
   var queryParameters: [String: String]? {
     guard let components = URLComponents(url: self, resolvingAgainstBaseURL: true),
       let queryItems = components.queryItems else { return nil }

@@ -12,7 +12,7 @@ import PromiseKit
 /**
 * Key store interface for `InMemorySigner`.
 */
-internal protocol KeyStore {
+public protocol KeyStore {
   func setKey(networkId: String, accountId: String, keyPair: KeyPair) -> Promise<Void>
   func getKey(networkId: String, accountId: String) -> Promise<KeyPair?>
   func removeKey(networkId: String, accountId: String) -> Promise<Void>

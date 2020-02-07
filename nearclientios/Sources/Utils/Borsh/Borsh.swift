@@ -7,8 +7,8 @@
 
 import Foundation
 
-internal typealias BorshCodable = BorshSerializable & BorshDeserializable
+public typealias BorshCodable = BorshSerializable & BorshDeserializable
 
-internal enum BorshDecodingError: Error {
+public enum BorshDecodingError: Error {
   case unknownData
 }

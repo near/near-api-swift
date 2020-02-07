@@ -10,11 +10,11 @@ import Foundation
 import PromiseKit
 import AwaitKit
 
-internal enum TypedError: Error {
+public enum TypedError: Error {
   case error(type: String = "UntypedError", message: String?)
 }
 
-internal final class JSONRPCProvider {
+public final class JSONRPCProvider {
   /// Keep ids unique across all connections
   private var _nextId = 123
 
@@ -47,36 +47,36 @@ extension JSONRPCProvider {
 }
 
 extension JSONRPCProvider: Provider {
-  func getNetwork() -> Promise<Network> {
+  public func getNetwork() -> Promise<Network> {
     let result: Network = Network(name: "test", chainId: "test")
     return .value(result)
   }
 
-  func status() throws -> Promise<NodeStatusResult> {
+  public func status() throws -> Promise<NodeStatusResult> {
     return try sendJsonRpc(method: "status", params: [])
   }
 
-  func sendTransaction(signedTransaction: SignedTransaction) throws -> Promise<FinalExecutionOutcome> {
+  public func sendTransaction(signedTransaction: SignedTransaction) throws -> Promise<FinalExecutionOutcome> {
     let data = try BorshEncoder().encode(signedTransaction)
     let params = [data.base64EncodedString()]
 //    debugPrint("params \(params)")
     return try sendJsonRpc(method: "broadcast_tx_commit", params: params)
   }
 
-  func txStatus(txHash: [UInt8], accountId: String) throws -> Promise<FinalExecutionOutcome> {
+  public func txStatus(txHash: [UInt8], accountId: String) throws -> Promise<FinalExecutionOutcome> {
     let params = [txHash.baseEncoded, accountId]
     return try sendJsonRpc(method: "tx", params: params)
   }
 
-  func query<T: Decodable>(path: String, data: String) throws -> Promise<T> {
+  public func query<T: Decodable>(path: String, data: String) throws -> Promise<T> {
     return try sendJsonRpc(method: "query", params: [path, data])
   }
 
-  func block(blockId: BlockId) throws -> Promise<BlockResult> {
+  public func block(blockId: BlockId) throws -> Promise<BlockResult> {
     return try sendJsonRpc(method: "block", params: [blockId])
   }
 
-  func chunk(chunkId: ChunkId) throws -> Promise<ChunkResult> {
+  public func chunk(chunkId: ChunkId) throws -> Promise<ChunkResult> {
     return try sendJsonRpc(method: "chunk", params: [chunkId])
   }
 }

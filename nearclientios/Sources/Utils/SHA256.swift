@@ -9,7 +9,7 @@
 import Foundation
 import CommonCrypto
 
-internal extension Collection where Element == UInt8 {
+public extension Collection where Element == UInt8 {
   var digest: [UInt8] {
     var result = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
     data.withUnsafeBytes {

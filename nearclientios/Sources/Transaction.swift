@@ -10,7 +10,7 @@ import Foundation
 import PromiseKit
 import AwaitKit
 
-internal struct FunctionCallPermission {
+public struct FunctionCallPermission {
   let allowance: UInt128?
   let receiverId: String
   let methodNames: [String]
@@ -21,7 +21,7 @@ extension FunctionCallPermission: Decodable {
     case allowance, receiverId = "receiver_id", methodNames = "method_names"
   }
 
-  init(from decoder: Decoder) throws {
+  public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     allowance = UInt128(stringLiteral: try container.decode(String.self, forKey: .allowance))
     receiverId = try container.decode(String.self, forKey: .receiverId)
@@ -30,30 +30,30 @@ extension FunctionCallPermission: Decodable {
 }
 
 extension FunctionCallPermission: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try allowance.serialize(to: &writer)
     try receiverId.serialize(to: &writer)
     try methodNames.serialize(to: &writer)
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.allowance = try .init(from: &reader)
     self.receiverId = try .init(from: &reader)
     self.methodNames = try .init(from: &reader)
   }
 }
 
-internal struct FullAccessPermission: Equatable {}
+public struct FullAccessPermission: Equatable {}
 
 extension FullAccessPermission: BorshCodable {
-  func serialize(to writer: inout Data) throws {}
+  public func serialize(to writer: inout Data) throws {}
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.init()
   }
 }
 
-internal enum AccessKeyPermission {
+public enum AccessKeyPermission {
   case functionCall(FunctionCallPermission)
   case fullAccess(FullAccessPermission)
 
@@ -65,7 +65,7 @@ internal enum AccessKeyPermission {
   }
 }
 
-internal enum DecodingError: Error {
+public enum DecodingError: Error {
   case notExpected
 }
 
@@ -74,7 +74,7 @@ extension AccessKeyPermission: Decodable {
     case functionCall = "FunctionCall"
   }
 
-  init(from decoder: Decoder) throws {
+  public init(from decoder: Decoder) throws {
     if let container = try? decoder.singleValueContainer() {
       let value = try? container.decode(String.self)
       if value == "FullAccess" {
@@ -92,7 +92,7 @@ extension AccessKeyPermission: Decodable {
 }
 
 extension AccessKeyPermission: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try rawValue.serialize(to: &writer)
     switch self {
     case .functionCall(let permission): try permission.serialize(to: &writer)
@@ -100,7 +100,7 @@ extension AccessKeyPermission: BorshCodable {
     }
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     let rawValue = try UInt8(from: &reader)
     switch rawValue {
     case 0: self = .functionCall(try FunctionCallPermission(from: &reader))
@@ -110,63 +110,63 @@ extension AccessKeyPermission: BorshCodable {
   }
 }
 
-internal struct AccessKey: Decodable {
+public struct AccessKey: Decodable {
   var nonce: UInt64
   let permission: AccessKeyPermission
 }
 
 extension AccessKey: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try nonce.serialize(to: &writer)
     try permission.serialize(to: &writer)
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.nonce = try .init(from: &reader)
     self.permission = try .init(from: &reader)
   }
 }
 
-internal func fullAccessKey() -> AccessKey {
+public func fullAccessKey() -> AccessKey {
   let fullAccess = FullAccessPermission()
   let permission = AccessKeyPermission.fullAccess(fullAccess)
   return AccessKey(nonce: 0, permission: permission)
 }
 
-internal func functionCallAccessKey(receiverId: String, methodNames: [String], allowance: UInt128?) -> AccessKey {
+public func functionCallAccessKey(receiverId: String, methodNames: [String], allowance: UInt128?) -> AccessKey {
   let callPermission = FunctionCallPermission(allowance: allowance, receiverId: receiverId, methodNames: methodNames)
   let permission = AccessKeyPermission.functionCall(callPermission)
   return AccessKey(nonce: 0, permission: permission)
 }
 
-internal protocol IAction {}
+public protocol IAction {}
 
-internal struct CreateAccount: IAction {}
+public struct CreateAccount: IAction {}
 
 extension CreateAccount: BorshCodable {
-  func serialize(to writer: inout Data) throws {}
+  public func serialize(to writer: inout Data) throws {}
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.init()
   }
 }
 
-internal struct DeployContract: IAction {
+public struct DeployContract: IAction {
   let code: [UInt8]
 }
 
 extension DeployContract: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try code.serialize(to: &writer)
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     let code: [UInt8] = try .init(from: &reader)
     self.init(code: code)
   }
 }
 
-internal struct FunctionCall: IAction {
+public struct FunctionCall: IAction {
   let methodName: String
   let args: [UInt8]
   let gas: UInt64
@@ -174,14 +174,14 @@ internal struct FunctionCall: IAction {
 }
 
 extension FunctionCall: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try methodName.serialize(to: &writer)
     try args.serialize(to: &writer)
     try gas.serialize(to: &writer)
     try deposit.serialize(to: &writer)
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.methodName = try .init(from: &reader)
     self.args = try .init(from: &reader)
     self.gas = try .init(from: &reader)
@@ -189,78 +189,78 @@ extension FunctionCall: BorshCodable {
   }
 }
 
-internal struct Transfer: IAction {
+public struct Transfer: IAction {
   let deposit: UInt128
 }
 
 extension Transfer: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try deposit.serialize(to: &writer)
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.deposit = try .init(from: &reader)
   }
 }
 
-internal struct Stake: IAction {
+public struct Stake: IAction {
   let stake: UInt128
   let publicKey: PublicKey
 }
 
 extension Stake: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try stake.serialize(to: &writer)
     try publicKey.serialize(to: &writer)
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.stake = try .init(from: &reader)
     self.publicKey = try .init(from: &reader)
   }
 }
 
-internal struct AddKey: IAction {
+public struct AddKey: IAction {
   let publicKey: PublicKey
   let accessKey: AccessKey
 }
 
 extension AddKey: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try publicKey.serialize(to: &writer)
     try accessKey.serialize(to: &writer)
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.publicKey = try .init(from: &reader)
     self.accessKey = try .init(from: &reader)
   }
 }
 
-internal struct DeleteKey: IAction {
+public struct DeleteKey: IAction {
   let publicKey: PublicKey
 }
 
 extension DeleteKey: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try publicKey.serialize(to: &writer)
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.publicKey = try .init(from: &reader)
   }
 }
 
-internal struct DeleteAccount: IAction {
+public struct DeleteAccount: IAction {
   let beneficiaryId: String
 }
 
 extension DeleteAccount: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try beneficiaryId.serialize(to: &writer)
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.beneficiaryId = try .init(from: &reader)
   }
 }
@@ -297,12 +297,15 @@ func deleteAccount(beneficiaryId: String) -> Action {
   return .deleteAccount(DeleteAccount(beneficiaryId: beneficiaryId))
 }
 
-internal struct SignaturePayload: FixedLengthByteArray, BorshCodable {
-  static let fixedLength: UInt32 = 64
-  let bytes: [UInt8]
+public struct SignaturePayload: FixedLengthByteArray, BorshCodable {
+  public static let fixedLength: UInt32 = 64
+  public let bytes: [UInt8]
+  public init(bytes: [UInt8]) {
+    self.bytes = bytes
+  }
 }
 
-internal struct CodableSignature {
+public struct CodableSignature {
   let keyType: KeyType
   let data: SignaturePayload
 
@@ -313,23 +316,26 @@ internal struct CodableSignature {
 }
 
 extension CodableSignature: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try keyType.serialize(to: &writer)
     try data.serialize(to: &writer)
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.keyType = try .init(from: &reader)
     self.data = try .init(from: &reader)
   }
 }
 
-internal struct BlockHashPayload: FixedLengthByteArray, BorshCodable {
-  static let fixedLength: UInt32 = 32
-  let bytes: [UInt8]
+public struct BlockHashPayload: FixedLengthByteArray, BorshCodable {
+  public static let fixedLength: UInt32 = 32
+  public let bytes: [UInt8]
+  public init(bytes: [UInt8]) {
+    self.bytes = bytes
+  }
 }
 
-internal struct CodableTransaction {
+public struct CodableTransaction {
   let signerId: String
   let publicKey: PublicKey
   let nonce: UInt64
@@ -339,7 +345,7 @@ internal struct CodableTransaction {
 }
 
 extension CodableTransaction: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try signerId.serialize(to: &writer)
     try publicKey.serialize(to: &writer)
     try nonce.serialize(to: &writer)
@@ -348,7 +354,7 @@ extension CodableTransaction: BorshCodable {
     try actions.serialize(to: &writer)
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.signerId = try .init(from: &reader)
     self.publicKey = try .init(from: &reader)
     self.nonce = try .init(from: &reader)
@@ -358,24 +364,24 @@ extension CodableTransaction: BorshCodable {
   }
 }
 
-internal struct SignedTransaction {
+public struct SignedTransaction {
   let transaction: CodableTransaction
   let signature: CodableSignature
 }
 
 extension SignedTransaction: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try transaction.serialize(to: &writer)
     try signature.serialize(to: &writer)
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.transaction = try .init(from: &reader)
     self.signature = try .init(from: &reader)
   }
 }
 
-internal enum Action {
+public enum Action {
   case createAccount(CreateAccount)
   case deployContract(DeployContract)
   case functionCall(FunctionCall)
@@ -400,7 +406,7 @@ internal enum Action {
 }
 
 extension Action: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try rawValue.serialize(to: &writer)
     switch self {
     case .createAccount(let payload): try payload.serialize(to: &writer)
@@ -414,7 +420,7 @@ extension Action: BorshCodable {
     }
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     let rawValue = try UInt8.init(from: &reader)
     switch rawValue {
     case 0: self = .createAccount(try CreateAccount(from: &reader))

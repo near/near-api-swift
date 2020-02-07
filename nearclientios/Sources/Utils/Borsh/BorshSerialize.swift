@@ -7,7 +7,7 @@
 
 import Foundation
 
-internal protocol BorshSerializable {
+public protocol BorshSerializable {
   func serialize(to writer: inout Data) throws
 }
 
@@ -22,14 +22,14 @@ extension Int32: BorshSerializable {}
 extension Int64: BorshSerializable {}
 extension Int128: BorshSerializable {}
 
-internal extension FixedWidthInteger {
+public extension FixedWidthInteger {
   func serialize(to writer: inout Data) throws {
     writer.append(contentsOf: withUnsafeBytes(of: self.littleEndian) { Array($0) })
   }
 }
 
 extension Float32: BorshSerializable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     assert(!self.isNaN, "For portability reasons we do not allow to serialize NaNs.")
     var start = bitPattern.littleEndian
     writer.append(Data(buffer: UnsafeBufferPointer(start: &start, count: 1)))
@@ -37,7 +37,7 @@ extension Float32: BorshSerializable {
 }
 
 extension Float64: BorshSerializable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     assert(!self.isNaN, "For portability reasons we do not allow to serialize NaNs.")
     var start = bitPattern.littleEndian
     writer.append(Data(buffer: UnsafeBufferPointer(start: &start, count: 1)))
@@ -45,7 +45,7 @@ extension Float64: BorshSerializable {
 }
 
 extension Bool: BorshSerializable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     let intRepresentation: UInt8 = self ? 1 : 0
     try intRepresentation.serialize(to: &writer)
   }
@@ -64,7 +64,7 @@ extension Optional where Wrapped: BorshSerializable {
 }
 
 extension String: BorshSerializable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     let data = Data(utf8)
     try UInt32(data.count).serialize(to: &writer)
     writer.append(data)
@@ -72,20 +72,20 @@ extension String: BorshSerializable {
 }
 
 extension Array: BorshSerializable where Element: BorshSerializable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try UInt32(count).serialize(to: &writer)
     try forEach { try $0.serialize(to: &writer) }
   }
 }
 
 extension Set: BorshSerializable where Element: BorshSerializable & Comparable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try sorted().serialize(to: &writer)
   }
 }
 
 extension Dictionary: BorshSerializable where Key: BorshSerializable & Comparable, Value: BorshSerializable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     let sortedByKeys = sorted(by: {$0.key < $1.key})
     try UInt32(sortedByKeys.count).serialize(to: &writer)
     try sortedByKeys.forEach { key, value in

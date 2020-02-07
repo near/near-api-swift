@@ -10,22 +10,22 @@ import Foundation
 import PromiseKit
 import AwaitKit
 
-internal protocol AccountCreator {
+public protocol AccountCreator {
   func createAccount(newAccountId: String, publicKey: PublicKey) throws -> Promise<Void>
 }
 
-internal struct LocalAccountCreator {
+public struct LocalAccountCreator {
   let masterAccount: Account
   let initialBalance: UInt128
 }
 
 extension LocalAccountCreator: AccountCreator {
-  func createAccount(newAccountId: String, publicKey: PublicKey) throws -> Promise<Void> {
+  public func createAccount(newAccountId: String, publicKey: PublicKey) throws -> Promise<Void> {
     return try masterAccount.createAccount(newAccountId: newAccountId, publicKey: publicKey, amount: initialBalance).asVoid()
   }
 }
 
-internal struct UrlAccountCreator {
+public struct UrlAccountCreator {
   let connection: Connection
   let helperConnection: ConnectionInfo
 }
@@ -37,7 +37,7 @@ extension UrlAccountCreator {
 }
 
 extension UrlAccountCreator: AccountCreator {
-  func createAccount(newAccountId: String, publicKey: PublicKey) throws -> Promise<Void> {
+  public func createAccount(newAccountId: String, publicKey: PublicKey) throws -> Promise<Void> {
     return .value(())
   }
 }

@@ -9,27 +9,27 @@
 import Foundation
 import TweetNacl
 
-internal protocol SignatureProtocol {
+public protocol SignatureProtocol {
   var signature: [UInt8] {get}
   var publicKey: PublicKey {get}
 }
 
-internal struct Signature: SignatureProtocol {
-  let signature: [UInt8]
-  let publicKey: PublicKey
+public struct Signature: SignatureProtocol {
+  public let signature: [UInt8]
+  public let publicKey: PublicKey
 }
 
 /** All supported key types */
-internal enum KeyType: String, Codable, Equatable, BorshCodable {
+public enum KeyType: String, Codable, Equatable, BorshCodable {
   case ED25519 = "ed25519"
 
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     switch self {
     case .ED25519: return try UInt8(0).serialize(to: &writer)
     }
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     let value = try UInt8(from: &reader)
     switch value {
     case 0: self = .ED25519
@@ -38,22 +38,25 @@ internal enum KeyType: String, Codable, Equatable, BorshCodable {
   }
 }
 
-internal enum PublicKeyDecodeError: Error {
+public enum PublicKeyDecodeError: Error {
   case invalidKeyFormat(String)
   case unknowKeyType
 }
 
-internal struct PublicKeyPayload: FixedLengthByteArray, Equatable, Decodable, BorshCodable {
-  static let fixedLength: UInt32 = 32
-  let bytes: [UInt8]
+public struct PublicKeyPayload: FixedLengthByteArray, Equatable, Decodable, BorshCodable {
+  public static let fixedLength: UInt32 = 32
+  public let bytes: [UInt8]
+  public init(bytes: [UInt8]) {
+    self.bytes = bytes
+  }
 }
 
 /**
  * PublicKey representation that has type and bytes of the key.
  */
-internal struct PublicKey: Decodable, Equatable {
+public struct PublicKey: Decodable, Equatable {
   private let keyType: KeyType
-  internal let data: PublicKeyPayload
+  public let data: PublicKeyPayload
 
   init(keyType: KeyType, data: [UInt8]) {
     self.keyType = keyType
@@ -78,23 +81,23 @@ internal struct PublicKey: Decodable, Equatable {
 }
 
 extension PublicKey: BorshCodable {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     try keyType.serialize(to: &writer)
     try data.serialize(to: &writer)
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     self.keyType = try .init(from: &reader)
     self.data = try .init(from: &reader)
   }
 }
 
-internal enum KeyPairDecodeError: Error {
+public enum KeyPairDecodeError: Error {
   case invalidKeyFormat(String)
   case unknowCurve(String)
 }
 
-internal protocol KeyPair {
+public protocol KeyPair {
   func sign(message: [UInt8]) throws -> SignatureProtocol
   func verify(message: [UInt8], signature: [UInt8]) throws -> Bool
   func toString() -> String
@@ -127,7 +130,7 @@ func keyPairFromString(encodedKey: String) throws -> KeyPair {
 * This struct provides key pair functionality for Ed25519 curve:
 * generating key pairs, encoding key pairs, signing and verifying.
 */
-internal struct KeyPairEd25519: Equatable {
+public struct KeyPairEd25519: Equatable {
   private let publicKey: PublicKey
   private let secretKey: String
 
@@ -162,20 +165,20 @@ internal struct KeyPairEd25519: Equatable {
 }
 
 extension KeyPairEd25519: KeyPair {
-  func sign(message: [UInt8]) throws -> SignatureProtocol {
+  public func sign(message: [UInt8]) throws -> SignatureProtocol {
     let signature = try NaclSign.signDetached(message: message.data, secretKey: secretKey.baseDecoded.data)
     return Signature(signature: signature.bytes, publicKey: publicKey)
   }
 
-  func verify(message: [UInt8], signature: [UInt8]) throws -> Bool {
+  public func verify(message: [UInt8], signature: [UInt8]) throws -> Bool {
     return try NaclSign.signDetachedVerify(message: message.data, sig: signature.data, publicKey: publicKey.data.bytes.data)
   }
 
-  func toString() -> String {
+  public func toString() -> String {
     return "ed25519:\(secretKey)"
   }
 
-  func getPublicKey() -> PublicKey {
+  public func getPublicKey() -> PublicKey {
     return publicKey
   }
 

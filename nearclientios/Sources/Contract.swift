@@ -10,17 +10,17 @@ import Foundation
 import PromiseKit
 import AwaitKit
 
-internal protocol ContractOptionsProtocol {
+public protocol ContractOptionsProtocol {
   var viewMethods: [ViewMethod] {get}
   var changeMethods: [ChangeMethod] {get}
   var sender: String? {get}
 }
 
-internal typealias MethodName = String
-internal typealias ViewMethod = MethodName
-internal typealias ChangeMethod = MethodName
+public typealias MethodName = String
+public typealias ViewMethod = MethodName
+public typealias ChangeMethod = MethodName
 
-internal extension ViewMethod {
+public extension ViewMethod {
   static let getValue = "getValue"
   static let getLastResult = "getLastResult"
   static let hello = "hello"
@@ -28,7 +28,7 @@ internal extension ViewMethod {
   static let returnHiWithLogs = "returnHiWithLogs"
 }
 
-internal extension ChangeMethod {
+public extension ChangeMethod {
   static let setValue = "setValue"
   static let callPromise = "callPromise"
   static let generateLogs = "generateLogs"
@@ -36,13 +36,13 @@ internal extension ChangeMethod {
   static let testSetRemove = "testSetRemove"
 }
 
-internal struct ContractOptions: ContractOptionsProtocol {
-  let viewMethods: [ViewMethod]
-  let changeMethods: [ChangeMethod]
-  let sender: String?
+public struct ContractOptions: ContractOptionsProtocol {
+  public let viewMethods: [ViewMethod]
+  public let changeMethods: [ChangeMethod]
+  public let sender: String?
 }
 
-internal struct Contract {
+public struct Contract {
   let account: Account
   let contractId: String
   let viewMethods: [ViewMethod]
@@ -50,20 +50,20 @@ internal struct Contract {
   let sender: String?
 }
 
-internal extension Contract {
+public extension Contract {
   init(account: Account, contractId: String, options:  ContractOptionsProtocol) {
     self.init(account: account, contractId: contractId, viewMethods: options.viewMethods,
               changeMethods: options.changeMethods, sender: nil)
   }
 }
 
-internal extension Contract {
+public extension Contract {
   func view<T: Decodable>(methodName: ChangeMethod, args: [String: Any] = [:]) throws -> Promise<T> {
     return try account.viewFunction(contractId: contractId, methodName: methodName, args: args)
   }
 }
 
-internal extension Contract {
+public extension Contract {
   @discardableResult
   func change(methodName: ChangeMethod, args: [String: Any] = [:],
               gas: UInt64? = nil, amount: UInt128 = 0) throws -> Promise<Any?> {

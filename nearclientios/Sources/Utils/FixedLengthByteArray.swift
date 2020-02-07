@@ -7,18 +7,18 @@
 
 import Foundation
 
-internal protocol FixedLengthByteArray {
+public protocol FixedLengthByteArray {
   static var fixedLength: UInt32 {get}
   var bytes: [UInt8] {get}
   init(bytes: [UInt8]) throws
 }
 
 extension FixedLengthByteArray {
-  func serialize(to writer: inout Data) throws {
+  public func serialize(to writer: inout Data) throws {
     writer.append(bytes, count: Int(Self.fixedLength))
   }
 
-  init(from reader: inout BinaryReader) throws {
+  public init(from reader: inout BinaryReader) throws {
     try self.init(bytes: reader.read(count: Self.fixedLength))
   }
 }

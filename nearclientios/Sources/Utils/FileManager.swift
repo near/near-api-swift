@@ -7,7 +7,7 @@
 
 import Foundation
 
-internal extension FileManager {
+public extension FileManager {
   func ensureDir(path: String) throws -> Void {
     try createDirectory(atPath: path, withIntermediateDirectories: true, attributes: nil)
   }

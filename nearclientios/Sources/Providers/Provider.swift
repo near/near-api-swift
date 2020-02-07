@@ -9,9 +9,9 @@
 import Foundation
 import PromiseKit
 
-internal typealias Number = Int
+public typealias Number = Int
 
-internal struct SyncInfo: Codable {
+public struct SyncInfo: Codable {
   let latest_block_hash: String
   let latest_block_height: Number
   let latest_block_time: String
@@ -19,28 +19,28 @@ internal struct SyncInfo: Codable {
   let syncing: Bool
 }
 
-internal struct Validator: Codable {}
+public struct Validator: Codable {}
 
-internal struct NodeStatusResult: Codable {
+public struct NodeStatusResult: Codable {
   let chain_id: String
   let rpc_addr: String
   let sync_info: SyncInfo
   let validators: [Validator]
 }
 
-internal typealias BlockHash = String
-internal typealias BlockHeight = Number
+public typealias BlockHash = String
+public typealias BlockHeight = Number
 //typealias BlockId = BlockHash | BlockHeight
 // TODO find correct representation way for this
-internal typealias BlockId = BlockHash
+public typealias BlockId = BlockHash
 
-internal enum ExecutionStatusBasic: String, Decodable {
+public enum ExecutionStatusBasic: String, Decodable {
   case unknown = "Unknown"
   case pending = "Pending"
   case failure = "Failure"
 }
 
-internal enum ExecutionStatus: Decodable, Equatable {
+public enum ExecutionStatus: Decodable, Equatable {
   case successValue(String)
   case basic(ExecutionStatusBasic)
   case successReceiptId(String)
@@ -52,7 +52,7 @@ internal enum ExecutionStatus: Decodable, Equatable {
     case successReceiptId = "SuccessReceiptId"
   }
 
-  init(from decoder: Decoder) throws {
+  public init(from decoder: Decoder) throws {
     if let container = try? decoder.singleValueContainer(), let status = try? container.decode(ExecutionStatusBasic.self) {
       self = .basic(status)
       return
@@ -74,13 +74,13 @@ internal enum ExecutionStatus: Decodable, Equatable {
   }
 }
 
-internal enum FinalExecutionStatusBasic: String, Codable {
+public enum FinalExecutionStatusBasic: String, Codable {
   case notStarted = "NotStarted"
   case started = "Started"
   case failure = "Failure"
 }
 
-internal struct ExecutionError: Codable, Equatable{
+public struct ExecutionError: Codable, Equatable{
   let error_message: String?
   let error_type: String?
 
@@ -90,7 +90,7 @@ internal struct ExecutionError: Codable, Equatable{
   }
 }
 
-internal enum FinalExecutionStatus: Decodable, Equatable {
+public enum FinalExecutionStatus: Decodable, Equatable {
   case successValue(String)
   case basic(ExecutionStatusBasic)
   case failure(ExecutionError)
@@ -100,7 +100,7 @@ internal enum FinalExecutionStatus: Decodable, Equatable {
     case failure = "Failure"
   }
 
-  init(from decoder: Decoder) throws {
+  public init(from decoder: Decoder) throws {
     if let container = try? decoder.singleValueContainer(), let status = try? container.decode(ExecutionStatusBasic.self) {
       self = .basic(status)
       return
@@ -118,29 +118,29 @@ internal enum FinalExecutionStatus: Decodable, Equatable {
   }
 }
 
-internal struct ExecutionOutcomeWithId: Decodable, Equatable {
+public struct ExecutionOutcomeWithId: Decodable, Equatable {
   let id: String
   let outcome: ExecutionOutcome
 }
 
-internal struct ExecutionOutcome: Decodable, Equatable {
+public struct ExecutionOutcome: Decodable, Equatable {
   let status: ExecutionStatus
   let logs: [String]
   let receipt_ids: [String]
   let gas_burnt: Number
 }
 
-internal struct FinalExecutionOutcome: Decodable, Equatable {
+public struct FinalExecutionOutcome: Decodable, Equatable {
   let status: FinalExecutionStatus
   let transaction: ExecutionOutcomeWithId
   let receipts: [ExecutionOutcomeWithId]
 }
 
-internal struct TotalWeight: Codable {
+public struct TotalWeight: Codable {
   let num: Number
 }
 
-internal struct BlockHeader: Codable {
+public struct BlockHeader: Codable {
   let approval_mask: String
   let approval_sigs: String
   let hash: String
@@ -152,18 +152,18 @@ internal struct BlockHeader: Codable {
   let tx_root: String
 }
 
-internal typealias ChunkHash = String
-internal typealias ShardId = Int
+public typealias ChunkHash = String
+public typealias ShardId = Int
 // TODO find correct representation way for this
-//internal typealias BlockShardId = [BlockId, ShardId]
-internal typealias BlockShardId = [BlockId]
+//public typealias BlockShardId = [BlockId, ShardId]
+public typealias BlockShardId = [BlockId]
 // TODO find correct representation way for this
 //internal typealias ChunkId = ChunkHash | BlockShardId
-internal typealias ChunkId = ChunkHash
+public typealias ChunkId = ChunkHash
 
-internal struct ValidatorProposal: Codable {}
+public struct ValidatorProposal: Codable {}
 
-internal struct ChunkHeader: Codable {
+public struct ChunkHeader: Codable {
   let balance_burnt: String
   let chunk_hash: ChunkHash
   let encoded_length: Number
@@ -184,33 +184,33 @@ internal struct ChunkHeader: Codable {
   let validator_reward: String
 }
 
-internal struct Receipt: Codable {}
+public struct Receipt: Codable {}
 
-internal struct ChunkResult: Codable {
+public struct ChunkResult: Codable {
   let header: ChunkHeader
   let receipts: [Receipt]
   let transactions: [Transaction]
 }
 
-internal struct TransactionBody: Codable {}
+public struct TransactionBody: Codable {}
 
-internal struct Transaction: Codable {
+public struct Transaction: Codable {
   let hash: String
   let public_key: String
   let signature: String
   let body: TransactionBody
 }
 
-internal struct BlockResult: Codable {
+public struct BlockResult: Codable {
   let header: BlockHeader
   let transactions: [Transaction]
 }
 
-internal enum ProviderType {
+public enum ProviderType {
   case jsonRPC(URL)
 }
 
-internal protocol Provider {
+public protocol Provider {
   func getNetwork() throws -> Promise<Network>
   func status() throws -> Promise<NodeStatusResult>
   func sendTransaction(signedTransaction: SignedTransaction) throws -> Promise<FinalExecutionOutcome>
@@ -220,7 +220,7 @@ internal protocol Provider {
   func chunk(chunkId: ChunkId) throws -> Promise<ChunkResult>
 }
 
-internal func getTransactionLastResult(txResult: FinalExecutionOutcome) -> Any? {
+public func getTransactionLastResult(txResult: FinalExecutionOutcome) -> Any? {
   if case .successValue(let value) = txResult.status, let data = Data(base64Encoded: value) {
     do {
       return try JSONSerialization.jsonObject(with: data, options: [])
