@@ -21,8 +21,16 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
-			<key>CFBundleURLName</key>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLIconFile</key>
 			<string></string>
+			<key>CFBundleURLName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nearclientios</string>
+			</array>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
@@ -46,18 +54,6 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
-  </array>
-  <key>CFBundleURLTypes</key>
-  <array>
-    <dict>
-      <key>CFBundleURLName</key>
-      <string>com.ocad.popular</string>
-      <key>CFBundleURLSchemes</key>
-      <array>
-        <string>nearclientiosexample</string>
-      </array>
-    </dict>
-  </array>
-
+	</array>
 </dict>
 </plist>
