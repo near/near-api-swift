@@ -65,6 +65,10 @@ extension Signer {
  */
 public struct InMemorySigner {
   let keyStore: KeyStore
+
+  public init(keyStore: KeyStore) {
+    self.keyStore = keyStore
+  }
 }
 
 public enum InMemorySignerError: Error {
