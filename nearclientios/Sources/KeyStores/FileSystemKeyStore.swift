@@ -29,7 +29,7 @@ public struct UnencryptedFileSystemKeyStore {
   let keyDir: String
   let manager: FileManager
 
-  init(keyDir: String, manager: FileManager = .default) {
+  public init(keyDir: String, manager: FileManager = .default) {
     self.keyDir = keyDir
     self.manager = manager
   }

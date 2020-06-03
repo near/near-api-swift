@@ -58,12 +58,12 @@ public struct PublicKey: Decodable, Equatable {
   private let keyType: KeyType
   public let data: PublicKeyPayload
 
-  init(keyType: KeyType, data: [UInt8]) {
+  public init(keyType: KeyType, data: [UInt8]) {
     self.keyType = keyType
     self.data = PublicKeyPayload(bytes: data)
   }
 
-  static func fromString(encodedKey: String) throws -> PublicKey {
+  public static func fromString(encodedKey: String) throws -> PublicKey {
     let parts = encodedKey.split(separator: ":").map {String($0)}
     if parts.count == 1 {
       return PublicKey(keyType: .ED25519, data: parts[0].baseDecoded)
@@ -75,7 +75,7 @@ public struct PublicKey: Decodable, Equatable {
     }
   }
 
-  func toString() -> String {
+  public func toString() -> String {
     return "\(keyType.rawValue):\(data.bytes.baseEncoded)"
   }
 }
@@ -139,7 +139,7 @@ public struct KeyPairEd25519: Equatable {
    * It's generally assumed that these are encoded in base58.
    * - Parameter secretKey: SecretKey to be used for KeyPair
    */
-  init(secretKey: String) throws {
+  public init(secretKey: String) throws {
     let keyPair = try NaclSign.KeyPair.keyPair(fromSecretKey: secretKey.baseDecoded.data)
     self.publicKey = PublicKey(keyType: .ED25519, data: keyPair.publicKey.bytes)
     self.secretKey = secretKey
@@ -158,7 +158,7 @@ public struct KeyPairEd25519: Equatable {
       - Returns: secretKey
    ```
    */
-  static func fromRandom() throws -> Self {
+  public static func fromRandom() throws -> Self {
     let newKeyPair = try NaclSign.KeyPair.keyPair()
     return try KeyPairEd25519(secretKey: newKeyPair.secretKey.baseEncoded)
   }

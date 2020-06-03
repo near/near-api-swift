@@ -9,12 +9,12 @@ import Foundation
 import PromiseKit
 import KeychainAccess
 
-let KEYCHAIN_STORAGE_SERVICE = "nearlib.keystore"
+public let NEAR_KEYCHAIN_STORAGE_SERVICE = "near.keystore"
 
 public struct KeychainKeyStore {
   private let keychain: Keychain
 
-  init(keychain: Keychain = .init(service: KEYCHAIN_STORAGE_SERVICE)) {
+  public init(keychain: Keychain = .init(service: NEAR_KEYCHAIN_STORAGE_SERVICE)) {
     self.keychain = keychain
   }
 }

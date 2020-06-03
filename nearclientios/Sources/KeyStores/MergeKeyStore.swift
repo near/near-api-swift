@@ -17,7 +17,7 @@ public struct MergeKeyStore {
   /// First keystore gets all write calls, read calls are attempted from start to end of array
   private(set) var keyStores: [KeyStore]
 
-  init(keyStores: [KeyStore] = []) {
+  public init(keyStores: [KeyStore] = []) {
     self.keyStores = keyStores
   }
 }
