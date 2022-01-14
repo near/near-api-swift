@@ -67,7 +67,7 @@ public extension Contract {
   @discardableResult
   func change(methodName: ChangeMethod, args: [String: Any] = [:],
               gas: UInt64? = nil, amount: UInt128 = 0) throws -> Promise<Any?> {
-    let rawResult = try await(account.functionCall(contractId: contractId,
+    let rawResult = try `await`(account.functionCall(contractId: contractId,
                                                    methodName: methodName,
                                                    args: args,
                                                    gas: gas,

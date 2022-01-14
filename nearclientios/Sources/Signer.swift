@@ -78,17 +78,17 @@ public enum InMemorySignerError: Error {
 extension InMemorySigner: Signer {
   public func createKey(accountId: String, networkId: String) throws -> Promise<PublicKey> {
     let keyPair = try keyPairFromRandom(curve: .ED25519)
-    try await(keyStore.setKey(networkId: networkId, accountId: accountId, keyPair: keyPair))
+    try `await`(keyStore.setKey(networkId: networkId, accountId: accountId, keyPair: keyPair))
     return .value(keyPair.getPublicKey())
   }
 
   public func getPublicKey(accountId: String, networkId: String) throws -> Promise<PublicKey?> {
-    let keyPair = try await(keyStore.getKey(networkId: networkId, accountId: accountId))
+    let keyPair = try `await`(keyStore.getKey(networkId: networkId, accountId: accountId))
     return .value(keyPair?.getPublicKey())
   }
 
   public func signHash(hash: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol> {
-    guard let keyPair = try await(keyStore.getKey(networkId: networkId, accountId: accountId)) else {
+    guard let keyPair = try `await`(keyStore.getKey(networkId: networkId, accountId: accountId)) else {
       throw InMemorySignerError.notFound("Key for \(accountId) not found in \(networkId)")
     }
     let signature = try keyPair.sign(message: hash)

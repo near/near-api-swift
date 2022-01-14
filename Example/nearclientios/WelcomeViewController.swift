@@ -39,17 +39,17 @@ class WelcomeViewController: UIViewController {
   
   private func setupWallet() -> WalletAccount {
     let keyStore = InMemoryKeyStore()
-    let config = NearConfig(networkId: "default",
-                            nodeUrl: URL(string: "https://rpc.nearprotocol.com")!,
+    let config = NearConfig(networkId: "testnet",
+                            nodeUrl: URL(string: "https://rpc.testnet.near.org")!,
                             masterAccount: nil,
                             keyPath: nil,
                             helperUrl: nil,
                             initialBalance: nil,
-                            providerType: .jsonRPC(URL(string: "https://rpc.nearprotocol.com")!),
+                            providerType: .jsonRPC(URL(string: "https://rpc.testnet.near.org")!),
                             signerType: .inMemory(keyStore),
                             keyStore: keyStore,
                             contractName: "myContractId",
-                            walletUrl: "https://wallet.nearprotocol.com")
+                            walletUrl: "https://wallet.testnet.near.org")
     near = try! Near(config: config)
     return try! WalletAccount(near: near!)
   }
@@ -73,7 +73,7 @@ class WelcomeViewController: UIViewController {
   @IBAction func tapShowAuthForm(_ sender: UIButton) {
     let appName = UIApplication.name ?? "signInTitle"
     (UIApplication.shared.delegate as? AppDelegate)?.walletSignIn = self
-    try! await(walletAccount!.requestSignIn(contractId: "signInContract",
+    try! `await`(walletAccount!.requestSignIn(contractId: "farts.testnet",
                                             title: appName,
                                             successUrl: URL(string: "nearclientios://success"),
                                             failureUrl: URL(string: "nearclientios://fail"),
@@ -84,7 +84,7 @@ class WelcomeViewController: UIViewController {
 extension WelcomeViewController: WalletSignInDelegate {
   func completeSignIn(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) {
     do {
-      try await(walletAccount!.completeSignIn(app, open: url, options: options))
+      try `await`(walletAccount!.completeSignIn(app, open: url, options: options))
     } catch {
       let alert = UIAlertController(title: "Error", message: "\(error)", preferredStyle: .alert)
       present(alert, animated: true, completion: nil)

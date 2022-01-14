@@ -58,13 +58,13 @@ extension AccountViewController {
   }
   
   private func fetchAccountState() -> AccountState {
-    let account = try! await(near!.account(accountId: walletAccount!.getAccountId()))
-    return try! await(account.state())
+    let account = try! `await`(near!.account(accountId: walletAccount!.getAccountId()))
+    return try! `await`(account.state())
   }
   
   private func setupData(with accountState: AccountState) { 
     data.append(AccountStateField(title: "Account ID", value: walletAccount!.getAccountId()))
-    let balance = String(accountState.amount.prefix(accountState.amount.count - 24))  //24 near indivisible units
+    let balance = String( )  //24 near indivisible units
     data.append(AccountStateField(title: "Balance", value: balance))
     data.append(AccountStateField(title: "Storage (used/paid)", value: "\(accountState.storage_usage.toStorageUnit())/\(accountState.storage_paid_at.toStorageUnit())"))
   }

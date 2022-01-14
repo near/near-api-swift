@@ -36,7 +36,7 @@ extension JSONRPCProvider {
                                   "params": params,
                                   "id": getId(),
                                   "jsonrpc": "2.0"]
-    let json = try await(fetchJson(connection: connection, json: request))
+    let json = try `await`(fetchJson(connection: connection, json: request))
     let data = try JSONSerialization.data(withJSONObject: json, options: [])
 //    debugPrint("=====================")
 //    debugPrint(json)

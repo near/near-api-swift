@@ -29,7 +29,7 @@ extension MergeKeyStore: KeyStore {
 
   public func getKey(networkId: String, accountId: String) -> Promise<KeyPair?> {
     for keyStore in keyStores {
-      if let keyPair = try! await(keyStore.getKey(networkId: networkId, accountId: accountId)) {
+      if let keyPair = try! `await`(keyStore.getKey(networkId: networkId, accountId: accountId)) {
         return .value(keyPair)
       }
     }
@@ -49,7 +49,7 @@ extension MergeKeyStore: KeyStore {
   public func getNetworks() throws -> Promise<[String]> {
     var result = Set<String>()
     for keyStore in keyStores {
-      let networks = try await(keyStore.getNetworks())
+      let networks = try `await`(keyStore.getNetworks())
       for network in networks {
         result.insert(network)
       }
@@ -60,7 +60,7 @@ extension MergeKeyStore: KeyStore {
   public func getAccounts(networkId: String) throws -> Promise<[String]> {
     var result = Set<String>()
     for keyStore in keyStores {
-      let accounts = try await(keyStore.getAccounts(networkId: networkId))
+      let accounts = try `await`(keyStore.getAccounts(networkId: networkId))
       for account in accounts {
         result.insert(account)
       }

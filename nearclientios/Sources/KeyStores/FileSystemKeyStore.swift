@@ -61,7 +61,7 @@ extension UnencryptedFileSystemKeyStore: KeyStore {
     let path = getKeyFileUrl(networkPath: networkPath, accountId: accountId).path
     guard manager.fileExists(atPath: path) else {return .value(nil)}
     do {
-      let accountKeyPair = try await(UnencryptedFileSystemKeyStore.readKeyFile(path: path))
+      let accountKeyPair = try `await`(UnencryptedFileSystemKeyStore.readKeyFile(path: path))
       return .value(accountKeyPair.1)
     } catch let error {
       return .init(error: error)
@@ -125,7 +125,7 @@ extension UnencryptedFileSystemKeyStore {
   }
 
   static func readKeyFile(path: String) throws -> Promise<(String, KeyPair)> {
-    let accountInfo = try await(loadJsonFile(path: path))
+    let accountInfo = try `await`(loadJsonFile(path: path))
     // The private key might be in private_key or secret_key field.
     var privateKey = accountInfo.private_key
     if privateKey == nil, accountInfo.secret_key != nil {

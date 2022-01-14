@@ -103,7 +103,7 @@ extension WalletAccount {
   public func requestSignIn(contractId: String, title: String,
                      successUrl: URL? = nil, failureUrl: URL? = nil, appUrl: URL? = nil) throws -> Promise<Bool> {
     guard getAccountId().isEmpty else {return .value(true)}
-    guard try await(_keyStore.getKey(networkId: _networkId, accountId: getAccountId())) == nil else {return .value(true)}
+    guard try `await`(_keyStore.getKey(networkId: _networkId, accountId: getAccountId())) == nil else {return .value(true)}
 
     guard let appUrlSchemes = UIApplication.urlSchemes?.compactMap(URL.init(string:)), !appUrlSchemes.isEmpty else {
       throw WalletAccountError.noRegisteredURLSchemes
@@ -132,7 +132,7 @@ extension WalletAccount {
 
     newUrlComponents?.queryItems = [title, contract_id, success_url, failure_url, app_url, public_key]
     let accountId = PENDING_ACCESS_KEY_PREFIX + accessKey.getPublicKey().toString()
-    try await(_keyStore.setKey(networkId: _networkId, accountId: accountId, keyPair: accessKey))
+    try `await`(_keyStore.setKey(networkId: _networkId, accountId: accountId, keyPair: accessKey))
     if let openUrl = newUrlComponents?.url {
       return .value(authService.openURL(openUrl))
     }
@@ -148,17 +148,17 @@ extension WalletAccount {
     if let publicKey = params["public_key"], let accountId = params["account_id"] {
       _authData = AuthData(accountId: accountId)
       storage[_authDataKey] = accountId
-      try await(_moveKeyFromTempToPermanent(accountId: accountId, publicKey: publicKey))
+      try `await`(_moveKeyFromTempToPermanent(accountId: accountId, publicKey: publicKey))
     }
     return .value(())
   }
 
   private func _moveKeyFromTempToPermanent(accountId: String, publicKey: String) throws -> Promise<Void> {
     let pendingAccountId = PENDING_ACCESS_KEY_PREFIX + publicKey
-    guard let keyPair = try await(_keyStore.getKey(networkId: _networkId,
+    guard let keyPair = try `await`(_keyStore.getKey(networkId: _networkId,
                                                    accountId: pendingAccountId)) else {throw WalletAccountError.noKeyPair}
-    try await(_keyStore.setKey(networkId: _networkId, accountId: accountId, keyPair: keyPair))
-    try await(_keyStore.removeKey(networkId: _networkId, accountId: PENDING_ACCESS_KEY_PREFIX + publicKey))
+    try `await`(_keyStore.setKey(networkId: _networkId, accountId: accountId, keyPair: keyPair))
+    try `await`(_keyStore.removeKey(networkId: _networkId, accountId: PENDING_ACCESS_KEY_PREFIX + publicKey))
     return .value(())
   }
 

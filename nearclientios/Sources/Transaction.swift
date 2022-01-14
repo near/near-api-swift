@@ -442,7 +442,7 @@ enum SignError: Error {
 
 func signTransaction(receiverId: String, nonce: UInt64, actions: [Action], blockHash: [UInt8],
                      signer: Signer, accountId: String, networkId: String) throws -> Promise<([UInt8], SignedTransaction)> {
-  guard let publicKey = try await(signer.getPublicKey(accountId: accountId, networkId: networkId)) else {
+  guard let publicKey = try `await`(signer.getPublicKey(accountId: accountId, networkId: networkId)) else {
     throw SignError.noPublicKey
   }
   let transaction = CodableTransaction(signerId: accountId,
@@ -453,7 +453,7 @@ func signTransaction(receiverId: String, nonce: UInt64, actions: [Action], block
                                        actions: actions)
   let message = try BorshEncoder().encode(transaction)
   let hash = message.digest
-  let signature = try await(signer.signMessage(message: message.bytes, accountId: accountId, networkId: networkId))
+  let signature = try `await`(signer.signMessage(message: message.bytes, accountId: accountId, networkId: networkId))
   let signedTx = SignedTransaction(transaction: transaction, signature: CodableSignature(signature: signature.signature))
   return .value((hash, signedTx))
 }

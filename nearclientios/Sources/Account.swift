@@ -90,13 +90,13 @@ public final class Account {
   }
 
   func fetchState() throws -> Promise<Void> {
-    _state = try await(connection.provider.query(path: "account/\(accountId)", data: ""))
-    guard let publicKey = try await(connection.signer.getPublicKey(accountId: accountId,
+    _state = try `await`(connection.provider.query(path: "account/\(accountId)", data: ""))
+    guard let publicKey = try `await`(connection.signer.getPublicKey(accountId: accountId,
                                                                    networkId: connection.networkId)) else {
                                                                     print("Missing public key for \(accountId) in \(connection.networkId)")
                                                                     return .value(())
     }
-    _accessKey = try await(connection.provider.query(path: "access_key/\(accountId)/\(publicKey.toString())", data: ""))
+    _accessKey = try `await`(connection.provider.query(path: "access_key/\(accountId)/\(publicKey.toString())", data: ""))
     guard _accessKey != nil else {
       return .init(error: AccountError.noAccessKey("Failed to fetch access key for '\(accountId)' with public key \(publicKey.toString())"))
     }
@@ -104,7 +104,7 @@ public final class Account {
   }
 
   public func state() throws -> Promise<AccountState> {
-    try await(ready)
+    try `await`(ready)
     return .value(_state!)
   }
 
@@ -115,10 +115,10 @@ public final class Account {
   private func retryTxResult(txHash: [UInt8], accountId: String) throws -> Promise<FinalExecutionOutcome> {
     var waitTime = TX_STATUS_RETRY_WAIT
     for _ in [0 ..< TX_STATUS_RETRY_NUMBER] {
-      if let result = try? await(connection.provider.txStatus(txHash: txHash, accountId: accountId)) {
+      if let result = try? `await`(connection.provider.txStatus(txHash: txHash, accountId: accountId)) {
         return .value(result)
       }
-      try await(sleep(millis: waitTime))
+      try `await`(sleep(millis: waitTime))
       waitTime *= TX_STATUS_RETRY_WAIT_BACKOFF
     }
     throw TypedError.error(type: "Exceeded \(TX_STATUS_RETRY_NUMBER) status check attempts for transaction \(txHash.baseEncoded).",
@@ -126,16 +126,16 @@ public final class Account {
   }
 
   private func signAndSendTransaction(receiverId: String, actions: [Action]) throws -> Promise<FinalExecutionOutcome> {
-    try await(ready)
+    try `await`(ready)
     guard _accessKey != nil else {
       throw TypedError.error(type: "Can not sign transactions, initialize account with available public key in Signer.", message: "KeyNotFound")
     }
 
-    let status = try await(connection.provider.status())
+    let status = try `await`(connection.provider.status())
 
     _accessKey!.nonce += 1
     let blockHash = status.sync_info.latest_block_hash.baseDecoded
-    let (txHash, signedTx) = try await(signTransaction(receiverId: receiverId,
+    let (txHash, signedTx) = try `await`(signTransaction(receiverId: receiverId,
                                                        nonce: _accessKey!.nonce,
                                                        actions: actions,
                                                        blockHash: blockHash,
@@ -145,10 +145,10 @@ public final class Account {
 
     let outcome: FinalExecutionOutcome?
     do {
-      outcome = try await(connection.provider.sendTransaction(signedTransaction: signedTx))
+      outcome = try `await`(connection.provider.sendTransaction(signedTransaction: signedTx))
     } catch let error {
       if case TypedError.error(let type, _) = error, type == "TimeoutError" {
-        outcome = try await(retryTxResult(txHash: txHash, accountId: accountId))
+        outcome = try `await`(retryTxResult(txHash: txHash, accountId: accountId))
       } else {
         throw error
       }
@@ -175,7 +175,7 @@ public final class Account {
                    nearclientios.transfer(deposit: amount),
                    nearclientios.addKey(publicKey: publicKey, accessKey: accessKey),
                    nearclientios.deployContract(code: data)]
-    try await(signAndSendTransaction(receiverId: contractId, actions: actions))
+    try `await`(signAndSendTransaction(receiverId: contractId, actions: actions))
     let contractAccount = Account(connection: connection, accountId: contractId)
     return .value(contractAccount)
   }
@@ -234,7 +234,7 @@ public final class Account {
 
   func viewFunction<T: Decodable>(contractId: String, methodName: String, args: [String: Any] = [:]) throws -> Promise<T> {
     let data = Data(json: args).baseEncoded
-    let result: QueryResult = try await(connection.provider.query(path: "call/\(contractId)/\(methodName)", data: data))
+    let result: QueryResult = try `await`(connection.provider.query(path: "call/\(contractId)/\(methodName)", data: data))
     if !result.logs.isEmpty {
       printLogs(contractId: contractId, logs: result.logs)
     }
@@ -251,14 +251,14 @@ public final class Account {
 
   /// Returns array of {access_key: AccessKey, public_key: PublicKey} items.
   func getAccessKeys() throws -> Promise<KeyBoxes> {
-    let response: KeyBoxes = try await(connection.provider.query(path: "access_key/\(accountId)", data: ""))
+    let response: KeyBoxes = try `await`(connection.provider.query(path: "access_key/\(accountId)", data: ""))
     return .value(response)
   }
 
   func getAccountDetails() throws -> Promise<AccountDetails> {
     // TODO: update the response value to return all the different keys, not just app keys.
     // Also if we need this function, or getAccessKeys is good enough.
-    let accessKeys = try await(getAccessKeys())
+    let accessKeys = try `await`(getAccessKeys())
     var authorizedApps: [AuthorizedApp] = []
     accessKeys.forEach { item in
       if case AccessKeyPermission.functionCall(let permission) = item.access_key.permission {

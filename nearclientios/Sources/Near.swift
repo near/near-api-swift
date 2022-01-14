@@ -80,7 +80,7 @@ extension Near {
 public extension Near {
   func account(accountId: String) throws -> Promise<Account> {
     let account = Account(connection: connection, accountId: accountId)
-    try await(account.state())
+    try `await`(account.state())
     return .value(account)
   }
 
@@ -88,7 +88,7 @@ public extension Near {
     guard let accountCreator = accountCreator else {
       throw NearError.noAccountCreator("Must specify account creator, either via masterAccount or helperUrl configuration settings.")
     }
-    try await(accountCreator.createAccount(newAccountId: accountId, publicKey: publicKey))
+    try `await`(accountCreator.createAccount(newAccountId: accountId, publicKey: publicKey))
     return .value(Account(connection: connection, accountId: accountId))
   }
 
@@ -118,7 +118,7 @@ public extension Near {
   private func sendTokens(amount: UInt128, originator: String, receiver: String) throws -> Promise<String> {
     print("near.sendTokens is deprecated. Use `yourAccount.sendMoney` instead.")
     let account = Account(connection: connection, accountId: originator)
-    let result = try await(account.sendMoney(receiverId: receiver, amount: amount))
+    let result = try `await`(account.sendMoney(receiverId: receiver, amount: amount))
     return .value(result.transaction.id)
   }
 }
@@ -128,10 +128,10 @@ func connect(config: NearConfigProtocol) throws -> Promise<Near> {
   var configuration = config
   if let keyPath = configuration.keyPath, let keyStore = configuration.keyStore {
     do {
-      let (accountId, keyPair) = try await(UnencryptedFileSystemKeyStore.readKeyFile(path: keyPath))
+      let (accountId, keyPair) = try `await`(UnencryptedFileSystemKeyStore.readKeyFile(path: keyPath))
       // TODO: Only load key if network ID matches
       let keyPathStore = InMemoryKeyStore()
-      try await(keyPathStore.setKey(networkId: configuration.networkId, accountId: accountId, keyPair: keyPair))
+      try `await`(keyPathStore.setKey(networkId: configuration.networkId, accountId: accountId, keyPair: keyPair))
       if configuration.masterAccount == nil {
         configuration.masterAccount = accountId
       }

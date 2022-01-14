@@ -1,28 +1,26 @@
 PODS:
   - AwaitKit (5.2.0):
     - PromiseKit (~> 6)
-  - Base58Swift (2.1.7):
-    - BigInt (~> 3.1)
-  - BigInt (3.1.0):
-    - SipHash (~> 1.2)
-  - KeychainAccess (4.1.0)
+  - Base58Swift (2.1.10):
+    - BigInt (~> 5.0.0)
+  - BigInt (5.0.0)
+  - KeychainAccess (4.2.2)
   - nearclientios (0.1.0):
-    - AwaitKit (~> 5.0)
-    - Base58Swift (~> 2.1.7)
-    - KeychainAccess (~> 4.1.0)
+    - AwaitKit (~> 5.2.0)
+    - Base58Swift (~> 2.1.10)
+    - KeychainAccess (~> 4.2.2)
     - TweetNacl (~> 1.0)
-  - Nimble (8.0.4)
-  - PromiseKit (6.11.0):
-    - PromiseKit/CorePromise (= 6.11.0)
-    - PromiseKit/Foundation (= 6.11.0)
-    - PromiseKit/UIKit (= 6.11.0)
-  - PromiseKit/CorePromise (6.11.0)
-  - PromiseKit/Foundation (6.11.0):
+  - Nimble (9.2.1)
+  - PromiseKit (6.15.3):
+    - PromiseKit/CorePromise (= 6.15.3)
+    - PromiseKit/Foundation (= 6.15.3)
+    - PromiseKit/UIKit (= 6.15.3)
+  - PromiseKit/CorePromise (6.15.3)
+  - PromiseKit/Foundation (6.15.3):
     - PromiseKit/CorePromise
-  - PromiseKit/UIKit (6.11.0):
+  - PromiseKit/UIKit (6.15.3):
     - PromiseKit/CorePromise
-  - Quick (2.2.0)
-  - SipHash (1.2.2)
+  - Quick (4.0.0)
   - TweetNacl (1.0.2)
 
 DEPENDENCIES:
@@ -39,7 +37,6 @@ SPEC REPOS:
     - Nimble
     - PromiseKit
     - Quick
-    - SipHash
     - TweetNacl
 
 EXTERNAL SOURCES:
@@ -48,16 +45,15 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AwaitKit: 512626cd12c82b1fbffddc8f414d0364cb456004
-  Base58Swift: 149c9dd95d8712f00e4695b36baafb3031927256
-  BigInt: 76b5dfdfa3e2e478d4ffdf161aeede5502e2742f
-  KeychainAccess: 445e28864fe6d3458b41fa211bcdc39890e8bd5a
-  nearclientios: ea8e674ac9dde3cfd1e6f53f9dbb53f724bfd903
-  Nimble: 18d5360282923225d62b09d781f63abc1a0111fc
-  PromiseKit: e4863d06976e7dee5e41c04fc7371c16b3600292
-  Quick: 7fb19e13be07b5dfb3b90d4f9824c855a11af40e
-  SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
+  Base58Swift: 53d551f0b33d9478fa63b3445e453a772d6b31a7
+  BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
+  KeychainAccess: c0c4f7f38f6fc7bbe58f5702e25f7bd2f65abf51
+  nearclientios: 2bd7584e87627b712cba2207895b1d08242910e6
+  Nimble: e7e615c0335ee4bf5b0d786685451e62746117d5
+  PromiseKit: 3b2b6995e51a954c46dbc550ce3da44fbfb563c5
+  Quick: 6473349e43b9271a8d43839d9ba1c442ed1b7ac4
   TweetNacl: 3abf4d1d2082b0114e7a67410e300892448951e6
 
 PODFILE CHECKSUM: 94032e5674b919cac77bff067f1a3ae57504b308
 
-COCOAPODS: 1.9.2
+COCOAPODS: 1.11.2
