@@ -11,12 +11,12 @@ import Quick
 import Nimble
 @testable import nearclientios
 
-class KeychainKeystoreSpec: QuickSpec {
-  static let keystoreService = "test.keystore"
-
-  private let keyStore: KeyStore = KeychainKeyStore(keychain: .init(service: keystoreService))
-
-  override func spec() {
-    itBehavesLike(KeyStoreSpec.self) {self.keyStore}
-  }
-}
+//class KeychainKeystoreSpec: QuickSpec {
+//  static let keystoreService = "test.keystore"
+//
+//  private let keyStore: KeyStore = KeychainKeyStore(keychain: .init(service: keystoreService))
+//
+//  override func spec() {
+//    itBehavesLike(KeyStoreSpec.self) {self.keyStore}
+//  }
+//}

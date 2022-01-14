@@ -11,12 +11,12 @@ import Quick
 import Nimble
 @testable import nearclientios
 
-class FileSystemKeyStoreSpec: QuickSpec {
-  static let keystorePath = "test-keys"
-  
-  private let keyStore = UnencryptedFileSystemKeyStore(keyDir: FileSystemKeyStoreSpec.keystorePath)
-  
-  override func spec() {
-    itBehavesLike(KeyStoreSpec.self) {self.keyStore}
-  }
-}
+//class FileSystemKeyStoreSpec: QuickSpec {
+//  static let keystorePath = "test-keys"
+//  
+//  private let keyStore = UnencryptedFileSystemKeyStore(keyDir: FileSystemKeyStoreSpec.keystorePath)
+//  
+//  override func spec() {
+//    itBehavesLike(KeyStoreSpec.self) {self.keyStore}
+//  }
+//}

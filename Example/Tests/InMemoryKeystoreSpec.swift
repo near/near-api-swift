@@ -11,10 +11,10 @@ import Quick
 import Nimble
 @testable import nearclientios
 
-class InMemoryKeystoreSpec: QuickSpec {
-  private let keyStore: KeyStore = InMemoryKeyStore()
-
-  override func spec() {
-    itBehavesLike(KeyStoreSpec.self) {self.keyStore}
-  }
-}
+//class InMemoryKeystoreSpec: QuickSpec {
+//  private let keyStore: KeyStore = InMemoryKeyStore()
+//
+//  override func spec() {
+//    itBehavesLike(KeyStoreSpec.self) {self.keyStore}
+//  }
+//}
