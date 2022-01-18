@@ -69,6 +69,9 @@ extension AccountViewController {
     let balance = String( )  //24 near indivisible units
     data.append(AccountStateField(title: "Balance", value: balance))
     data.append(AccountStateField(title: "Storage (used/paid)", value: "\(accountState.storage_usage.toStorageUnit())/\(accountState.storage_paid_at.toStorageUnit())"))
+    await MainActor.run {
+      tableView.reloadData()
+    }
   }
 }
 

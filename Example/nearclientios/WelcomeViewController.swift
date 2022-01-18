@@ -56,7 +56,9 @@ class WelcomeViewController: UIViewController {
   
   private func setupUI(with wallet: WalletAccount) async {
     if await wallet.isSignedIn() {
-     showAccountState(with: wallet)
+      await MainActor.run {
+        showAccountState(with: wallet)
+      }
     } else {
       //Hide preloader
     }
@@ -74,7 +76,7 @@ class WelcomeViewController: UIViewController {
     Task {
       let appName = UIApplication.name ?? "signInTitle"
       (UIApplication.shared.delegate as? AppDelegate)?.walletSignIn = self
-      try! await walletAccount!.requestSignIn(contractId: "farts.testnet",
+      try! await walletAccount!.requestSignIn(contractId: "myContractId",
                                             title: appName,
                                             successUrl: URL(string: "nearclientios://success"),
                                             failureUrl: URL(string: "nearclientios://fail"),
