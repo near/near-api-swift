@@ -7,8 +7,6 @@
 //
 
 import Foundation
-import PromiseKit
-import AwaitKit
 
 public enum SignerType {
   case inMemory(KeyStore)
@@ -25,7 +23,7 @@ public protocol Signer {
       - accountId: accountId to retrieve from.
       - networkId: network for this accountId.
    */
-  func createKey(accountId: String, networkId: String) throws -> Promise<PublicKey>
+  func createKey(accountId: String, networkId: String) async throws -> PublicKey
 
   /**
    - Parameters:
@@ -33,7 +31,7 @@ public protocol Signer {
       - networkId: network for this accountId.
     - Returns: public key for given account / network.
    */
-  func getPublicKey(accountId: String, networkId: String) throws -> Promise<PublicKey?>
+  func getPublicKey(accountId: String, networkId: String) async throws -> PublicKey?
 
   /**
    Signs given hash.
@@ -42,7 +40,7 @@ public protocol Signer {
       - accountId: accountId to use for signing.
       - networkId: network for this accontId.
    */
-  func signHash(hash: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol>
+  func signHash(hash: [UInt8], accountId: String, networkId: String) async throws -> SignatureProtocol
 
   /**
    Signs given message, by first hashing with sha256.
@@ -51,12 +49,12 @@ public protocol Signer {
       - accountId: accountId to use for signing.
       - networkId: network for this accontId.
    */
-  func signMessage(message: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol>
+  func signMessage(message: [UInt8], accountId: String, networkId: String) async throws -> SignatureProtocol
 }
 
 extension Signer {
-  public func signMessage(message: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol> {
-    return try signHash(hash: message.digest, accountId: accountId, networkId: networkId)
+  public func signMessage(message: [UInt8], accountId: String, networkId: String) async throws -> SignatureProtocol {
+    return try await signHash(hash: message.digest, accountId: accountId, networkId: networkId)
   }
 }
 
@@ -76,22 +74,22 @@ public enum InMemorySignerError: Error {
 }
 
 extension InMemorySigner: Signer {
-  public func createKey(accountId: String, networkId: String) throws -> Promise<PublicKey> {
+  public func createKey(accountId: String, networkId: String) async throws -> PublicKey {
     let keyPair = try keyPairFromRandom(curve: .ED25519)
-    try `await`(keyStore.setKey(networkId: networkId, accountId: accountId, keyPair: keyPair))
-    return .value(keyPair.getPublicKey())
+    try await keyStore.setKey(networkId: networkId, accountId: accountId, keyPair: keyPair)
+    return keyPair.getPublicKey()
   }
 
-  public func getPublicKey(accountId: String, networkId: String) throws -> Promise<PublicKey?> {
-    let keyPair = try `await`(keyStore.getKey(networkId: networkId, accountId: accountId))
-    return .value(keyPair?.getPublicKey())
+  public func getPublicKey(accountId: String, networkId: String) async throws -> PublicKey? {
+    let keyPair = try await keyStore.getKey(networkId: networkId, accountId: accountId)
+    return keyPair?.getPublicKey()
   }
 
-  public func signHash(hash: [UInt8], accountId: String, networkId: String) throws -> Promise<SignatureProtocol> {
-    guard let keyPair = try `await`(keyStore.getKey(networkId: networkId, accountId: accountId)) else {
+  public func signHash(hash: [UInt8], accountId: String, networkId: String) async throws -> SignatureProtocol {
+    guard let keyPair = try await keyStore.getKey(networkId: networkId, accountId: accountId) else {
       throw InMemorySignerError.notFound("Key for \(accountId) not found in \(networkId)")
     }
     let signature = try keyPair.sign(message: hash)
-    return .value(signature)
+    return signature
   }
 }

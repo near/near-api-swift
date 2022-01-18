@@ -20,39 +20,36 @@ public struct KeychainKeyStore {
 }
 
 extension KeychainKeyStore: KeyStore {
-  public func setKey(networkId: String, accountId: String, keyPair: KeyPair) -> Promise<Void> {
+  public func setKey(networkId: String, accountId: String, keyPair: KeyPair) async throws -> Void {
     keychain[storageKeyForSecretKey(networkId: networkId, accountId: accountId)] = keyPair.toString()
-    return .value(())
   }
 
-  public func getKey(networkId: String, accountId: String) -> Promise<KeyPair?> {
+  public func getKey(networkId: String, accountId: String) async throws -> KeyPair? {
     guard let value = keychain[storageKeyForSecretKey(networkId: networkId, accountId: accountId)] else {
-      return .value(nil)
+      return nil
     }
-    return .value(try? keyPairFromString(encodedKey: value))
+    return try? keyPairFromString(encodedKey: value)
   }
 
-  public func removeKey(networkId: String, accountId: String) -> Promise<Void> {
+  public func removeKey(networkId: String, accountId: String) async throws -> Void {
     keychain[storageKeyForSecretKey(networkId: networkId, accountId: accountId)] = nil
-    return .value(())
   }
 
-  public func clear() -> Promise<Void> {
+  public func clear() async throws -> Void {
     try? keychain.removeAll()
-    return .value(())
   }
 
-  public func getNetworks() throws -> Promise<[String]> {
+  public func getNetworks() async throws -> [String] {
     var result = Set<String>()
     for key in storageKeys() {
       if let networkId = key.components(separatedBy: ":").last {
         result.insert(networkId)
       }
     }
-    return .value(Array(result))
+    return Array(result)
   }
 
-  public func getAccounts(networkId: String) throws -> Promise<[String]> {
+  public func getAccounts(networkId: String) async throws -> [String] {
     var result = [String]()
     for key in storageKeys() {
       let components = key.components(separatedBy: ":")
@@ -60,7 +57,7 @@ extension KeychainKeyStore: KeyStore {
         result.append(accountId)
       }
     }
-    return .value(result)
+    return result
   }
 }
 

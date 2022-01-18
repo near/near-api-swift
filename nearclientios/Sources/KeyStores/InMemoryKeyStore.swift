@@ -21,36 +21,33 @@ public class InMemoryKeyStore {
 }
 
 extension InMemoryKeyStore: KeyStore {
-  public func setKey(networkId: String, accountId: String, keyPair: KeyPair) -> Promise<Void> {
+  public func setKey(networkId: String, accountId: String, keyPair: KeyPair) async throws -> Void {
     keys["\(accountId):\(networkId)"] = keyPair.toString()
-    return .value(())
   }
 
-  public func getKey(networkId: String, accountId: String) -> Promise<KeyPair?> {
-    guard let value = keys["\(accountId):\(networkId)"] else {return .value(nil)}
-    return .value(try? keyPairFromString(encodedKey: value))
+  public func getKey(networkId: String, accountId: String) async throws -> KeyPair? {
+    guard let value = keys["\(accountId):\(networkId)"] else {return nil}
+    return try? keyPairFromString(encodedKey: value)
   }
 
-  public func removeKey(networkId: String, accountId: String) -> Promise<Void> {
+  public func removeKey(networkId: String, accountId: String) async throws -> Void {
     keys.removeValue(forKey: "\(accountId):\(networkId)")
-    return .value(())
   }
 
-  public func clear() -> Promise<Void> {
+  public func clear() async throws -> Void {
     keys = [:]
-    return .value(())
   }
 
-  public func getNetworks() throws -> Promise<[String]> {
+  public func getNetworks() async throws -> [String] {
     var result = Set<String>()
     keys.keys.forEach {key in
       let parts = key.split(separator: ":")
       result.insert(String(parts[1]))
     }
-    return .value(Array(result))
+    return Array(result)
   }
 
-  public func getAccounts(networkId: String) throws -> Promise<[String]> {
+  public func getAccounts(networkId: String) async throws -> [String] {
     var result = [String]()
     keys.keys.forEach {key in
       let parts = key.split(separator: ":").map {String($0)}
@@ -58,6 +55,6 @@ extension InMemoryKeyStore: KeyStore {
           result.append(parts.dropLast().joined(separator: ":"))
       }
     }
-    return .value(result)
+    return result
   }
 }

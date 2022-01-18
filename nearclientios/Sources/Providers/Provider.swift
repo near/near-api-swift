@@ -211,13 +211,13 @@ public enum ProviderType {
 }
 
 public protocol Provider {
-  func getNetwork() throws -> Promise<Network>
-  func status() throws -> Promise<NodeStatusResult>
-  func sendTransaction(signedTransaction: SignedTransaction) throws -> Promise<FinalExecutionOutcome>
-  func txStatus(txHash: [UInt8], accountId: String) throws -> Promise<FinalExecutionOutcome>
-  func query<T: Decodable>(path: String, data: String) throws -> Promise<T>
-  func block(blockId: BlockId) throws -> Promise<BlockResult>
-  func chunk(chunkId: ChunkId) throws -> Promise<ChunkResult>
+  func getNetwork() async throws -> Network
+  func status() async throws -> NodeStatusResult
+  func sendTransaction(signedTransaction: SignedTransaction) async throws -> FinalExecutionOutcome
+  func txStatus(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome
+  func query<T: Decodable>(path: String, data: String) async throws -> T
+  func block(blockId: BlockId) async throws -> BlockResult
+  func chunk(chunkId: ChunkId) async throws -> ChunkResult
 }
 
 public func getTransactionLastResult(txResult: FinalExecutionOutcome) -> Any? {

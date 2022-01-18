@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'https://github.com/nearprotocol/near-client-ios.git', :tag => s.version.to_s }
   s.social_media_url = 'https://twitter.com/nearprotocol'
 
-  s.ios.deployment_target = '9.3'
+  s.ios.deployment_target = '13.0'
 
   s.source_files = 'nearclientios/Sources/**/*'
   s.swift_versions   = ["5.0"]

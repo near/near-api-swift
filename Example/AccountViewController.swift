@@ -8,8 +8,6 @@
 
 import UIKit
 import nearclientios
-import PromiseKit
-import AwaitKit
 
 struct AccountStateField {
   let title: String
@@ -27,8 +25,10 @@ class AccountViewController: UITableViewController {
     super.viewDidLoad()
     title = "Near account"
     setupSignOutButton()
-    accountState = fetchAccountState()
-    setupData(with: accountState!)
+    Task {
+      accountState = await fetchAccountState()
+      await setupData(with: accountState!)
+    }
     // Do any additional setup after loading the view, typically from a nib.
   }
   
@@ -46,8 +46,10 @@ extension AccountViewController {
   }
   
   @objc private func back(sender: UIBarButtonItem) {
-    walletAccount?.signOut()
-    navigationController?.popViewController(animated: true)
+    Task {
+      await walletAccount?.signOut()
+      navigationController?.popViewController(animated: true)
+    }
   }
 }
 
@@ -57,13 +59,13 @@ extension AccountViewController {
     walletAccount = wallet
   }
   
-  private func fetchAccountState() -> AccountState {
-    let account = try! `await`(near!.account(accountId: walletAccount!.getAccountId()))
-    return try! `await`(account.state())
+  private func fetchAccountState() async -> AccountState {
+    let account = try! await near!.account(accountId: walletAccount!.getAccountId())
+    return try! await account.state()
   }
   
-  private func setupData(with accountState: AccountState) { 
-    data.append(AccountStateField(title: "Account ID", value: walletAccount!.getAccountId()))
+  private func setupData(with accountState: AccountState) async {
+    data.append(AccountStateField(title: "Account ID", value: await walletAccount!.getAccountId()))
     let balance = String( )  //24 near indivisible units
     data.append(AccountStateField(title: "Balance", value: balance))
     data.append(AccountStateField(title: "Storage (used/paid)", value: "\(accountState.storage_usage.toStorageUnit())/\(accountState.storage_paid_at.toStorageUnit())"))

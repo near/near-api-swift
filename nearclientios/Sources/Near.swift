@@ -7,8 +7,6 @@
 //
 
 import Foundation
-import PromiseKit
-import AwaitKit
 
 public protocol NearConfigProtocol: ConnectionConfigProtocol {
   var networkId: String {get}
@@ -78,18 +76,18 @@ extension Near {
 }
 
 public extension Near {
-  func account(accountId: String) throws -> Promise<Account> {
+  func account(accountId: String) async throws -> Account {
     let account = Account(connection: connection, accountId: accountId)
-    try `await`(account.state())
-    return .value(account)
+    try await account.ready()
+    return account
   }
 
-  private func createAccount(accountId: String, publicKey: PublicKey) throws -> Promise<Account> {
+  private func createAccount(accountId: String, publicKey: PublicKey) async throws -> Account {
     guard let accountCreator = accountCreator else {
       throw NearError.noAccountCreator("Must specify account creator, either via masterAccount or helperUrl configuration settings.")
     }
-    try `await`(accountCreator.createAccount(newAccountId: accountId, publicKey: publicKey))
-    return .value(Account(connection: connection, accountId: accountId))
+    try await accountCreator.createAccount(newAccountId: accountId, publicKey: publicKey)
+    return Account(connection: connection, accountId: accountId)
   }
 
   /**
@@ -99,13 +97,13 @@ public extension Near {
    - Returns: promise with contract.
    */
   @available(*, deprecated, renamed: "Contract.init", message: "Backwards compatibility method. Use contract constructor instead")
-  private func loadContract(contractId: String, options: ContractOptionsProtocol) throws -> Promise<Contract> {
+  private func loadContract(contractId: String, options: ContractOptionsProtocol) async throws -> Contract {
     print("near.loadContract is deprecated. Use `Contract.init` instead.")
     guard let accountId = options.sender else { throw NearError.noAccountId }
     let account = Account(connection: connection, accountId: accountId)
     let contract = Contract(account: account, contractId: contractId, viewMethods: options.viewMethods,
                     changeMethods: options.changeMethods, sender: accountId)
-    return .value(contract)
+    return contract
   }
 
   /**
@@ -115,23 +113,23 @@ public extension Near {
       - receiver: receiver
    */
   @available(*, deprecated, renamed: "yourAccount.sendMoney", message: "Backwards compatibility method. Use `yourAccount.sendMoney` instead")
-  private func sendTokens(amount: UInt128, originator: String, receiver: String) throws -> Promise<String> {
+  private func sendTokens(amount: UInt128, originator: String, receiver: String) async throws -> String {
     print("near.sendTokens is deprecated. Use `yourAccount.sendMoney` instead.")
     let account = Account(connection: connection, accountId: originator)
-    let result = try `await`(account.sendMoney(receiverId: receiver, amount: amount))
-    return .value(result.transaction.id)
+    let result = try await account.sendMoney(receiverId: receiver, amount: amount)
+    return result.transaction.id
   }
 }
 
-func connect(config: NearConfigProtocol) throws -> Promise<Near> {
+func connect(config: NearConfigProtocol) async throws -> Near {
     // Try to find extra key in `KeyPath` if provided.let
   var configuration = config
   if let keyPath = configuration.keyPath, let keyStore = configuration.keyStore {
     do {
-      let (accountId, keyPair) = try `await`(UnencryptedFileSystemKeyStore.readKeyFile(path: keyPath))
+      let (accountId, keyPair) = try await UnencryptedFileSystemKeyStore.readKeyFile(path: keyPath)
       // TODO: Only load key if network ID matches
       let keyPathStore = InMemoryKeyStore()
-      try `await`(keyPathStore.setKey(networkId: configuration.networkId, accountId: accountId, keyPair: keyPair))
+      try await keyPathStore.setKey(networkId: configuration.networkId, accountId: accountId, keyPair: keyPair)
       if configuration.masterAccount == nil {
         configuration.masterAccount = accountId
       }
@@ -142,5 +140,5 @@ func connect(config: NearConfigProtocol) throws -> Promise<Near> {
     }
   }
   let near = try Near(config: configuration)
-  return .value(near)
+  return near
 }

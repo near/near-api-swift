@@ -7,11 +7,9 @@
 //
 
 import Foundation
-import PromiseKit
-import AwaitKit
 
 public protocol AccountCreator {
-  func createAccount(newAccountId: String, publicKey: PublicKey) throws -> Promise<Void>
+  func createAccount(newAccountId: String, publicKey: PublicKey) async throws -> Void
 }
 
 public struct LocalAccountCreator {
@@ -20,8 +18,8 @@ public struct LocalAccountCreator {
 }
 
 extension LocalAccountCreator: AccountCreator {
-  public func createAccount(newAccountId: String, publicKey: PublicKey) throws -> Promise<Void> {
-    return try masterAccount.createAccount(newAccountId: newAccountId, publicKey: publicKey, amount: initialBalance).asVoid()
+  public func createAccount(newAccountId: String, publicKey: PublicKey) async throws -> Void {
+    let _ = try await masterAccount.createAccount(newAccountId: newAccountId, publicKey: publicKey, amount: initialBalance)
   }
 }
 
@@ -37,7 +35,7 @@ extension UrlAccountCreator {
 }
 
 extension UrlAccountCreator: AccountCreator {
-  public func createAccount(newAccountId: String, publicKey: PublicKey) throws -> Promise<Void> {
-    return .value(())
+  public func createAccount(newAccountId: String, publicKey: PublicKey) async throws -> Void {
+    // no-op
   }
 }
