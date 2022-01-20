@@ -37,12 +37,21 @@ extension JSONRPCProvider {
                                   "id": getId(),
                                   "jsonrpc": "2.0"]
     let json = try await fetchJson(connection: connection, json: request)
+
     let data = try JSONSerialization.data(withJSONObject: json, options: [])
 //    debugPrint("=====================")
-//    debugPrint(json)
+//    print(T.self)
+//    print(String(decoding: data, as: UTF8.self))
 //    debugPrint("=====================")
-    let decoded = try JSONDecoder().decode(T.self, from: data)
-    return decoded
+    do {
+      let decoded = try JSONDecoder().decode(T.self, from: data)
+      return decoded
+    } catch let error {
+      print(error)
+      print(String(decoding: try! JSONSerialization.data(withJSONObject: request, options: []), as: UTF8.self))
+      print(T.self)
+      throw error
+    }
   }
 }
 

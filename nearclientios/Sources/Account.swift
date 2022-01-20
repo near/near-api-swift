@@ -127,7 +127,6 @@ public final class Account {
     }
 
     let status = try await connection.provider.status()
-
     _accessKey!.nonce += 1
     let blockHash = status.sync_info.latest_block_hash.baseDecoded
     let (txHash, signedTx) = try await signTransaction(receiverId: receiverId,
@@ -150,7 +149,6 @@ public final class Account {
     }
 
     guard let result = outcome else {throw AccountError.noResult}
-
     let flatLogs = ([result.transaction] + result.receipts).reduce([], {$0 + $1.outcome.logs})
     printLogs(contractId: signedTx.transaction.receiverId, logs: flatLogs)
 

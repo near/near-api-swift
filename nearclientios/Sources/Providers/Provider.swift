@@ -134,6 +134,9 @@ public struct FinalExecutionOutcome: Decodable, Equatable {
   let status: FinalExecutionStatus
   let transaction: ExecutionOutcomeWithId
   let receipts: [ExecutionOutcomeWithId]
+  private enum CodingKeys : String, CodingKey {
+          case status, transaction = "transaction_outcome", receipts = "receipts_outcome"
+      }
 }
 
 public struct TotalWeight: Codable {

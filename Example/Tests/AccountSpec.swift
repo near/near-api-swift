@@ -1,17 +1,31 @@
-////
-////  AccountSpec.swift
-////  nearclientios_Tests
-////
-////  Created by Dmytro Kurochka on 28.11.2019.
-////  Copyright © 2019 CocoaPods. All rights reserved.
-////
 //
-//import XCTest
-//import Quick
-//import Nimble
-//import AwaitKit
-//@testable import nearclientios
+//  AccountSpec.swift
+//  nearclientios_Tests
 //
+//  Created by Dmytro Kurochka on 28.11.2019.
+//  Copyright © 2019 CocoaPods. All rights reserved.
+//
+
+import XCTest
+import Quick
+import Nimble
+import AwaitKit
+@testable import nearclientios
+class _AccountSpec: XCTestCase {
+  var near: Near!
+  var workingAccount: Account!
+  override func setUp() async throws {
+    self.near = try await TestUtils.setUpTestConnection()
+    let masterAccount = try await self.near.account(accountId: testAccountName)
+    let amount = INITIAL_BALANCE * UInt128(100)
+    self.workingAccount = try await TestUtils.createAccount(masterAccount: masterAccount, amount: amount)
+    print(self.workingAccount)
+  }
+  func testPredifinedAccountWithCorrectName() async throws {
+//    let status = try await self.workingAccount.state()
+//    XCTAssertEqual(status.code_hash, "11111111111111111111111111111111")
+  }
+}
 //class AccountSpec: QuickSpec {
 //  var near: Near!
 //  var workingAccount: Account!
