@@ -11,7 +11,10 @@
 let networkId = "unittest"
 let testAccountName = "test.near"
 
-let INITIAL_BALANCE = UInt128(100000000000)
+let INITIAL_BALANCE = UInt128(stringLiteral: "500000000000000000000000000")
+// Length of a random account. Set to 40 because in the protocol minimal allowed top-level account length should be at
+// least 32.
+let RANDOM_ACCOUNT_LENGTH = 40;
 
 enum TestUtils {}
 
@@ -38,12 +41,18 @@ extension TestUtils {
 
   // Generate some unique string with a given prefix using the alice nonce.
   static func generateUniqueString(prefix: String) -> String {
-    return prefix + "\(Int(Date().timeIntervalSince1970 * 1000))" + "\(Int.random(in: 0..<1000))"
+    var result = prefix + "-\(Int(Date().timeIntervalSince1970 * 1000))" + "-\(Int.random(in: 0..<1000000))"
+    let add_symbols = max(RANDOM_ACCOUNT_LENGTH - result.count, 1)
+    for _ in 0..<add_symbols {
+      result += "0"
+    }
+
+    return result
   }
 
   static func createAccount(masterAccount: Account, amount: UInt128 = INITIAL_BALANCE, trials: UInt32 = 5) async throws -> Account {
     try await masterAccount.fetchState()
-    let newAccountName = generateUniqueString(prefix: generateUniqueString(prefix: "test-") + "-")
+    let newAccountName = generateUniqueString(prefix: "test")
     let newPublicKey = try await(masterAccount.connection.signer.createKey(accountId: newAccountName,
                                                                            networkId: networkId))
     try await masterAccount.createAccount(newAccountId: newAccountName, publicKey: newPublicKey, amount: amount)

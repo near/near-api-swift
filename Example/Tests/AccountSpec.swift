@@ -14,16 +14,60 @@ import AwaitKit
 class _AccountSpec: XCTestCase {
   var near: Near!
   var workingAccount: Account!
+  
   override func setUp() async throws {
     self.near = try await TestUtils.setUpTestConnection()
     let masterAccount = try await self.near.account(accountId: testAccountName)
-    let amount = INITIAL_BALANCE * UInt128(100)
+    let amount = INITIAL_BALANCE
     self.workingAccount = try await TestUtils.createAccount(masterAccount: masterAccount, amount: amount)
-    print(self.workingAccount)
   }
-  func testPredifinedAccountWithCorrectName() async throws {
-//    let status = try await self.workingAccount.state()
-//    XCTAssertEqual(status.code_hash, "11111111111111111111111111111111")
+  
+  func testViewPredefinedAccountWithCorrectName() async throws {
+    let status = try await self.workingAccount.state()
+    XCTAssertEqual(status.code_hash, "11111111111111111111111111111111")
+  }
+  
+  func testCreateAccountAndViewNewAccount() async throws {
+    let newAccountName = TestUtils.generateUniqueString(prefix: "test")
+    let newAccountPublicKey = try PublicKey.fromString(encodedKey: "9AhWenZ3JddamBoyMqnTbp7yVbRuvqAv3zwfrWgfVRJE")
+    let workingState = try await self.workingAccount.state()
+    let amount = workingState.amount
+    let newAmount = UInt128(stringLiteral: amount) / UInt128(100)
+    _ = try await self.workingAccount.createAccount(newAccountId: newAccountName,
+                                                publicKey: newAccountPublicKey,
+                                                amount: newAmount)
+    let newAccount = Account(connection: self.near.connection, accountId: newAccountName)
+    let state = try await newAccount.state()
+    XCTAssertEqual(state.amount, "\(newAmount)")
+  }
+  
+  func testSendMoney() async throws {
+    let workingState = try await self.workingAccount.state()
+    let amountFraction = UInt128(stringLiteral: workingState.amount) / UInt128(100)
+    let sender = try await TestUtils.createAccount(masterAccount: self.workingAccount, amount: amountFraction)
+    let receiver = try await TestUtils.createAccount(masterAccount: self.workingAccount, amount: amountFraction)
+    _ = try await sender.sendMoney(receiverId: receiver.accountId, amount: UInt128(10000))
+    try await receiver.fetchState()
+    let state = try await receiver.state()
+    XCTAssertEqual(state.amount, "\(amountFraction + UInt128(10000))")
+  }
+  
+  func testDeleteAccount() async throws {
+    let workingState = try await self.workingAccount.state()
+    let amountFraction = UInt128(stringLiteral: workingState.amount) / UInt128(100)
+    let sender = try await(TestUtils.createAccount(masterAccount: self.workingAccount, amount: amountFraction))
+    let receiver = try await(TestUtils.createAccount(masterAccount: self.workingAccount, amount: amountFraction))
+    _ = try await(sender.deleteAccount(beneficiaryId: receiver.accountId))
+    
+    let reloaded = Account(connection: sender.connection, accountId: sender.accountId)
+    do {
+      _ = try await reloaded.state()
+      XCTFail("This should fail, as the sender has been deleted.")
+    } catch {
+      try await receiver.fetchState()
+      let senderState = try await receiver.state()
+      XCTAssertGreaterThan(UInt128(stringLiteral: senderState.amount), amountFraction)
+    }
   }
 }
 //class AccountSpec: QuickSpec {
