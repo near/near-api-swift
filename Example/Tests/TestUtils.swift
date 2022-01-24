@@ -55,14 +55,14 @@ extension TestUtils {
     let newAccountName = generateUniqueString(prefix: "test")
     let newPublicKey = try await(masterAccount.connection.signer.createKey(accountId: newAccountName,
                                                                            networkId: networkId))
-    try await masterAccount.createAccount(newAccountId: newAccountName, publicKey: newPublicKey, amount: amount)
+    _ = try await masterAccount.createAccount(newAccountId: newAccountName, publicKey: newPublicKey, amount: amount)
     return Account(connection: masterAccount.connection, accountId: newAccountName)
   }
 
   static func deployContract(workingAccount: Account, contractId: String, amount: UInt128 = UInt128(10000000)) async throws -> Contract {
     let newPublicKey = try await workingAccount.connection.signer.createKey(accountId: contractId, networkId: networkId)
     let data = Wasm().data
-    try await workingAccount.createAndDeployContract(contractId: contractId,
+    _ = try await workingAccount.createAndDeployContract(contractId: contractId,
                                                      publicKey: newPublicKey,
                                                      data: data.bytes,
                                                      amount: amount)
