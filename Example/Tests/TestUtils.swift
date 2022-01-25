@@ -12,11 +12,22 @@ let networkId = "unittest"
 let testAccountName = "test.near"
 
 let INITIAL_BALANCE = UInt128(stringLiteral: "500000000000000000000000000")
+let HELLO_WASM_BALANCE = UInt128(stringLiteral: "10000000000000000000000000")
+
 // Length of a random account. Set to 40 because in the protocol minimal allowed top-level account length should be at
 // least 32.
 let RANDOM_ACCOUNT_LENGTH = 40;
 
 enum TestUtils {}
+
+func unsafeWaitFor(_ f: @escaping () async -> ()) {
+  let sema = DispatchSemaphore(value: 0)
+  async {
+    await f()
+    sema.signal()
+  }
+  sema.wait()
+}
 
 extension TestUtils {
 
@@ -59,7 +70,7 @@ extension TestUtils {
     return Account(connection: masterAccount.connection, accountId: newAccountName)
   }
 
-  static func deployContract(workingAccount: Account, contractId: String, amount: UInt128 = UInt128(10000000)) async throws -> Contract {
+  static func deployContract(workingAccount: Account, contractId: String, amount: UInt128 = HELLO_WASM_BALANCE) async throws -> Contract {
     let newPublicKey = try await workingAccount.connection.signer.createKey(accountId: contractId, networkId: networkId)
     let data = Wasm().data
     _ = try await workingAccount.createAndDeployContract(contractId: contractId,
