@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import PromiseKit
 
 /**
 * Simple in-memory keystore for testing purposes.

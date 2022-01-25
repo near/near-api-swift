@@ -7,10 +7,6 @@
 ////
 //
 //import XCTest
-//import Quick
-//import Nimble
-//import PromiseKit
-//import AwaitKit
 //@testable import nearclientios
 //
 //class AccessKeySpec: QuickSpec {

@@ -7,10 +7,6 @@
 ////
 //
 //import XCTest
-//import PromiseKit
-//import AwaitKit
-//import Quick
-//import Nimble
 //@testable import nearclientios
 //
 //let NETWORK_ID_SINGLE_KEY = "singlekeynetworkid"

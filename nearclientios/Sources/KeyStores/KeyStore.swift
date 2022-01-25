@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import PromiseKit
 
 /**
 * Key store interface for `InMemorySigner`.

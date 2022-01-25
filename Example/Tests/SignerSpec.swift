@@ -7,8 +7,6 @@
 ////
 //
 //import XCTest
-//import Quick
-//import Nimble
 //@testable import nearclientios
 //
 //class SignerSpec: QuickSpec {

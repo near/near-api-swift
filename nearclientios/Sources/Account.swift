@@ -7,8 +7,6 @@
 //
 
 import Foundation
-import PromiseKit
-import AwaitKit
 
 /// Default amount of gas to be sent with the function calls. Used to pay for the fees
 /// incurred while running the contract execution. The unused amount will be refunded back to

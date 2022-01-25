@@ -7,8 +7,6 @@
 //
 
 import Foundation
-import PromiseKit
-import AwaitKit
 
 public enum TypedError: Error {
   case error(type: String = "UntypedError", message: String?)

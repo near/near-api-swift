@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import PromiseKit
 import KeychainAccess
 
 public let NEAR_KEYCHAIN_STORAGE_SERVICE = "near.keystore"

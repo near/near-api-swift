@@ -6,9 +6,6 @@
 //  Copyright © 2019 CocoaPods. All rights reserved.
 
 import XCTest
-//import Quick
-//import Nimble
-//import AwaitKit
 @testable import nearclientios
 
 internal struct Test {

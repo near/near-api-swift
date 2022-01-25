@@ -7,9 +7,6 @@
 ////
 //
 //import XCTest
-//import Quick
-//import Nimble
-//import AwaitKit
 //@testable import nearclientios
 //
 //class MergeKeyStoreSpec: QuickSpec {

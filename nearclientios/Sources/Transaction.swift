@@ -7,8 +7,6 @@
 //
 
 import Foundation
-import PromiseKit
-import AwaitKit
 
 public struct FunctionCallPermission {
   let allowance: UInt128?
