@@ -63,7 +63,7 @@ public enum AccessKeyPermission {
   }
 }
 
-public enum DecodingError: Error {
+public enum NEARDecodingError: Error {
   case notExpected
 }
 
@@ -84,7 +84,7 @@ extension AccessKeyPermission: Decodable {
       let permission = try container.decode(FunctionCallPermission.self, forKey: .functionCall)
       self = .functionCall(permission)
     } else {
-      throw DecodingError.notExpected
+      throw NEARDecodingError.notExpected
     }
   }
 }

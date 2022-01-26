@@ -48,7 +48,9 @@ public struct KeyBox: Decodable {
   let public_key: String
 }
 
-public typealias KeyBoxes = [KeyBox]
+public struct KeyBoxes: Decodable {
+  let keys: [KeyBox]
+}
 
 public enum AccountError: Error {
   case noAccessKey(String)
@@ -162,6 +164,7 @@ public final class Account {
     return result
   }
 
+  @discardableResult
   func createAndDeployContract(contractId: String, publicKey: PublicKey,
                                        data: [UInt8], amount: UInt128) async throws -> Account {
     let accessKey = fullAccessKey()
@@ -174,10 +177,12 @@ public final class Account {
     return contractAccount
   }
 
+  @discardableResult
   func sendMoney(receiverId: String, amount: UInt128) async throws -> FinalExecutionOutcome {
     return try await signAndSendTransaction(receiverId: receiverId, actions: [nearclientios.transfer(deposit: amount)])
   }
 
+  @discardableResult
   func createAccount(newAccountId: String, publicKey: PublicKey,
                              amount: UInt128) async throws -> FinalExecutionOutcome {
     let accessKey = fullAccessKey()
@@ -187,6 +192,7 @@ public final class Account {
     return try await signAndSendTransaction(receiverId: newAccountId, actions: actions)
   }
 
+  @discardableResult
   func deleteAccount(beneficiaryId: String) async throws -> FinalExecutionOutcome {
     return try await signAndSendTransaction(receiverId: accountId,
                                       actions: [nearclientios.deleteAccount(beneficiaryId: beneficiaryId)])
@@ -205,6 +211,7 @@ public final class Account {
   }
 
   // TODO: expand this API to support more options.
+  @discardableResult
   func addKey(publicKey: PublicKey, contractId: String?, methodName: String?,
                       amount: UInt128?) async throws -> FinalExecutionOutcome {
     let accessKey: AccessKey
@@ -217,6 +224,7 @@ public final class Account {
     return try await signAndSendTransaction(receiverId: accountId, actions: [nearclientios.addKey(publicKey: publicKey, accessKey: accessKey)])
   }
 
+  @discardableResult
   func deleteKey(publicKey: PublicKey) async throws -> FinalExecutionOutcome {
     return try await signAndSendTransaction(receiverId: accountId, actions: [nearclientios.deleteKey(publicKey: publicKey)])
   }
@@ -254,7 +262,7 @@ public final class Account {
     // Also if we need this function, or getAccessKeys is good enough.
     let accessKeys = try await getAccessKeys()
     var authorizedApps: [AuthorizedApp] = []
-    accessKeys.forEach { item in
+    accessKeys.keys.forEach { item in
       if case AccessKeyPermission.functionCall(let permission) = item.access_key.permission {
         authorizedApps.append(AuthorizedApp(contractId: permission.receiverId,
                                             amount: permission.allowance ?? 0,

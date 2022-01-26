@@ -7,6 +7,7 @@
 //
 
 @testable import nearclientios
+import XCTest
 
 let networkId = "unittest"
 let testAccountName = "test.near"
@@ -82,5 +83,22 @@ extension TestUtils {
                                   sender: nil)
     let contract = Contract(account: workingAccount, contractId: contractId, options: options)
     return contract
+  }
+}
+
+extension XCTest {
+  func XCTAssertThrowsError(
+    _ expression: @autoclosure () async throws -> Any,
+    _ message: @autoclosure () -> String = "",
+    file: StaticString = #filePath,
+    line: UInt = #line,
+    _ errorHandler: (_ error: Error) -> Void = { _ in }
+  ) async {
+    do {
+      _ = try await expression()
+      XCTFail(message(), file: file, line: line)
+    } catch {
+      errorHandler(error)
+    }
   }
 }

@@ -69,7 +69,7 @@ public enum ExecutionStatus: Decodable, Equatable {
       self = .failure(value)
       return
     }
-    throw DecodingError.notExpected
+    throw NEARDecodingError.notExpected
   }
 }
 
@@ -113,7 +113,7 @@ public enum FinalExecutionStatus: Decodable, Equatable {
       self = .failure(value)
       return
     }
-    throw DecodingError.notExpected
+    throw NEARDecodingError.notExpected
   }
 }
 

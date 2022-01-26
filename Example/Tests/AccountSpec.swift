@@ -33,7 +33,7 @@ class AccountSpec: XCTestCase {
     // Contract setup
     let newPublicKey = try await near.connection.signer.createKey(accountId: contractId, networkId: networkId)
     let data = Wasm().data
-    _ = try await workingAccount.createAndDeployContract(contractId: contractId, publicKey: newPublicKey, data: data.bytes, amount: HELLO_WASM_BALANCE)
+    try await workingAccount.createAndDeployContract(contractId: contractId, publicKey: newPublicKey, data: data.bytes, amount: HELLO_WASM_BALANCE)
     let options = ContractOptions(viewMethods: [.hello, .getValue, .getAllKeys, .returnHiWithLogs], changeMethods: [.setValue, .generateLogs, .triggerAssert, .testSetRemove], sender: nil)
     contract = Contract(account: workingAccount, contractId: contractId, options: options)
   }
@@ -49,7 +49,7 @@ class AccountSpec: XCTestCase {
     let workingState = try await AccountSpec.workingAccount.state()
     let amount = workingState.amount
     let newAmount = UInt128(stringLiteral: amount) / UInt128(100)
-    _ = try await AccountSpec.workingAccount.createAccount(newAccountId: newAccountName, publicKey: newAccountPublicKey, amount: newAmount)
+    try await AccountSpec.workingAccount.createAccount(newAccountId: newAccountName, publicKey: newAccountPublicKey, amount: newAmount)
     let newAccount = Account(connection: AccountSpec.near.connection, accountId: newAccountName)
     let state = try await newAccount.state()
     XCTAssertEqual(state.amount, "\(newAmount)")
@@ -60,7 +60,7 @@ class AccountSpec: XCTestCase {
     let amountFraction = UInt128(stringLiteral: workingState.amount) / UInt128(100)
     let sender = try await TestUtils.createAccount(masterAccount: AccountSpec.workingAccount, amount: amountFraction)
     let receiver = try await TestUtils.createAccount(masterAccount: AccountSpec.workingAccount, amount: amountFraction)
-    _ = try await sender.sendMoney(receiverId: receiver.accountId, amount: UInt128(10000))
+    try await sender.sendMoney(receiverId: receiver.accountId, amount: UInt128(10000))
     try await receiver.fetchState()
     let state = try await receiver.state()
     XCTAssertEqual(state.amount, "\(amountFraction + UInt128(10000))")
@@ -71,25 +71,22 @@ class AccountSpec: XCTestCase {
     let amountFraction = UInt128(stringLiteral: workingState.amount) / UInt128(100)
     let sender = try await TestUtils.createAccount(masterAccount: AccountSpec.workingAccount, amount: amountFraction)
     let receiver = try await TestUtils.createAccount(masterAccount: AccountSpec.workingAccount, amount: amountFraction)
-    _ = try await sender.deleteAccount(beneficiaryId: receiver.accountId)
+    try await sender.deleteAccount(beneficiaryId: receiver.accountId)
+    try await receiver.fetchState()
+    let senderState = try await receiver.state()
+    XCTAssertGreaterThan(UInt128(stringLiteral: senderState.amount), amountFraction)
     
     let reloaded = Account(connection: sender.connection, accountId: sender.accountId)
-    do {
-      _ = try await reloaded.state()
-      XCTFail("This should fail, as the sender has been deleted.")
-    } catch {
-      try await receiver.fetchState()
-      let senderState = try await receiver.state()
-      XCTAssertGreaterThan(UInt128(stringLiteral: senderState.amount), amountFraction)
+    await XCTAssertThrowsError(try await reloaded.state()) { error in
+      XCTAssertTrue(error is HTTPError)
     }
   }
   
   // Errors
   func testCreatingAnExistingAccountShouldThrow() async throws {
-    do {
-      _ = try await AccountSpec.workingAccount.createAccount(newAccountId: AccountSpec.workingAccount.accountId, publicKey: PublicKey.fromString(encodedKey: "9AhWenZ3JddamBoyMqnTbp7yVbRuvqAv3zwfrWgfVRJE"), amount: 100)
-      XCTFail("This should fail, as the account exists already.")
-    } catch { }
+    await XCTAssertThrowsError(try await AccountSpec.workingAccount.createAccount(newAccountId: AccountSpec.workingAccount.accountId, publicKey: PublicKey.fromString(encodedKey: "9AhWenZ3JddamBoyMqnTbp7yVbRuvqAv3zwfrWgfVRJE"), amount: 100)) { error in
+      XCTAssertTrue(error is TypedError)
+    }
   }
   
   // With deploy contract
@@ -129,10 +126,8 @@ class AccountSpec: XCTestCase {
   }
   
   func testCanGetAssertMessageFromMethodResult() async throws {
-    do {
-      try await AccountSpec.contract.change(methodName: .triggerAssert)
-      XCTFail("The purpose of this method in the test contract is to fail.")
-    } catch {
+    await XCTAssertThrowsError(try await AccountSpec.contract.change(methodName: .triggerAssert) as Any) { error in
+      XCTAssertTrue(error is TypedError)
       // This method in the testing contract is just designed to test logging after failure.
       //expect(logs[0]).toEqual(`[${contractId}]: LOG: log before assert`)
       //expect(logs[1]).toMatch(new RegExp(`^\\[${contractId}\\]: ABORT: "?expected to fail"?,?
