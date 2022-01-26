@@ -99,6 +99,7 @@ extension WalletAccount {
         - networkId: successUrl url to redirect on success
         - failureUrl: failureUrl url to redirect on failure
    */
+  @discardableResult
   public func requestSignIn(contractId: String, title: String,
                      successUrl: URL? = nil, failureUrl: URL? = nil, appUrl: URL? = nil) async throws -> Bool {
     guard getAccountId().isEmpty else {return true}
