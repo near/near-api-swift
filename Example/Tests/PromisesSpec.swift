@@ -98,19 +98,24 @@ class PromiseSpec: XCTestCase {
   // it should pass test two promises, no callbacks (A->B->C)
   func testPassTwoPromisesNoCallbacks() async throws {
     let callPromiseArgs: [String: Any?] = ["receiver": PromiseSpec.contractName2,
-                                          "methodName": "callbackWithName",
-                                          "gas": "40000000000000",
-                                          "balance": "0",
-                                          "callbackBalance": "0",
-                                          "callbackGas": "20000000000000"]
+                                           "methodName": "callbackWithName",
+                                           "args": nil,
+                                           "gas": "40000000000000",
+                                           "callback": nil,
+                                           "callbackArgs": nil,
+                                           "balance": "0",
+                                           "callbackBalance": "0",
+                                           "callbackGas": "20000000000000"]
     let args: [String: Any?] = ["receiver": PromiseSpec.contractName1,
-                               "methodName": "callPromise",
-                               "args": callPromiseArgs,
-                               "gas": "60000000000000",
-                               "balance": "0",
-                               "callbackBalance": "0",
-                               "callbackGas": "60000000000000"]
-    let realResultDictionary = try await PromiseSpec.contract.change(methodName: .callPromise, args: ["args": args]) as! [String: Any?]
+                                "methodName": "callPromise",
+                                "args": callPromiseArgs,
+                                "gas": "60000000000000",
+                                "callback": nil,
+                                "callbackArgs": nil,
+                                "balance": "0",
+                                "callbackBalance": "0",
+                                "callbackGas": "60000000000000"]
+    let realResultDictionary = try await PromiseSpec.contract.change(methodName: .callPromise, args: ["args": args], gas: UInt64(100000000000000)) as! [String: Any?]
     let realResult = try JSONDecoder().decode(Result.self, from: try realResultDictionary.toData())
     let lastResult2: Result = try await PromiseSpec.contract2.view(methodName: .getLastResult)
     XCTAssertEqual(lastResult2, Result(rs: [], n: PromiseSpec.contractName2))
@@ -137,7 +142,7 @@ class PromiseSpec: XCTestCase {
                                "callbackBalance": "0",
                                "callbackGas": "30000000000000"]
     let realResultDictionary = try await PromiseSpec.contract.change(methodName: .callPromise,
-                                                         args: ["args": args]) as! [String: Any]
+                                                                     args: ["args": args], gas: UInt64(170000000000000)) as! [String: Any]
     let realResult = try JSONDecoder().decode(Result.self, from: try realResultDictionary.toData())
     let lastResult2: Result = try await PromiseSpec.contract2.view(methodName: .getLastResult)
     XCTAssertEqual(lastResult2, Result(rs: [], n: PromiseSpec.contractName2))
@@ -168,7 +173,7 @@ class PromiseSpec: XCTestCase {
                                "callbackBalance": "0",
                                "callbackGas": "30000000000000"]
     let realResultDictionary = try await PromiseSpec.contract.change(methodName: .callPromise,
-                                                         args: ["args": args]) as! [String: Any]
+                                                                     args: ["args": args], gas: UInt64(170000000000000)) as! [String: Any]
     let realResult = try JSONDecoder().decode(Result.self, from: try realResultDictionary.toData())
     let lastResult1: Result = try await PromiseSpec.contract1.view(methodName: .getLastResult)
     XCTAssertEqual(lastResult1, Result(rs: [RSResult(ok: true,
@@ -197,7 +202,7 @@ class PromiseSpec: XCTestCase {
                                "callbackBalance": "0",
                                "callbackGas": "30000000000000"]
     let realResultDictionary = try await PromiseSpec.contract.change(methodName: .callPromise,
-                                                         args: ["args": args]) as! [String: Any]
+                                                                     args: ["args": args], gas: UInt64(100000000000000)) as! [String: Any]
     let realResult = try JSONDecoder().decode(Result.self, from: try realResultDictionary.toData())
     let lastResult2: Result = try await PromiseSpec.contract2.view(methodName: .getLastResult)
     XCTAssertEqual(lastResult2, Result(rs: [], n: PromiseSpec.contractName2))
@@ -225,7 +230,7 @@ class PromiseSpec: XCTestCase {
                                "callbackBalance": "0",
                                "callbackGas": "0"]
     let realResultDictionary = try await PromiseSpec.contract.change(methodName: .callPromise,
-                                                         args: ["args": args]) as! [String: Any]
+                                                                     args: ["args": args], gas: UInt64(140000000000000)) as! [String: Any]
     let realResult = try JSONDecoder().decode(Result.self, from: try realResultDictionary.toData())
     let lastResult2: Result = try await PromiseSpec.contract2.view(methodName: .getLastResult)
     XCTAssertEqual(lastResult2, Result(rs: [], n: PromiseSpec.contractName2))
