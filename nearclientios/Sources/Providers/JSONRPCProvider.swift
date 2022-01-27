@@ -12,6 +12,11 @@ public enum TypedError: Error {
   case error(type: String = "UntypedError", message: String?)
 }
 
+public enum Finality: String, Codable {
+  case final
+  case optimistic
+}
+
 public final class JSONRPCProvider {
   /// Keep ids unique across all connections
   private var _nextId = 123
@@ -87,18 +92,15 @@ extension JSONRPCProvider: Provider {
     return try await sendJsonRpc(method: "tx", params: params)
   }
 
-  public func query<T: Decodable>(path: String, data: String) async throws -> T {
-    return try await sendJsonRpc(method: "query", params: [path, data])
-  }
   public func query<T: Decodable>(params: [String: Any]) async throws -> T {
     return try await sendJsonRpc(method: "query", paramsDict: params)
   }
 
   public func block(blockId: BlockId) async throws -> BlockResult {
-    return try await sendJsonRpc(method: "block", params: [blockId])
+    return try await sendJsonRpc(method: "block", paramsDict: ["block_id": blockId])
   }
 
   public func chunk(chunkId: ChunkId) async throws -> ChunkResult {
-    return try await sendJsonRpc(method: "chunk", params: [chunkId])
+    return try await sendJsonRpc(method: "chunk", paramsDict: ["chunk_id": chunkId])
   }
 }

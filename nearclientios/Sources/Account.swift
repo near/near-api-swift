@@ -91,7 +91,7 @@ public final class Account {
   func fetchState() async throws -> Void {
     _state = try await connection.provider.query(params: [
       "request_type": "view_account",
-      "finality": "optimistic",
+      "finality": Finality.optimistic.rawValue,
       "account_id": accountId
     ])
     guard let publicKey = try await connection.signer.getPublicKey(accountId: accountId, networkId: connection.networkId) else {
@@ -100,7 +100,7 @@ public final class Account {
     }
     _accessKey = try await connection.provider.query(params: [
       "request_type": "view_access_key",
-      "finality": "optimistic",
+      "finality": Finality.optimistic.rawValue,
       "account_id": accountId,
       "public_key": publicKey.toString()
     ])
@@ -247,7 +247,7 @@ public final class Account {
     let data = Data(json: args).base64EncodedString()
     let result: QueryResult = try await connection.provider.query(params: [
       "request_type": "call_function",
-      "finality": "optimistic",
+      "finality": Finality.optimistic.rawValue,
       "account_id": contractId,
       "method_name": methodName,
       "args_base64": data
@@ -270,7 +270,7 @@ public final class Account {
   func getAccessKeys() async throws -> KeyBoxes {
     let response: KeyBoxes = try await connection.provider.query(params: [
         "request_type": "view_access_key_list",
-        "finality": "optimistic",
+        "finality": Finality.optimistic.rawValue,
         "account_id": accountId,
       ])
     return response
