@@ -19,7 +19,11 @@ class AccountSpec: XCTestCase {
   override class func setUp() {
     super.setUp()
     unsafeWaitFor {
-      try! await setUpAll()
+      do {
+        try await setUpAll()
+      } catch let error {
+        print(error)
+      }
     }
   }
   

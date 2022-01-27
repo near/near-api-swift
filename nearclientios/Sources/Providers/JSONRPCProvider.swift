@@ -35,7 +35,19 @@ extension JSONRPCProvider {
                                   "id": getId(),
                                   "jsonrpc": "2.0"]
     let json = try await fetchJson(connection: connection, json: request)
-
+    return try await processJsonRpc(request: request, json: json)
+  }
+  
+  private func sendJsonRpc<T: Decodable>(method: String, paramsDict: [String: Any]) async throws -> T {
+    let request: [String: Any] = ["method": method,
+                                  "params": paramsDict,
+                                  "id": getId(),
+                                  "jsonrpc": "2.0"]
+    let json = try await fetchJson(connection: connection, json: request)
+    return try await processJsonRpc(request: request, json: json)
+  }
+  
+  func processJsonRpc<T: Decodable>(request: [String: Any], json: Any) async throws -> T {
     let data = try JSONSerialization.data(withJSONObject: json, options: [])
 //    debugPrint("=====================")
 //    print(T.self)
@@ -77,6 +89,9 @@ extension JSONRPCProvider: Provider {
 
   public func query<T: Decodable>(path: String, data: String) async throws -> T {
     return try await sendJsonRpc(method: "query", params: [path, data])
+  }
+  public func query<T: Decodable>(params: [String: Any]) async throws -> T {
+    return try await sendJsonRpc(method: "query", paramsDict: params)
   }
 
   public func block(blockId: BlockId) async throws -> BlockResult {

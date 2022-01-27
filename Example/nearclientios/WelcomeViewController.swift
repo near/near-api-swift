@@ -38,7 +38,7 @@ class WelcomeViewController: UIViewController {
   }
   
   private func setupWallet() async -> WalletAccount {
-    let keyStore = InMemoryKeyStore()
+    let keyStore = KeychainKeyStore(keychain: .init(service: "example.keystore"))
     let config = NearConfig(networkId: "testnet",
                             nodeUrl: URL(string: "https://rpc.testnet.near.org")!,
                             masterAccount: nil,

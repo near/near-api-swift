@@ -135,7 +135,6 @@ extension WalletAccount {
     try await _keyStore.setKey(networkId: _networkId, accountId: accountId, keyPair: accessKey)
     
     if let openUrl = newUrlComponents?.url {
-      print(openUrl)
       return await MainActor.run { authService.openURL(openUrl) }
     }
     return false

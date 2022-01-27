@@ -217,7 +217,7 @@ public protocol Provider {
   func status() async throws -> NodeStatusResult
   func sendTransaction(signedTransaction: SignedTransaction) async throws -> FinalExecutionOutcome
   func txStatus(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome
-  func query<T: Decodable>(path: String, data: String) async throws -> T
+  func query<T: Decodable>(params: [String: Any]) async throws -> T
   func block(blockId: BlockId) async throws -> BlockResult
   func chunk(chunkId: ChunkId) async throws -> ChunkResult
 }

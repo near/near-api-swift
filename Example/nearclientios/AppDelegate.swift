@@ -44,7 +44,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
   
   func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-    print("Open url \(url)")
     guard let appUrlSchemes = UIApplication.urlSchemes?.filter({ $0 == url.scheme }), !appUrlSchemes.isEmpty else {
       return false
     }

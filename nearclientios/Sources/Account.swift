@@ -89,12 +89,21 @@ public final class Account {
   }
 
   func fetchState() async throws -> Void {
-    _state = try await connection.provider.query(path: "account/\(accountId)", data: "")
+    _state = try await connection.provider.query(params: [
+      "request_type": "view_account",
+      "finality": "optimistic",
+      "account_id": accountId
+    ])
     guard let publicKey = try await connection.signer.getPublicKey(accountId: accountId, networkId: connection.networkId) else {
       print("Missing public key for \(accountId) in \(connection.networkId)")
       return
     }
-    _accessKey = try await connection.provider.query(path: "access_key/\(accountId)/\(publicKey.toString())", data: "")
+    _accessKey = try await connection.provider.query(params: [
+      "request_type": "view_access_key",
+      "finality": "optimistic",
+      "account_id": accountId,
+      "public_key": publicKey.toString()
+    ])
     guard _accessKey != nil else {
       throw AccountError.noAccessKey("Failed to fetch access key for '\(accountId)' with public key \(publicKey.toString())")
     }
@@ -235,8 +244,14 @@ public final class Account {
   }
 
   func viewFunction<T: Decodable>(contractId: String, methodName: String, args: [String: Any] = [:]) async throws -> T {
-    let data = Data(json: args).baseEncoded
-    let result: QueryResult = try await connection.provider.query(path: "call/\(contractId)/\(methodName)", data: data)
+    let data = Data(json: args).base64EncodedString()
+    let result: QueryResult = try await connection.provider.query(params: [
+      "request_type": "call_function",
+      "finality": "optimistic",
+      "account_id": contractId,
+      "method_name": methodName,
+      "args_base64": data
+    ])
     if !result.logs.isEmpty {
       printLogs(contractId: contractId, logs: result.logs)
     }
@@ -253,7 +268,11 @@ public final class Account {
 
   /// Returns array of {access_key: AccessKey, public_key: PublicKey} items.
   func getAccessKeys() async throws -> KeyBoxes {
-    let response: KeyBoxes = try await connection.provider.query(path: "access_key/\(accountId)", data: "")
+    let response: KeyBoxes = try await connection.provider.query(params: [
+        "request_type": "view_access_key_list",
+        "finality": "optimistic",
+        "account_id": accountId,
+      ])
     return response
   }
 
