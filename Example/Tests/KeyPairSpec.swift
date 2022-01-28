@@ -26,6 +26,18 @@ class KeyPairSpec: XCTestCase {
     XCTAssertTrue(try! keyPair.verify(message: message, signature: signature.signature))
   }
   
+  func testSignAndVerifyWithSepc256k1Random() {
+    let keyPair = try! KeyPairSecp256k1.fromRandom()
+    let message = "message".data(using: .utf8)!.digest
+    let signature = try! keyPair.sign(message: message)
+    XCTAssertTrue(try! keyPair.verify(message: message, signature: signature.signature))
+  }
+  
+  func testSecp256k1InitFromSecret() {
+    let keyPair = try! KeyPairSecp256k1(secretKey: "Cqmi5vHc59U1MHhq7JCxTSJentvVBYMcKGUA7s7kwnKn")
+    XCTAssertEqual(keyPair.getPublicKey().toString(), "secp256k1:QYkvGGNVpePURHmKh4GtTMNSHSFmkAUowm1wrciqLrLGnKNWZgouUxHJUuKiaTwRJxUQ4ghnZ9uLXDFau6UDjQDn")
+  }
+  
   func testInitFromSecret() {
     let keyPair = try! KeyPairEd25519(secretKey: "5JueXZhEEVqGVT5powZ5twyPP8wrap2K7RdAYGGdjBwiBdd7Hh6aQxMP1u3Ma9Yanq1nEv32EW7u8kUJsZ6f315C")
     XCTAssertEqual(keyPair.getPublicKey().toString(), "ed25519:EWrekY1deMND7N3Q7Dixxj12wD7AVjFRt2H9q21QHUSW")

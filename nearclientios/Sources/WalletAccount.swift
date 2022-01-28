@@ -101,7 +101,7 @@ extension WalletAccount {
    */
   @discardableResult
   public func requestSignIn(contractId: String, title: String,
-                     successUrl: URL? = nil, failureUrl: URL? = nil, appUrl: URL? = nil) async throws -> Bool {
+                            successUrl: URL? = nil, failureUrl: URL? = nil, appUrl: URL? = nil, curve: KeyType = .ED25519) async throws -> Bool {
     guard getAccountId().isEmpty else {return true}
     guard try await _keyStore.getKey(networkId: _networkId, accountId: getAccountId()) == nil else {return true}
     
@@ -127,7 +127,7 @@ extension WalletAccount {
     let success_url = URLQueryItem(name: "success_url", value: successUrlPath)
     let failure_url = URLQueryItem(name: "failure_url", value: failureUrlPath)
     let app_url = URLQueryItem(name: "app_url", value: redirectUrl.absoluteString)
-    let accessKey = try keyPairFromRandom(curve: .ED25519)
+    let accessKey = try keyPairFromRandom(curve: curve)
     let public_key = URLQueryItem(name: "public_key", value: accessKey.getPublicKey().toString())
 
     newUrlComponents?.queryItems = [title, contract_id, success_url, failure_url, app_url, public_key]

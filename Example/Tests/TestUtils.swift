@@ -66,13 +66,13 @@ extension TestUtils {
     try await masterAccount.fetchState()
     let newAccountName = generateUniqueString(prefix: "test")
     let newPublicKey = try await(masterAccount.connection.signer.createKey(accountId: newAccountName,
-                                                                           networkId: networkId))
+                                                                           networkId: networkId, curve: .ED25519))
     _ = try await masterAccount.createAccount(newAccountId: newAccountName, publicKey: newPublicKey, amount: amount)
     return Account(connection: masterAccount.connection, accountId: newAccountName)
   }
 
   static func deployContract(workingAccount: Account, contractId: String, amount: UInt128 = HELLO_WASM_BALANCE) async throws -> Contract {
-    let newPublicKey = try await workingAccount.connection.signer.createKey(accountId: contractId, networkId: networkId)
+    let newPublicKey = try await workingAccount.connection.signer.createKey(accountId: contractId, networkId: networkId, curve: .ED25519)
     let data = Wasm().data
     _ = try await workingAccount.createAndDeployContract(contractId: contractId,
                                                      publicKey: newPublicKey,

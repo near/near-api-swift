@@ -23,7 +23,7 @@ public protocol Signer {
       - accountId: accountId to retrieve from.
       - networkId: network for this accountId.
    */
-  func createKey(accountId: String, networkId: String) async throws -> PublicKey
+  func createKey(accountId: String, networkId: String, curve: KeyType) async throws -> PublicKey
 
   /**
    - Parameters:
@@ -74,8 +74,8 @@ public enum InMemorySignerError: Error {
 }
 
 extension InMemorySigner: Signer {
-  public func createKey(accountId: String, networkId: String) async throws -> PublicKey {
-    let keyPair = try keyPairFromRandom(curve: .ED25519)
+  public func createKey(accountId: String, networkId: String, curve: KeyType = .ED25519) async throws -> PublicKey {
+    let keyPair = try keyPairFromRandom(curve: curve)
     try await keyStore.setKey(networkId: networkId, accountId: accountId, keyPair: keyPair)
     return keyPair.getPublicKey()
   }

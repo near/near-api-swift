@@ -6,7 +6,9 @@ PODS:
   - nearclientios (0.1.0):
     - Base58Swift (~> 2.1.10)
     - KeychainAccess (~> 4.2.2)
+    - secp256k1.swift
     - TweetNacl (~> 1.0)
+  - secp256k1.swift (0.1.4)
   - TweetNacl (1.0.2)
 
 DEPENDENCIES:
@@ -17,6 +19,7 @@ SPEC REPOS:
     - Base58Swift
     - BigInt
     - KeychainAccess
+    - secp256k1.swift
     - TweetNacl
 
 EXTERNAL SOURCES:
@@ -27,7 +30,8 @@ SPEC CHECKSUMS:
   Base58Swift: 53d551f0b33d9478fa63b3445e453a772d6b31a7
   BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
   KeychainAccess: c0c4f7f38f6fc7bbe58f5702e25f7bd2f65abf51
-  nearclientios: 7122da87d07b18157108bf6f92cf46a0d50fbcf9
+  nearclientios: 16b546e6dcbcb72a1ed6064ab6a695f0e8902821
+  secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
   TweetNacl: 3abf4d1d2082b0114e7a67410e300892448951e6
 
 PODFILE CHECKSUM: bf2ede311928de0026e7155c3c779a7c3a7fed9d

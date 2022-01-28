@@ -35,7 +35,7 @@ class AccountSpec: XCTestCase {
     workingAccount = try await TestUtils.createAccount(masterAccount: masterAccount, amount: amount)
     
     // Contract setup
-    let newPublicKey = try await near.connection.signer.createKey(accountId: contractId, networkId: networkId)
+    let newPublicKey = try await near.connection.signer.createKey(accountId: contractId, networkId: networkId, curve: .ED25519)
     let data = Wasm().data
     try await workingAccount.createAndDeployContract(contractId: contractId, publicKey: newPublicKey, data: data.bytes, amount: HELLO_WASM_BALANCE)
     let options = ContractOptions(viewMethods: [.hello, .getValue, .getAllKeys, .returnHiWithLogs], changeMethods: [.setValue, .generateLogs, .triggerAssert, .testSetRemove], sender: nil)
