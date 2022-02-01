@@ -93,14 +93,36 @@ class SerializeSpec: XCTestCase {
     try! await keyStore.setKey(networkId: "test", accountId: "test.near", keyPair: keyPair)
     let actions = [transfer(deposit: 1)]
     let blockHash = "244ZQ9cgj3CQ6bWBdytfrJMuMQ1jdXLFGnr4HhvtCTnM".baseDecoded
-    let (_, signedTx) = try! await(signTransaction(receiverId: "whatever.near",
+    let (_, signedTx) = try! await signTransaction(receiverId: "whatever.near",
                                                    nonce: 1,
                                                    actions: actions,
                                                    blockHash: blockHash,
                                                    signer: InMemorySigner(keyStore: keyStore),
                                                    accountId: "test.near",
-                                                   networkId: "test"))
-    let base64 = signedTx.signature.data.bytes.data.base64EncodedString()
+                                                   networkId: "test")
+    let base64 = signedTx.signature.bytes.data.base64EncodedString()
+    XCTAssertEqual(base64, "lpqDMyGG7pdV5IOTJVJYBuGJo9LSu0tHYOlEQ+l+HE8i3u7wBZqOlxMQDtpuGRRNp+ig735TmyBwi6HY0CG9AQ==")
+    let serialized = try! BorshEncoder().encode(signedTx)
+    XCTAssertEqual(serialized.hexString, "09000000746573742e6e65617200917b3d268d4b58f7fec1b150bd68d69be3ee5d4cc39855e341538465bb77860d01000000000000000d00000077686174657665722e6e6561720fa473fd26901df296be6adc4cc4df34d040efa2435224b6986910e630c2fef601000000030100000000000000000000000000000000969a83332186ee9755e4839325525806e189a3d2d2bb4b4760e94443e97e1c4f22deeef0059a8e9713100eda6e19144da7e8a0ef7e539b20708ba1d8d021bd01")
+  }
+  
+  func testSerializeAndSignSecp256k1TransferTransaction() async {
+    let keyStore = InMemoryKeyStore()
+    //    let keyPair = try! KeyPairSecp256k1(secretKey: "Cqmi5vHc59U1MHhq7JCxTSJentvVBYMcKGUA7s7kwnKn")
+    //XCTAssertEqual(keyPair.getPublicKey().toString(), "secp256k1:QYkvGGNVpePURHmKh4GtTMNSHSFmkAUowm1wrciqLrLGnKNWZgouUxHJUuKiaTwRJxUQ4ghnZ9uLXDFau6UDjQDn")
+
+    let keyPair = try! keyPairFromString(encodedKey: "secp256k1:Cqmi5vHc59U1MHhq7JCxTSJentvVBYMcKGUA7s7kwnKn") as! KeyPairSecp256k1
+    try! await keyStore.setKey(networkId: "test", accountId: "test.near", keyPair: keyPair)
+    let actions = [transfer(deposit: 1)]
+    let blockHash = "244ZQ9cgj3CQ6bWBdytfrJMuMQ1jdXLFGnr4HhvtCTnM".baseDecoded
+    let (_, signedTx) = try! await signTransaction(receiverId: "whatever.near",
+                                                   nonce: 1,
+                                                   actions: actions,
+                                                   blockHash: blockHash,
+                                                   signer: InMemorySigner(keyStore: keyStore),
+                                                   accountId: "test.near",
+                                                   networkId: "test")
+    let base64 = signedTx.signature.bytes.data.base64EncodedString()
     XCTAssertEqual(base64, "lpqDMyGG7pdV5IOTJVJYBuGJo9LSu0tHYOlEQ+l+HE8i3u7wBZqOlxMQDtpuGRRNp+ig735TmyBwi6HY0CG9AQ==")
     let serialized = try! BorshEncoder().encode(signedTx)
     XCTAssertEqual(serialized.hexString, "09000000746573742e6e65617200917b3d268d4b58f7fec1b150bd68d69be3ee5d4cc39855e341538465bb77860d01000000000000000d00000077686174657665722e6e6561720fa473fd26901df296be6adc4cc4df34d040efa2435224b6986910e630c2fef601000000030100000000000000000000000000000000969a83332186ee9755e4839325525806e189a3d2d2bb4b4760e94443e97e1c4f22deeef0059a8e9713100eda6e19144da7e8a0ef7e539b20708ba1d8d021bd01")

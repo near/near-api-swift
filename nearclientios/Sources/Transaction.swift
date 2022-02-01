@@ -295,33 +295,35 @@ func deleteAccount(beneficiaryId: String) -> Action {
   return .deleteAccount(DeleteAccount(beneficiaryId: beneficiaryId))
 }
 
-public struct SignaturePayload: FixedLengthByteArray, BorshCodable {
-  public static let fixedLength: UInt32 = 64
-  public let bytes: [UInt8]
-  public init(bytes: [UInt8]) {
-    self.bytes = bytes
-  }
-}
+//public struct SignaturePayload: FixedLengthByteArray, BorshCodable {
+//  public static let fixedLength: UInt32 = 64
+//  public let bytes: [UInt8]
+//  public init(bytes: [UInt8]) {
+//    self.bytes = bytes
+//  }
+//}
 
 public struct CodableSignature {
   let keyType: KeyType
-  let data: SignaturePayload
+  let bytes: [UInt8]
 
-  init(signature: [UInt8]) {
-    self.keyType = KeyType.ED25519
-    self.data = SignaturePayload(bytes: signature)
+  init(signature: [UInt8], curve: KeyType) {
+    self.keyType = curve
+    self.bytes = signature
   }
 }
 
 extension CodableSignature: BorshCodable {
+
   public func serialize(to writer: inout Data) throws {
+
     try keyType.serialize(to: &writer)
-    try data.serialize(to: &writer)
+    writer.append(bytes, count: Int(keyType == .ED25519 ? 64 : 65))
   }
 
   public init(from reader: inout BinaryReader) throws {
     self.keyType = try .init(from: &reader)
-    self.data = try .init(from: &reader)
+    self.bytes = reader.read(count: keyType == .ED25519 ? 64 : 65)
   }
 }
 
@@ -452,6 +454,7 @@ func signTransaction(receiverId: String, nonce: UInt64, actions: [Action], block
   let message = try BorshEncoder().encode(transaction)
   let hash = message.digest
   let signature = try await signer.signMessage(message: message.bytes, accountId: accountId, networkId: networkId)
-  let signedTx = SignedTransaction(transaction: transaction, signature: CodableSignature(signature: signature.signature))
+  
+  let signedTx = SignedTransaction(transaction: transaction, signature: CodableSignature(signature: signature.signature, curve: publicKey.keyType))
   return (hash, signedTx)
 }

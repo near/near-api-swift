@@ -35,7 +35,7 @@ class KeyPairSpec: XCTestCase {
   
   func testSecp256k1InitFromSecret() {
     let keyPair = try! KeyPairSecp256k1(secretKey: "Cqmi5vHc59U1MHhq7JCxTSJentvVBYMcKGUA7s7kwnKn")
-    XCTAssertEqual(keyPair.getPublicKey().toString(), "secp256k1:QYkvGGNVpePURHmKh4GtTMNSHSFmkAUowm1wrciqLrLGnKNWZgouUxHJUuKiaTwRJxUQ4ghnZ9uLXDFau6UDjQDn")
+    XCTAssertEqual(keyPair.getPublicKey().toString(), "secp256k1:45KcWwYt6MYRnnWFSxyQVkuu9suAzxoSkUMEnFNBi9kDayTo5YPUaqMWUrf7YHUDNMMj3w75vKuvfAMgfiFXBy28")
   }
   
   func testInitFromSecret() {

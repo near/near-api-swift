@@ -59,6 +59,18 @@ class AccountSpec: XCTestCase {
     XCTAssertEqual(state.amount, "\(newAmount)")
   }
   
+  func testCreateAccountAndViewNewAccountUsingSecp256k1Curve() async throws {
+    let newAccountName = TestUtils.generateUniqueString(prefix: "test")
+    let newAccountPublicKey = try PublicKey.fromString(encodedKey: "secp256k1:45KcWwYt6MYRnnWFSxyQVkuu9suAzxoSkUMEnFNBi9kDayTo5YPUaqMWUrf7YHUDNMMj3w75vKuvfAMgfiFXBy28")
+    let workingState = try await AccountSpec.workingAccount.state()
+    let amount = workingState.amount
+    let newAmount = UInt128(stringLiteral: amount) / UInt128(100)
+    try await AccountSpec.workingAccount.createAccount(newAccountId: newAccountName, publicKey: newAccountPublicKey, amount: newAmount)
+    let newAccount = Account(connection: AccountSpec.near.connection, accountId: newAccountName)
+    let state = try await newAccount.state()
+    XCTAssertEqual(state.amount, "\(newAmount)")
+  }
+  
   func testSendMoney() async throws {
     let workingState = try await AccountSpec.workingAccount.state()
     let amountFraction = UInt128(stringLiteral: workingState.amount) / UInt128(100)

@@ -47,24 +47,28 @@ public enum PublicKeyDecodeError: Error {
   case unknowKeyType
 }
 
-public struct PublicKeyPayload: FixedLengthByteArray, Equatable, Decodable, BorshCodable {
-  public static let fixedLength: UInt32 = 32
-  public let bytes: [UInt8]
-  public init(bytes: [UInt8]) {
-    self.bytes = bytes
-  }
-}
-
 /**
  * PublicKey representation that has type and bytes of the key.
  */
 public struct PublicKey: Decodable, Equatable {
-  private let keyType: KeyType
-  public let data: PublicKeyPayload
+  public let keyType: KeyType
+  public let data: [UInt8]
 
   public init(keyType: KeyType, data: [UInt8]) {
     self.keyType = keyType
-    self.data = PublicKeyPayload(bytes: data)
+    self.data = data
+  }
+  
+  func bytes() -> [UInt8] {
+    switch keyType {
+    case .ED25519:
+      return data
+    case .SECP256k1:
+       // inject the first byte back into the data, it will always be 0x04 since we always use SECP256K1_EC_UNCOMPRESSED
+      var modifiedBytes = data
+      modifiedBytes.insert(0x04, at: 0)
+      return modifiedBytes
+    }
   }
 
   public static func fromString(encodedKey: String) throws -> PublicKey {
@@ -80,19 +84,20 @@ public struct PublicKey: Decodable, Equatable {
   }
 
   public func toString() -> String {
-    return "\(keyType.rawValue):\(data.bytes.baseEncoded)"
+    return "\(keyType.rawValue):\(data.baseEncoded)"
   }
 }
 
 extension PublicKey: BorshCodable {
+
   public func serialize(to writer: inout Data) throws {
     try keyType.serialize(to: &writer)
-    try data.serialize(to: &writer)
+    writer.append(data, count: Int(keyType == .ED25519 ? 32 : 64))
   }
 
   public init(from reader: inout BinaryReader) throws {
     self.keyType = try .init(from: &reader)
-    self.data = try .init(from: &reader)
+    self.data = reader.read(count: keyType == .ED25519 ? 32 : 64)
   }
 }
 
@@ -177,7 +182,7 @@ extension KeyPairEd25519: KeyPair {
   }
 
   public func verify(message: [UInt8], signature: [UInt8]) throws -> Bool {
-    return try NaclSign.signDetachedVerify(message: message.data, sig: signature.data, publicKey: publicKey.data.bytes.data)
+    return try NaclSign.signDetachedVerify(message: message.data, sig: signature.data, publicKey: publicKey.bytes().data)
   }
 
   public func toString() -> String {
@@ -248,7 +253,8 @@ public struct KeyPairSecp256k1: Equatable {
     }
     secp256k1_ec_pubkey_serialize(context, outputPointer, &publicKeyLength, publicKeyPointer, UInt32(SECP256K1_EC_UNCOMPRESSED))
     
-    let publicKey = Data(bytes: outputPointer, count: publicKeyLength)
+    // drop the first byte of the data, it will always be 0x04 since we always use SECP256K1_EC_UNCOMPRESSED
+    let publicKey = Data(bytes: outputPointer, count: publicKeyLength).subdata(in: 1..<publicKeyLength)
     
     self.publicKey = PublicKey(keyType: .SECP256k1, data: publicKey.bytes)
     self.secretKey = secretKey
@@ -309,6 +315,7 @@ extension KeyPairSecp256k1: KeyPair {
     outputWithRecidPointer.advanced(by: 64).pointee = UInt8(recid)
     
     let signature = Data(bytes: outputWithRecidPointer, count: 65)
+    
     return Signature(signature: signature.bytes, publicKey: publicKey)
   }
 
@@ -327,11 +334,8 @@ extension KeyPairSecp256k1: KeyPair {
     defer {
         publicKeyPointer.deallocate()
     }
-    //    let pubBool = secp256k1_ec_pubkey_parse(ctx!, &pubkey, pubArray, pubArray.count)
-//    if pubBool == 0 {
-    
-    print(publicKey.data.bytes)
-    guard secp256k1_ec_pubkey_parse(context, publicKeyPointer, publicKey.data.bytes, publicKey.data.bytes.count) == 1 else {
+    let publicKeyBytes = publicKey.bytes()
+    guard secp256k1_ec_pubkey_parse(context, publicKeyPointer, publicKeyBytes, publicKeyBytes.count) == 1 else {
       throw Secp256k1Error.invalidPublicKey("Unable to verify secp256k1 message, invalid public key")
     }
     var signatureOutput = secp256k1_ecdsa_signature()
@@ -343,7 +347,7 @@ extension KeyPairSecp256k1: KeyPair {
   }
 
   public func toString() -> String {
-    return "ed25519:\(secretKey)"
+    return "secp256k1:\(secretKey)"
   }
 
   public func getPublicKey() -> PublicKey {

@@ -57,6 +57,24 @@ class AccessKeySpec: XCTestCase {
     XCTAssertEqual(testValue, setCallValue)
   }
   
+  func testMakeFunctionCallsUsingSepc256k1AcccessKey() async throws {
+    let keyPair = try keyPairFromRandom(curve: .SECP256k1)
+    let publicKey = keyPair.getPublicKey()
+    try await self.workingAccount.addKey(publicKey: publicKey,
+                                         contractId: self.contractId,
+                                         methodName: "",
+                                         amount: UInt128(stringLiteral: "2000000000000000000000000"))
+    // Override in the key store the workingAccount key to the given access key.
+    let signer = AccessKeySpec.near.connection.signer as! InMemorySigner
+    try await signer.keyStore.setKey(networkId: networkId,
+                                     accountId: self.workingAccount.accountId,
+                                     keyPair: keyPair)
+    let setCallValue = TestUtils.generateUniqueString(prefix: "setCallPrefix")
+    try await self.contract.change(methodName: .setValue, args: ["value": setCallValue])
+    let testValue: String = try await self.contract.view(methodName: .getValue)
+    XCTAssertEqual(testValue, setCallValue)
+  }
+  
   func testRemoveAccessKeyNoLongerWorks() async throws {
     let keyPair = try keyPairFromRandom()
     let publicKey = keyPair.getPublicKey()
