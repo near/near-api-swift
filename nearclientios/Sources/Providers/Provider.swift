@@ -29,9 +29,22 @@ public struct NodeStatusResult: Codable {
 
 public typealias BlockHash = String
 public typealias BlockHeight = Number
-//typealias BlockId = BlockHash | BlockHeight
-// TODO find correct representation way for this
-public typealias BlockId = BlockHash
+public enum BlockId {
+  case blockHash(String)
+  case blockHeight(Int)
+}
+public enum GasBlockId {
+  case blockHash(String)
+  case blockHeight(Int)
+  case null
+}
+
+public struct BlockReference {
+  let blockId: BlockId?
+  let finality: Finality?
+  let sync_checkpoint: SyncCheckpoint?
+}
+
 
 public enum ExecutionStatusBasic: String, Decodable {
   case unknown = "Unknown"
@@ -208,6 +221,25 @@ public struct BlockResult: Codable {
   let transactions: [Transaction]
 }
 
+public struct BlockChange: Codable {
+  let type: String
+  let account_id: String
+}
+
+public struct BlockChangeResult: Codable {
+  let block_hash: String
+  let changes: [BlockChange]
+}
+
+public struct ChangeResult: Codable {
+  let block_hash: String
+  //let changes: [Any]
+}
+
+public struct GasPrice: Codable {
+  let gas_price: String
+}
+
 public enum ProviderType {
   case jsonRPC(URL)
 }
@@ -219,7 +251,10 @@ public protocol Provider {
   func txStatus(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome
   func query<T: Decodable>(params: [String: Any]) async throws -> T
   func block(blockId: BlockId) async throws -> BlockResult
+  func blockChanges(blockQuery: BlockReference) async throws -> BlockChangeResult
   func chunk(chunkId: ChunkId) async throws -> ChunkResult
+  func gasPrice(blockId: GasBlockId) async throws -> GasPrice
+//  func accessKeyChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult
 }
 
 public func getTransactionLastResult(txResult: FinalExecutionOutcome) -> Any? {

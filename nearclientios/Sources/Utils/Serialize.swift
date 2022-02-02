@@ -42,7 +42,7 @@ public extension Data {
   }
 }
 
-public extension Collection where Element == UInt8 {
+public extension Sequence where Element == UInt8 {
   var baseEncoded: String {
     return data.baseEncoded
   }

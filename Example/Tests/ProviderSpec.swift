@@ -65,6 +65,36 @@ class ProviderSpec: XCTestCase {
     XCTAssertNil(getTransactionLastResult(txResult: result))
   }
   
+  func testFetchBlockChanges() async throws {
+    let status = try await self.provider.status()
+    let latestHash = BlockId.blockHash(status.sync_info.latest_block_hash)
+    let blockQuery = BlockReference(blockId: latestHash, finality: nil, sync_checkpoint: nil)
+    let response = try await self.provider.blockChanges(blockQuery: blockQuery)
+    XCTAssertNotNil(response.block_hash)
+    XCTAssertNotNil(response.changes)
+    
+    let latestHeight = BlockId.blockHeight(status.sync_info.latest_block_height)
+    let blockQuery2 = BlockReference(blockId: latestHeight, finality: nil, sync_checkpoint: nil)
+    let response2 = try await self.provider.blockChanges(blockQuery: blockQuery2)
+    XCTAssertNotNil(response2.block_hash)
+    XCTAssertNotNil(response2.changes)
+  }
+  
+  func testGasPrice() async throws {
+    let status = try await self.provider.status()
+    
+    let blockHeight = GasBlockId.blockHeight(status.sync_info.latest_block_height)
+    let response1 = try await provider.gasPrice(blockId: blockHeight)
+    XCTAssertGreaterThan(Int(response1.gas_price) ?? 0, 0)
+    
+    let blockHash = GasBlockId.blockHash(status.sync_info.latest_block_hash)
+    let response2 = try await provider.gasPrice(blockId: blockHash)
+    XCTAssertGreaterThan(Int(response2.gas_price) ?? 0, 0)
+    
+    let response3 = try await provider.gasPrice(blockId: GasBlockId.null)
+    XCTAssertGreaterThan(Int(response3.gas_price) ?? 0, 0)
+  }
+  
 //  func testFetchBlockInfo() async {
 //    let response = try! await provider.block(blockId: "1")
 //    XCTAssertEqual(response.header.height, 1)

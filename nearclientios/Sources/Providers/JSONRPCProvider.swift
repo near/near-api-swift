@@ -17,6 +17,11 @@ public enum Finality: String, Codable {
   case optimistic
 }
 
+public enum SyncCheckpoint: String, Codable {
+  case genesis = "genesis"
+  case earliestAvailable = "earliest_available"
+}
+
 public final class JSONRPCProvider {
   /// Keep ids unique across all connections
   private var _nextId = 123
@@ -34,7 +39,7 @@ extension JSONRPCProvider {
     return _nextId
   }
 
-  private func sendJsonRpc<T: Decodable>(method: String, params: [Any]) async throws -> T {
+  private func sendJsonRpc<T: Decodable>(method: String, params: [Any?]) async throws -> T {
     let request: [String: Any] = ["method": method,
                                   "params": params,
                                   "id": getId(),
@@ -54,10 +59,10 @@ extension JSONRPCProvider {
   
   func processJsonRpc<T: Decodable>(request: [String: Any], json: Any) async throws -> T {
     let data = try JSONSerialization.data(withJSONObject: json, options: [])
-//    debugPrint("=====================")
-//    print(T.self)
-//    print(String(decoding: data, as: UTF8.self))
-//    debugPrint("=====================")
+    debugPrint("=====================")
+    print(T.self)
+    print(String(decoding: data, as: UTF8.self))
+    debugPrint("=====================")
     do {
       let decoded = try JSONDecoder().decode(T.self, from: data)
       return decoded
@@ -99,8 +104,39 @@ extension JSONRPCProvider: Provider {
   public func block(blockId: BlockId) async throws -> BlockResult {
     return try await sendJsonRpc(method: "block", paramsDict: ["block_id": blockId])
   }
+  
+  public func blockChanges(blockQuery: BlockReference) async throws -> BlockChangeResult {
+    var params: [String: Any] = [:]
+    switch blockQuery.blockId {
+      case .blockHeight(let height):
+        params["block_id"] = height
+      case .blockHash(let hash):
+        params["block_id"] = hash
+      default:
+        break
+    }
+    if blockQuery.finality != nil {
+      params["finality"] = blockQuery.finality!.rawValue
+    }
+    
+    return try await sendJsonRpc(method: "EXPERIMENTAL_changes_in_block", paramsDict: params)
+  }
 
   public func chunk(chunkId: ChunkId) async throws -> ChunkResult {
     return try await sendJsonRpc(method: "chunk", paramsDict: ["chunk_id": chunkId])
+  }
+  
+  public func gasPrice(blockId: GasBlockId) async throws -> GasPrice {
+    var params: Any? = nil
+    switch blockId {
+    case .blockHeight(let height):
+      params = height
+    case .blockHash(let hash):
+      params = hash
+    case .null:
+      break
+    }
+    
+    return try await sendJsonRpc(method: "gas_price", params: [params])
   }
 }
