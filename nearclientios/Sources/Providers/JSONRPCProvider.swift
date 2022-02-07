@@ -101,8 +101,20 @@ extension JSONRPCProvider: Provider {
     return try await sendJsonRpc(method: "query", paramsDict: params)
   }
 
-  public func block(blockId: BlockId) async throws -> BlockResult {
-    return try await sendJsonRpc(method: "block", paramsDict: ["block_id": blockId])
+  public func block(blockQuery: BlockReference) async throws -> BlockResult {
+    var params: [String: Any] = [:]
+    switch blockQuery.blockId {
+    case .blockHeight(let height):
+      params["block_id"] = height
+    case .blockHash(let hash):
+      params["block_id"] = hash
+    default:
+      break
+    }
+    if blockQuery.finality != nil {
+      params["finality"] = blockQuery.finality!.rawValue
+    }
+    return try await sendJsonRpc(method: "block", paramsDict: params)
   }
   
   public func blockChanges(blockQuery: BlockReference) async throws -> BlockChangeResult {

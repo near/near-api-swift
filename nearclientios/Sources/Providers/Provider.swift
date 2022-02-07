@@ -42,7 +42,6 @@ public enum GasBlockId {
 public struct BlockReference {
   let blockId: BlockId?
   let finality: Finality?
-  let sync_checkpoint: SyncCheckpoint?
 }
 
 
@@ -156,15 +155,32 @@ public struct TotalWeight: Codable {
 }
 
 public struct BlockHeader: Codable {
-  let approval_mask: String
-  let approval_sigs: String
-  let hash: String
   let height: Number
+  let epoch_id: String
+  let next_epoch_id: String
+  let hash: String
   let prev_hash: String
   let prev_state_root: String
+  let chunk_receipts_root: String
+  let chunk_headers_root: String
+  let chunk_tx_root: String
+  let outcome_root: String
+  let chunks_included: Number
+  let challenges_root: String
   let timestamp: Number
-  let total_weight: TotalWeight
-  let tx_root: String
+  let timestamp_nanosec: String
+  let random_value: String
+  let validator_proposals: [ValidatorProposal]
+  let chunk_mask: [Bool]
+  let gas_price: String
+  let rent_paid: String
+  let validator_reward: String
+  let total_supply: String
+  //let challenges_result: [Any]
+  let last_final_block: String
+  let last_ds_final_block: String
+  let next_bp_hash: String
+  let block_merkle_root: String
 }
 
 public typealias ChunkHash = String
@@ -218,7 +234,7 @@ public struct Transaction: Codable {
 
 public struct BlockResult: Codable {
   let header: BlockHeader
-  let transactions: [Transaction]
+  let transactions: [Transaction]?
 }
 
 public struct BlockChange: Codable {
@@ -250,7 +266,7 @@ public protocol Provider {
   func sendTransaction(signedTransaction: SignedTransaction) async throws -> FinalExecutionOutcome
   func txStatus(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome
   func query<T: Decodable>(params: [String: Any]) async throws -> T
-  func block(blockId: BlockId) async throws -> BlockResult
+  func block(blockQuery: BlockReference) async throws -> BlockResult
   func blockChanges(blockQuery: BlockReference) async throws -> BlockChangeResult
   func chunk(chunkId: ChunkId) async throws -> ChunkResult
   func gasPrice(blockId: GasBlockId) async throws -> GasPrice

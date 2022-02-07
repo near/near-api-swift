@@ -65,19 +65,42 @@ class ProviderSpec: XCTestCase {
     XCTAssertNil(getTransactionLastResult(txResult: result))
   }
   
+  func testFetchBlockInfo() async throws {
+    let status = try await self.provider.status()
+    
+    let height = status.sync_info.latest_block_height - 1
+    let blockHeight = BlockId.blockHeight(height)
+    let response = try await provider.block(blockQuery: BlockReference(blockId: blockHeight, finality: nil))
+    XCTAssertEqual(response.header.height, height)
+    
+    let sameBlock = try await provider.block(blockQuery: BlockReference(blockId: BlockId.blockHash(response.header.hash), finality: nil))
+    XCTAssertEqual(sameBlock.header.height, height)
+    
+    let optimisticBlock = try await provider.block(blockQuery: BlockReference(blockId: nil, finality: Finality.optimistic))
+    XCTAssertLessThan(optimisticBlock.header.height - height, 5)
+    
+    let finalBlock = try await provider.block(blockQuery: BlockReference(blockId: nil, finality: Finality.final))
+    XCTAssertLessThan(finalBlock.header.height - height, 5)
+  }
+  
   func testFetchBlockChanges() async throws {
     let status = try await self.provider.status()
     let latestHash = BlockId.blockHash(status.sync_info.latest_block_hash)
-    let blockQuery = BlockReference(blockId: latestHash, finality: nil, sync_checkpoint: nil)
+    let blockQuery = BlockReference(blockId: latestHash, finality: nil)
     let response = try await self.provider.blockChanges(blockQuery: blockQuery)
     XCTAssertNotNil(response.block_hash)
     XCTAssertNotNil(response.changes)
     
     let latestHeight = BlockId.blockHeight(status.sync_info.latest_block_height)
-    let blockQuery2 = BlockReference(blockId: latestHeight, finality: nil, sync_checkpoint: nil)
+    let blockQuery2 = BlockReference(blockId: latestHeight, finality: nil)
     let response2 = try await self.provider.blockChanges(blockQuery: blockQuery2)
     XCTAssertNotNil(response2.block_hash)
     XCTAssertNotNil(response2.changes)
+    
+    let blockQuery3 = BlockReference(blockId: nil, finality: Finality.final)
+    let response3 = try await self.provider.blockChanges(blockQuery: blockQuery3)
+    XCTAssertNotNil(response3.block_hash)
+    XCTAssertNotNil(response3.changes)
   }
   
   func testGasPrice() async throws {
@@ -94,13 +117,6 @@ class ProviderSpec: XCTestCase {
     let response3 = try await provider.gasPrice(blockId: GasBlockId.null)
     XCTAssertGreaterThan(Int(response3.gas_price) ?? 0, 0)
   }
-  
-//  func testFetchBlockInfo() async {
-//    let response = try! await provider.block(blockId: "1")
-//    XCTAssertEqual(response.header.height, 1)
-//    let sameBlock = try! await provider.block(blockId: response.header.hash)
-//    XCTAssertEqual(sameBlock.header.height, 1)
-//  }
   
 //  func testFetchChunkInfo() async{
 //    let response = try! await provider.chunk(chunkId: "[1, 0]")
