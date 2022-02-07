@@ -39,11 +39,31 @@ public enum GasBlockId {
   case null
 }
 
-public struct BlockReference {
-  let blockId: BlockId?
-  let finality: Finality?
+public enum BlockReference {
+  case blockId(BlockId)
+  case finality(Finality)
 }
 
+public func unwrapBlockId(blockId: BlockId) -> Any {
+  switch blockId {
+  case .blockHeight(let height):
+    return height
+  case .blockHash(let hash):
+    return hash
+  }
+}
+
+public func unwrapBlockReferenceParams(blockQuery: BlockReference) -> [String: Any] {
+  var params: [String: Any] = [:]
+  switch blockQuery {
+  case .blockId(let blockId):
+    params["block_id"] = unwrapBlockId(blockId: blockId)
+  case .finality(let finality):
+    params["finality"] = finality.rawValue
+  }
+  
+  return params
+}
 
 public enum ExecutionStatusBasic: String, Decodable {
   case unknown = "Unknown"
@@ -184,35 +204,38 @@ public struct BlockHeader: Codable {
 }
 
 public typealias ChunkHash = String
-public typealias ShardId = Int
-// TODO find correct representation way for this
-//public typealias BlockShardId = [BlockId, ShardId]
-public typealias BlockShardId = [BlockId]
-// TODO find correct representation way for this
-//internal typealias ChunkId = ChunkHash | BlockShardId
-public typealias ChunkId = ChunkHash
+public typealias ShardId = Number
+public struct BlockShardId {
+  let blockId: BlockId
+  let shardId: ShardId
+}
+
+public enum ChunkId {
+  case chunkHash(ChunkHash)
+  case blockShardId(BlockShardId)
+}
 
 public struct ValidatorProposal: Codable {}
 
 public struct ChunkHeader: Codable {
-  let balance_burnt: String
   let chunk_hash: ChunkHash
-  let encoded_length: Number
+  let prev_block_hash: String
+  let outcome_root: String
+  let prev_state_root: String
   let encoded_merkle_root: String
-  let gas_limit: Number
-  let gas_used: Number
+  let encoded_length: Number
   let height_created: Number
   let height_included: Number
-  let outgoing_receipts_root: String
-  let prev_block_hash: String
-  let prev_state_num_parts: Number
-  let prev_state_root_hash: String
+  let shard_id: ShardId
+  let gas_used: Number
+  let gas_limit: Number
   let rent_paid: String
-  let shard_id: Number
-  let signature: String
+  let validator_reward: String
+  let balance_burnt: String
+  let outgoing_receipts_root: String
   let tx_root: String
   let validator_proposals: [ValidatorProposal]
-  let validator_reward: String
+  let signature: String
 }
 
 public struct Receipt: Codable {}

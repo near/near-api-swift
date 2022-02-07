@@ -102,40 +102,25 @@ extension JSONRPCProvider: Provider {
   }
 
   public func block(blockQuery: BlockReference) async throws -> BlockResult {
-    var params: [String: Any] = [:]
-    switch blockQuery.blockId {
-    case .blockHeight(let height):
-      params["block_id"] = height
-    case .blockHash(let hash):
-      params["block_id"] = hash
-    default:
-      break
-    }
-    if blockQuery.finality != nil {
-      params["finality"] = blockQuery.finality!.rawValue
-    }
+    let params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
     return try await sendJsonRpc(method: "block", paramsDict: params)
   }
   
   public func blockChanges(blockQuery: BlockReference) async throws -> BlockChangeResult {
-    var params: [String: Any] = [:]
-    switch blockQuery.blockId {
-      case .blockHeight(let height):
-        params["block_id"] = height
-      case .blockHash(let hash):
-        params["block_id"] = hash
-      default:
-        break
-    }
-    if blockQuery.finality != nil {
-      params["finality"] = blockQuery.finality!.rawValue
-    }
-    
+    let params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
     return try await sendJsonRpc(method: "EXPERIMENTAL_changes_in_block", paramsDict: params)
   }
 
   public func chunk(chunkId: ChunkId) async throws -> ChunkResult {
-    return try await sendJsonRpc(method: "chunk", paramsDict: ["chunk_id": chunkId])
+    var params: [String: Any] = [:]
+    switch chunkId {
+    case .chunkHash(let chunkHash):
+      params["chunk_id"] = chunkHash
+    case .blockShardId(let blockShardId):
+      params["block_id"] = unwrapBlockId(blockId: blockShardId.blockId)
+      params["shard_id"] = blockShardId.shardId
+    }
+    return try await sendJsonRpc(method: "chunk", paramsDict: params)
   }
   
   public func gasPrice(blockId: GasBlockId) async throws -> GasPrice {
