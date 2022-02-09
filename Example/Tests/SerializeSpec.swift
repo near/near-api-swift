@@ -108,8 +108,6 @@ class SerializeSpec: XCTestCase {
   
   func testSerializeAndSignSecp256k1TransferTransaction() async {
     let keyStore = InMemoryKeyStore()
-    //    let keyPair = try! KeyPairSecp256k1(secretKey: "Cqmi5vHc59U1MHhq7JCxTSJentvVBYMcKGUA7s7kwnKn")
-    //XCTAssertEqual(keyPair.getPublicKey().toString(), "secp256k1:QYkvGGNVpePURHmKh4GtTMNSHSFmkAUowm1wrciqLrLGnKNWZgouUxHJUuKiaTwRJxUQ4ghnZ9uLXDFau6UDjQDn")
 
     let keyPair = try! keyPairFromString(encodedKey: "secp256k1:Cqmi5vHc59U1MHhq7JCxTSJentvVBYMcKGUA7s7kwnKn") as! KeyPairSecp256k1
     try! await keyStore.setKey(networkId: "test", accountId: "test.near", keyPair: keyPair)
@@ -123,9 +121,9 @@ class SerializeSpec: XCTestCase {
                                                    accountId: "test.near",
                                                    networkId: "test")
     let base64 = signedTx.signature.bytes.data.base64EncodedString()
-    XCTAssertEqual(base64, "lpqDMyGG7pdV5IOTJVJYBuGJo9LSu0tHYOlEQ+l+HE8i3u7wBZqOlxMQDtpuGRRNp+ig735TmyBwi6HY0CG9AQ==")
+    XCTAssertEqual(base64, "YWIJ3B3XhXeex9LGQj+BhH/8zS9PbSD5Uf25vDETBKMsP17/ODnwQFVw8E+taAiHHDgxKxLtlZ4Ln/rmiPrrJAA=")
     let serialized = try! BorshEncoder().encode(signedTx)
-    XCTAssertEqual(serialized.hexString, "09000000746573742e6e65617200917b3d268d4b58f7fec1b150bd68d69be3ee5d4cc39855e341538465bb77860d01000000000000000d00000077686174657665722e6e6561720fa473fd26901df296be6adc4cc4df34d040efa2435224b6986910e630c2fef601000000030100000000000000000000000000000000969a83332186ee9755e4839325525806e189a3d2d2bb4b4760e94443e97e1c4f22deeef0059a8e9713100eda6e19144da7e8a0ef7e539b20708ba1d8d021bd01")
+    XCTAssertEqual(serialized.hexString, "09000000746573742e6e6561720199c6f51ad6f98c9c583f8e92bb7758ab2ca9a04110c0a1126ec43e5453d196c166b489a4b7c491e7688e6ebea3a71fc3a1a48d60f98d5ce84c93b65e423fde9101000000000000000d00000077686174657665722e6e6561720fa473fd26901df296be6adc4cc4df34d040efa2435224b6986910e630c2fef601000000030100000000000000000000000000000001616209dc1dd785779ec7d2c6423f81847ffccd2f4f6d20f951fdb9bc311304a32c3f5eff3839f0405570f04fad6808871c38312b12ed959e0b9ffae688faeb2400")
   }
 
   func testSerializePassRoundtrip() {
