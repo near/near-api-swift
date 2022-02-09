@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import AnyCodable
 
 public enum TypedError: Error {
   case error(type: String = "UntypedError", message: String?)
@@ -135,6 +136,15 @@ extension JSONRPCProvider: Provider {
     }
     
     return try await sendJsonRpc(method: "gas_price", params: [params])
+  }
+  
+  public func experimentalGenesisConfig() async throws -> ExperimentalNearProtocolConfig {
+    return try await sendJsonRpc(method: "EXPERIMENTAL_genesis_config", params: [])
+  }
+  
+  public func experimentalProtocolConfig(blockQuery: BlockReference) async throws -> ExperimentalNearProtocolConfig {
+    let params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    return try await sendJsonRpc(method: "EXPERIMENTAL_protocol_config", paramsDict: params)
   }
   
   public func accessKeyChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult {

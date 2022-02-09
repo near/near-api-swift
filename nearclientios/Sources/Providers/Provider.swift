@@ -281,6 +281,16 @@ public struct ChangeResult: Decodable {
   let changes: [AnyDecodable]
 }
 
+public struct ExperimentalNearProtocolConfig: Decodable {
+  let chain_id: String
+  let genesis_height: Number
+  let runtime_config: ExperimentalNearProtocolRuntimeConfig?
+}
+
+public struct ExperimentalNearProtocolRuntimeConfig: Decodable {
+  let storage_amount_per_byte: String
+}
+
 public struct GasPrice: Codable {
   let gas_price: String
 }
@@ -298,6 +308,8 @@ public protocol Provider {
   func block(blockQuery: BlockReference) async throws -> BlockResult
   func blockChanges(blockQuery: BlockReference) async throws -> BlockChangeResult
   func chunk(chunkId: ChunkId) async throws -> ChunkResult
+  func experimentalGenesisConfig() async throws -> ExperimentalNearProtocolConfig
+  func experimentalProtocolConfig(blockQuery: BlockReference) async throws -> ExperimentalNearProtocolConfig
   func gasPrice(blockId: GasBlockId) async throws -> GasPrice
   func accessKeyChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult
   func singleAccessKeyChanges(accessKeyArray: [AccessKeyWithPublicKey], blockQuery: BlockReference) async throws -> ChangeResult
