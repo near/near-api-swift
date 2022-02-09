@@ -131,6 +131,25 @@ class ProviderSpec: XCTestCase {
     XCTAssertGreaterThan(Int(response3.gas_price) ?? 0, 0)
   }
   
+  func testExperimentalGenesisConfig() async throws {
+    let response = try await self.provider.experimentalGenesisConfig()
+    
+    XCTAssertNotNil(response.chain_id)
+    XCTAssertNotNil(response.genesis_height)
+  }
+  
+  func testExperimentalProtocolConfig() async throws {
+    let status = try await self.provider.status()
+    let latestHash = BlockId.blockHash(status.sync_info.latest_block_hash)
+    let blockQuery = BlockReference.blockId(latestHash)
+    let response = try await self.provider.experimentalProtocolConfig(blockQuery: blockQuery)
+    
+    XCTAssertNotNil(response.chain_id)
+    XCTAssertNotNil(response.genesis_height)
+    XCTAssertNotNil(response.runtime_config)
+    XCTAssertNotNil(response.runtime_config?.storage_amount_per_byte)
+  }
+  
   func testAccessKeyChanges() async throws {
     let status = try await self.provider.status()
     let changes = try await provider.accessKeyChanges(accountIdArray: [testAccountName], blockQuery: BlockReference.blockId(BlockId.blockHash(status.sync_info.latest_block_hash)))
