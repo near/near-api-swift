@@ -117,7 +117,7 @@ public extension Near {
     print("near.sendTokens is deprecated. Use `yourAccount.sendMoney` instead.")
     let account = Account(connection: connection, accountId: originator)
     let result = try await account.sendMoney(receiverId: receiver, amount: amount)
-    return result.transaction.id
+    return result.transactionOutcome.id
   }
 }
 

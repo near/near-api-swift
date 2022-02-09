@@ -161,11 +161,11 @@ public final class Account {
     }
 
     guard let result = outcome else {throw AccountError.noResult}
-    let flatLogs = ([result.transaction] + result.receipts).reduce([], {$0 + $1.outcome.logs})
+    let flatLogs = ([result.transactionOutcome] + result.receiptsOutcome).reduce([], {$0 + $1.outcome.logs})
     printLogs(contractId: signedTx.transaction.receiverId, logs: flatLogs)
 
     if case .failure(let error) = result.status {
-      throw TypedError.error(type: "Transaction \(result.transaction.id) failed. \(error.error_message ?? "")",
+      throw TypedError.error(type: "Transaction \(result.transactionOutcome.id) failed. \(error.error_message ?? "")",
         message: error.error_type)
     }
     // TODO: if Tx is Unknown or Started.

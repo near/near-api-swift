@@ -34,10 +34,21 @@ public enum BlockId {
   case blockHash(String)
   case blockHeight(Int)
 }
-public enum GasBlockId {
+public enum NullableBlockId {
   case blockHash(String)
   case blockHeight(Int)
   case null
+}
+
+public func unwrapNullableBlockId(blockId: NullableBlockId) -> Any? {
+  switch blockId {
+  case .blockHeight(let height):
+   return height
+  case .blockHash(let hash):
+    return hash
+  case .null:
+    return nil
+  }
 }
 
 public enum BlockReference {
@@ -169,11 +180,12 @@ public struct ExecutionOutcome: Decodable, Equatable {
 
 public struct FinalExecutionOutcome: Decodable, Equatable {
   let status: FinalExecutionStatus
-  let transaction: ExecutionOutcomeWithId
-  let receipts: [ExecutionOutcomeWithId]
+  let transactionOutcome: ExecutionOutcomeWithId
+  let receiptsOutcome: [ExecutionOutcomeWithId]
+  let receipts: AnyDecodable?
   private enum CodingKeys : String, CodingKey {
-          case status, transaction = "transaction_outcome", receipts = "receipts_outcome"
-      }
+    case status, transactionOutcome = "transaction_outcome", receiptsOutcome = "receipts_outcome", receipts
+  }
 }
 
 public struct TotalWeight: Codable {
@@ -295,6 +307,46 @@ public struct GasPrice: Codable {
   let gas_price: String
 }
 
+public struct EpochValidatorInfo: Decodable {
+  // Validators for the current epoch.
+  let next_validators: [NextEpochValidatorInfo]
+  // Validators for the next epoch.
+  let current_validators: [CurrentEpochValidatorInfo]
+  // Fishermen for the current epoch.
+  let next_fishermen: [ValidatorStakeView]
+  // Fishermen for the next epoch.
+  let current_fishermen: [ValidatorStakeView]
+  // Proposals in the current epoch.
+  let current_proposals: [ValidatorStakeView]
+  // Kickout in the previous epoch.
+  let prev_epoch_kickout: [ValidatorStakeView]
+  // Epoch start height.
+  let epoch_start_height: Number
+}
+
+public struct CurrentEpochValidatorInfo: Decodable {
+  let account_id: String
+  let public_key: String
+  let is_slashed: Bool
+  let stake: String
+  let shards: [Number]
+  let num_produced_blocks: Number
+  let num_expected_blocks: Number
+}
+
+public struct NextEpochValidatorInfo: Decodable {
+  let account_id: String
+  let public_key: String
+  let stake: String
+  let shards: [Number]
+}
+
+public struct ValidatorStakeView: Decodable {
+  let account_id: String
+  let public_key: String
+  let stake: String
+}
+
 public enum ProviderType {
   case jsonRPC(URL)
 }
@@ -304,13 +356,15 @@ public protocol Provider {
   func status() async throws -> NodeStatusResult
   func sendTransaction(signedTransaction: SignedTransaction) async throws -> FinalExecutionOutcome
   func txStatus(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome
+  func experimentalTxStatusWithReceipts(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome
   func query<T: Decodable>(params: [String: Any]) async throws -> T
   func block(blockQuery: BlockReference) async throws -> BlockResult
   func blockChanges(blockQuery: BlockReference) async throws -> BlockChangeResult
   func chunk(chunkId: ChunkId) async throws -> ChunkResult
+  func gasPrice(blockId: NullableBlockId) async throws -> GasPrice
   func experimentalGenesisConfig() async throws -> ExperimentalNearProtocolConfig
   func experimentalProtocolConfig(blockQuery: BlockReference) async throws -> ExperimentalNearProtocolConfig
-  func gasPrice(blockId: GasBlockId) async throws -> GasPrice
+  func validators(blockId: NullableBlockId) async throws -> EpochValidatorInfo
   func accessKeyChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult
   func singleAccessKeyChanges(accessKeyArray: [AccessKeyWithPublicKey], blockQuery: BlockReference) async throws -> ChangeResult
   func accountChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult

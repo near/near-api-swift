@@ -97,6 +97,11 @@ extension JSONRPCProvider: Provider {
     let params = [txHash.baseEncoded, accountId]
     return try await sendJsonRpc(method: "tx", params: params)
   }
+  
+  public func experimentalTxStatusWithReceipts(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome {
+    let params = [txHash.baseEncoded, accountId]
+    return try await sendJsonRpc(method: "EXPERIMENTAL_tx_status", params: params)
+  }
 
   public func query<T: Decodable>(params: [String: Any]) async throws -> T {
     return try await sendJsonRpc(method: "query", paramsDict: params)
@@ -124,17 +129,8 @@ extension JSONRPCProvider: Provider {
     return try await sendJsonRpc(method: "chunk", paramsDict: params)
   }
   
-  public func gasPrice(blockId: GasBlockId) async throws -> GasPrice {
-    var params: Any? = nil
-    switch blockId {
-    case .blockHeight(let height):
-      params = height
-    case .blockHash(let hash):
-      params = hash
-    case .null:
-      break
-    }
-    
+  public func gasPrice(blockId: NullableBlockId) async throws -> GasPrice {
+    let params: Any? = unwrapNullableBlockId(blockId: blockId)
     return try await sendJsonRpc(method: "gas_price", params: [params])
   }
   
@@ -145,6 +141,11 @@ extension JSONRPCProvider: Provider {
   public func experimentalProtocolConfig(blockQuery: BlockReference) async throws -> ExperimentalNearProtocolConfig {
     let params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
     return try await sendJsonRpc(method: "EXPERIMENTAL_protocol_config", paramsDict: params)
+  }
+
+  public func validators(blockId: NullableBlockId) async throws -> EpochValidatorInfo {
+    let params: Any? = unwrapNullableBlockId(blockId: blockId)
+    return try await sendJsonRpc(method: "validators", params: [params])
   }
   
   public func accessKeyChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult {
