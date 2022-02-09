@@ -1,9 +1,11 @@
 PODS:
+  - AnyCodable-FlightSchool (0.6.2)
   - Base58Swift (2.1.10):
     - BigInt (~> 5.0.0)
   - BigInt (5.0.0)
   - KeychainAccess (4.2.2)
   - nearclientios (0.1.0):
+    - AnyCodable-FlightSchool (~> 0.6.0)
     - Base58Swift (~> 2.1.10)
     - KeychainAccess (~> 4.2.2)
     - secp256k1.swift
@@ -16,6 +18,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AnyCodable-FlightSchool
     - Base58Swift
     - BigInt
     - KeychainAccess
@@ -27,10 +30,11 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
+  AnyCodable-FlightSchool: ac75ed9bae659e16a41ebfa6c71a663d6f2c111c
   Base58Swift: 53d551f0b33d9478fa63b3445e453a772d6b31a7
   BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
   KeychainAccess: c0c4f7f38f6fc7bbe58f5702e25f7bd2f65abf51
-  nearclientios: 16b546e6dcbcb72a1ed6064ab6a695f0e8902821
+  nearclientios: cf24317f16d1b4ceedf8110b8f560c53619a3b19
   secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
   TweetNacl: 3abf4d1d2082b0114e7a67410e300892448951e6
 

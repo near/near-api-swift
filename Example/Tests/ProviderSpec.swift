@@ -131,4 +131,45 @@ class ProviderSpec: XCTestCase {
     XCTAssertGreaterThan(Int(response3.gas_price) ?? 0, 0)
   }
   
+  func testAccessKeyChanges() async throws {
+    let status = try await self.provider.status()
+    let changes = try await provider.accessKeyChanges(accountIdArray: [testAccountName], blockQuery: BlockReference.blockId(BlockId.blockHash(status.sync_info.latest_block_hash)))
+    XCTAssertEqual(status.sync_info.latest_block_hash, changes.block_hash)
+    XCTAssertNotNil(changes.changes)
+  }
+  
+  func testSingleAccessKeyChanges() async throws {
+    let status = try await self.provider.status()
+    let near = try await TestUtils.setUpTestConnection()
+    let testAccount = try await near.account(accountId: testAccountName)
+    let keyBox = try await testAccount.getAccessKeys()
+    let publicKey = keyBox.keys.first?.public_key
+    let accessKeyWithPublicKey = AccessKeyWithPublicKey(account_id: testAccountName, public_key: publicKey!)
+
+    let changes = try await provider.singleAccessKeyChanges(accessKeyArray: [accessKeyWithPublicKey], blockQuery: BlockReference.blockId(BlockId.blockHash(status.sync_info.latest_block_hash)))
+    XCTAssertEqual(status.sync_info.latest_block_hash, changes.block_hash)
+    XCTAssertNotNil(changes.changes)
+  }
+  
+  func testAccountChanges() async throws {
+    let status = try await self.provider.status()
+    let changes = try await provider.accountChanges(accountIdArray: [testAccountName], blockQuery: BlockReference.blockId(BlockId.blockHash(status.sync_info.latest_block_hash)))
+    XCTAssertEqual(status.sync_info.latest_block_hash, changes.block_hash)
+    XCTAssertNotNil(changes.changes)
+  }
+  
+  func testContractStateChanges() async throws {
+    let status = try await self.provider.status()
+    let changes = try await provider.contractStateChanges(accountIdArray: [testAccountName], blockQuery: BlockReference.blockId(BlockId.blockHash(status.sync_info.latest_block_hash)), keyPrefix: nil)
+    XCTAssertEqual(status.sync_info.latest_block_hash, changes.block_hash)
+    XCTAssertNotNil(changes.changes)
+  }
+  
+  func testContractCodeChanges() async throws {
+    let status = try await self.provider.status()
+    let changes = try await provider.contractCodeChanges(accountIdArray: [testAccountName], blockQuery: BlockReference.blockId(BlockId.blockHash(status.sync_info.latest_block_hash)))
+    XCTAssertEqual(status.sync_info.latest_block_hash, changes.block_hash)
+    XCTAssertNotNil(changes.changes)
+  }
+
 }

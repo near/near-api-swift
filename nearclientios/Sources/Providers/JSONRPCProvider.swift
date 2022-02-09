@@ -136,4 +136,49 @@ extension JSONRPCProvider: Provider {
     
     return try await sendJsonRpc(method: "gas_price", params: [params])
   }
+  
+  public func accessKeyChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult {
+    var params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    params["changes_type"] = "all_access_key_changes"
+    params["account_ids"] = accountIdArray
+    
+    return try await sendJsonRpc(method: "EXPERIMENTAL_changes", paramsDict: params)
+  }
+  
+  public func singleAccessKeyChanges(accessKeyArray: [AccessKeyWithPublicKey], blockQuery: BlockReference) async throws -> ChangeResult {
+    var params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    params["changes_type"] = "single_access_key_changes"
+    params["keys"] = accessKeyArray.map { value in
+      return [
+        "account_id": value.account_id,
+        "public_key": value.public_key
+      ]
+    }
+    
+    return try await sendJsonRpc(method: "EXPERIMENTAL_changes", paramsDict: params)
+  }
+  public func accountChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult {
+    var params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    params["changes_type"] = "account_changes"
+    params["account_ids"] = accountIdArray
+    
+    return try await sendJsonRpc(method: "EXPERIMENTAL_changes", paramsDict: params)
+  }
+  
+  public func contractStateChanges(accountIdArray: [String], blockQuery: BlockReference, keyPrefix: String?) async throws -> ChangeResult {
+    var params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    params["changes_type"] = "data_changes"
+    params["account_ids"] = accountIdArray
+    params["key_prefix_base64"] = keyPrefix ?? ""
+    
+    return try await sendJsonRpc(method: "EXPERIMENTAL_changes", paramsDict: params)
+  }
+  
+  public func contractCodeChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult {
+    var params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    params["changes_type"] = "contract_code_changes"
+    params["account_ids"] = accountIdArray
+    
+    return try await sendJsonRpc(method: "EXPERIMENTAL_changes", paramsDict: params)
+  }
 }

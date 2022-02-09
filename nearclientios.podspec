@@ -21,4 +21,5 @@ Pod::Spec.new do |s|
   s.dependency 'KeychainAccess', '~> 4.2.2'
   s.dependency 'Base58Swift', '~> 2.1.10'
   s.dependency 'secp256k1.swift'
+  s.dependency 'AnyCodable-FlightSchool', '~> 0.6.0'
 end

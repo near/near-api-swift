@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import AnyCodable
 
 public typealias Number = Int
 
@@ -63,6 +64,11 @@ public func unwrapBlockReferenceParams(blockQuery: BlockReference) -> [String: A
   }
   
   return params
+}
+
+public struct AccessKeyWithPublicKey: Codable {
+  let account_id: String
+  let public_key: String
 }
 
 public enum ExecutionStatusBasic: String, Decodable {
@@ -270,9 +276,9 @@ public struct BlockChangeResult: Codable {
   let changes: [BlockChange]
 }
 
-public struct ChangeResult: Codable {
+public struct ChangeResult: Decodable {
   let block_hash: String
-  //let changes: [Any]
+  let changes: [AnyDecodable]
 }
 
 public struct GasPrice: Codable {
@@ -293,7 +299,11 @@ public protocol Provider {
   func blockChanges(blockQuery: BlockReference) async throws -> BlockChangeResult
   func chunk(chunkId: ChunkId) async throws -> ChunkResult
   func gasPrice(blockId: GasBlockId) async throws -> GasPrice
-//  func accessKeyChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult
+  func accessKeyChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult
+  func singleAccessKeyChanges(accessKeyArray: [AccessKeyWithPublicKey], blockQuery: BlockReference) async throws -> ChangeResult
+  func accountChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult
+  func contractStateChanges(accountIdArray: [String], blockQuery: BlockReference, keyPrefix: String?) async throws -> ChangeResult
+  func contractCodeChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult
 }
 
 public func getTransactionLastResult(txResult: FinalExecutionOutcome) -> Any? {
