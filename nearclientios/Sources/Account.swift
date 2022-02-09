@@ -173,6 +173,33 @@ public final class Account {
     return result
   }
 
+  public func signAndSendTransactionAsync(receiverId: String, actions: [Action]) async throws -> SimpleRPCResult {
+    try await ready()
+    guard _accessKey != nil else {
+      throw TypedError.error(type: "Can not sign transactions, initialize account with available public key in Signer.", message: "KeyNotFound")
+    }
+
+    let status = try await connection.provider.status()
+    _accessKey!.nonce += 1
+    let blockHash = status.sync_info.latest_block_hash.baseDecoded
+    let (_, signedTx) = try await signTransaction(receiverId: receiverId,
+                                                       nonce: _accessKey!.nonce,
+                                                       actions: actions,
+                                                       blockHash: blockHash,
+                                                       signer: connection.signer,
+                                                       accountId: accountId,
+                                                       networkId: connection.networkId)
+
+    let outcome: SimpleRPCResult
+    do {
+      outcome = try await connection.provider.sendTransactionAsync(signedTransaction: signedTx)
+    } catch let error {
+      throw error
+    }
+    return outcome
+  }
+
+
   @discardableResult
   func createAndDeployContract(contractId: String, publicKey: PublicKey,
                                        data: [UInt8], amount: UInt128) async throws -> Account {

@@ -28,6 +28,17 @@ public struct NodeStatusResult: Codable {
   let validators: [Validator]
 }
 
+public struct SimpleRPCResult: Decodable {
+  public let id: String
+  public let jsonrpc: String
+  private let result: String
+  
+  public var hash: String {
+    return result
+  }
+
+}
+
 public typealias BlockHash = String
 public typealias BlockHeight = Number
 public enum BlockId {
@@ -355,6 +366,7 @@ public protocol Provider {
   func getNetwork() async throws -> Network
   func status() async throws -> NodeStatusResult
   func sendTransaction(signedTransaction: SignedTransaction) async throws -> FinalExecutionOutcome
+  func sendTransactionAsync(signedTransaction: SignedTransaction) async throws -> SimpleRPCResult
   func txStatus(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome
   func experimentalTxStatusWithReceipts(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome
   func query<T: Decodable>(params: [String: Any]) async throws -> T

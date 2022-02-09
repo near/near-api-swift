@@ -93,6 +93,13 @@ extension JSONRPCProvider: Provider {
     return try await sendJsonRpc(method: "broadcast_tx_commit", params: params)
   }
 
+  public func sendTransactionAsync(signedTransaction: SignedTransaction) async throws -> SimpleRPCResult {
+    let data = try BorshEncoder().encode(signedTransaction)
+    let params = [data.base64EncodedString()]
+//    debugPrint("params \(params)")
+    return try await sendJsonRpc(method: "broadcast_tx_async", params: params)
+  }
+  
   public func txStatus(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome {
     let params = [txHash.baseEncoded, accountId]
     return try await sendJsonRpc(method: "tx", params: params)
