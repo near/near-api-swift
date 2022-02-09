@@ -28,6 +28,10 @@ public struct NodeStatusResult: Codable {
   let validators: [Validator]
 }
 
+public struct NetworkInfoResult: Decodable {
+  let peer_max_count: Number
+}
+
 public struct SimpleRPCResult: Decodable {
   public let id: String
   public let jsonrpc: String
@@ -365,6 +369,7 @@ public enum ProviderType {
 public protocol Provider {
   func getNetwork() async throws -> Network
   func status() async throws -> NodeStatusResult
+  func networkInfo() async throws -> NetworkInfoResult
   func sendTransaction(signedTransaction: SignedTransaction) async throws -> FinalExecutionOutcome
   func sendTransactionAsync(signedTransaction: SignedTransaction) async throws -> SimpleRPCResult
   func txStatus(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome

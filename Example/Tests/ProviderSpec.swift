@@ -21,6 +21,11 @@ class ProviderSpec: XCTestCase {
     XCTAssertTrue(response.chain_id.contains("ci-testnet"))
   }
   
+  func testFetchNetworkInfo() async {
+    let response = try! await self.provider.networkInfo()
+    XCTAssertNotNil(response.peer_max_count)
+  }
+  
   func testCorrectFinalTransactionResult() {
     let outcome = ExecutionOutcome(status: .successReceiptId("11112"),
                                    logs: [],

@@ -85,6 +85,10 @@ extension JSONRPCProvider: Provider {
   public func status() async throws -> NodeStatusResult {
     return try await sendJsonRpc(method: "status", params: [])
   }
+  
+  public func networkInfo() async throws -> NetworkInfoResult {
+    return try await sendJsonRpc(method: "network_info", params: [])
+  }
 
   public func sendTransaction(signedTransaction: SignedTransaction) async throws -> FinalExecutionOutcome {
     let data = try BorshEncoder().encode(signedTransaction)
