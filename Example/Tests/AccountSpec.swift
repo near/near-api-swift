@@ -44,7 +44,7 @@ class AccountSpec: XCTestCase {
   
   func testViewPredefinedAccountWithCorrectName() async throws {
     let status = try await AccountSpec.workingAccount.state()
-    XCTAssertEqual(status.code_hash, "11111111111111111111111111111111")
+    XCTAssertEqual(status.codeHash, "11111111111111111111111111111111")
   }
   
   func testCreateAccountAndViewNewAccount() async throws {

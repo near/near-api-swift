@@ -18,28 +18,28 @@ class ProviderSpec: XCTestCase {
   
   func testFetchNodeStatus() async {
     let response = try! await self.provider.status()
-    XCTAssertTrue(response.chain_id.contains("ci-testnet"))
+    XCTAssertTrue(response.chainId.contains("ci-testnet"))
   }
   
   func testFetchNetworkInfo() async {
     let response = try! await self.provider.networkInfo()
-    XCTAssertNotNil(response.peer_max_count)
+    XCTAssertNotNil(response.peerMaxCount)
   }
   
   func testCorrectFinalTransactionResult() {
     let outcome = ExecutionOutcome(status: .successReceiptId("11112"),
                                    logs: [],
-                                   receipt_ids: ["11112"],
-                                   gas_burnt: 1)
+                                   receiptIds: ["11112"],
+                                   gasBurnt: 1)
     let transaction = ExecutionOutcomeWithId(id: "11111", outcome: outcome)
     let firstRecipientOutcome = ExecutionOutcome(status: .successValue("e30="),
                                                  logs: [],
-                                                 receipt_ids: ["11112"],
-                                                 gas_burnt: 9001)
+                                                 receiptIds: ["11112"],
+                                                 gasBurnt: 9001)
     let secondRecipientOutcome = ExecutionOutcome(status: .successValue(""),
                                                   logs: [],
-                                                  receipt_ids: [],
-                                                  gas_burnt: 0)
+                                                  receiptIds: [],
+                                                  gasBurnt: 0)
     let receipts = [ExecutionOutcomeWithId(id: "11112", outcome: firstRecipientOutcome),
                     ExecutionOutcomeWithId(id: "11113", outcome: secondRecipientOutcome)]
     let result = FinalExecutionOutcome(status: .successValue("e30="),
@@ -51,17 +51,17 @@ class ProviderSpec: XCTestCase {
   func testFinalTransactionResultWithNil() {
     let outcome = ExecutionOutcome(status: .successReceiptId("11112"),
                                    logs: [],
-                                   receipt_ids: ["11112"],
-                                   gas_burnt: 1)
+                                   receiptIds: ["11112"],
+                                   gasBurnt: 1)
     let transaction = ExecutionOutcomeWithId(id: "11111", outcome: outcome)
     let firstRecipientOutcome = ExecutionOutcome(status: .failure(ExecutionError()),
                                                  logs: [],
-                                                 receipt_ids: ["11112"],
-                                                 gas_burnt: 9001)
+                                                 receiptIds: ["11112"],
+                                                 gasBurnt: 9001)
     let secondRecipientOutcome = ExecutionOutcome(status: .successValue(""),
                                                   logs: [],
-                                                  receipt_ids: [],
-                                                  gas_burnt: 0)
+                                                  receiptIds: [],
+                                                  gasBurnt: 0)
     let receipts = [ExecutionOutcomeWithId(id: "11112", outcome: firstRecipientOutcome),
                     ExecutionOutcomeWithId(id: "11113", outcome: secondRecipientOutcome)]
     let result = FinalExecutionOutcome(status: .failure(ExecutionError()),
@@ -73,7 +73,7 @@ class ProviderSpec: XCTestCase {
   func testFetchBlockInfo() async throws {
     let status = try await self.provider.status()
     
-    let height = status.sync_info.latest_block_height - 1
+    let height = status.syncInfo.latestBlockHeight - 1
     let blockHeight = BlockId.blockHeight(height)
     let response = try await provider.block(blockQuery: BlockReference.blockId(blockHeight))
     XCTAssertEqual(response.header.height, height)
@@ -90,80 +90,80 @@ class ProviderSpec: XCTestCase {
   
   func testFetchBlockChanges() async throws {
     let status = try await self.provider.status()
-    let latestHash = BlockId.blockHash(status.sync_info.latest_block_hash)
+    let latestHash = BlockId.blockHash(status.syncInfo.latestBlockHash)
     let blockQuery = BlockReference.blockId(latestHash)
     let response = try await self.provider.blockChanges(blockQuery: blockQuery)
-    XCTAssertNotNil(response.block_hash)
+    XCTAssertNotNil(response.blockHash)
     XCTAssertNotNil(response.changes)
     
-    let latestHeight = BlockId.blockHeight(status.sync_info.latest_block_height)
+    let latestHeight = BlockId.blockHeight(status.syncInfo.latestBlockHeight)
     let blockQuery2 = BlockReference.blockId(latestHeight)
     let response2 = try await self.provider.blockChanges(blockQuery: blockQuery2)
-    XCTAssertNotNil(response2.block_hash)
+    XCTAssertNotNil(response2.blockHash)
     XCTAssertNotNil(response2.changes)
     
     let blockQuery3 = BlockReference.finality(Finality.final)
     let response3 = try await self.provider.blockChanges(blockQuery: blockQuery3)
-    XCTAssertNotNil(response3.block_hash)
+    XCTAssertNotNil(response3.blockHash)
     XCTAssertNotNil(response3.changes)
   }
   
   func testFetchChunkInfo() async throws {
     let status = try await self.provider.status()
-    let height = status.sync_info.latest_block_height - 1
+    let height = status.syncInfo.latestBlockHeight - 1
     let blockShardId = BlockShardId(blockId: BlockId.blockHeight(height), shardId: 0)
     let chunkId = ChunkId.blockShardId(blockShardId)
     let response = try await self.provider.chunk(chunkId: chunkId)
-    XCTAssertEqual(response.header.shard_id, 0)
+    XCTAssertEqual(response.header.shardId, 0)
     
-    let sameChunk = try await self.provider.chunk(chunkId: ChunkId.chunkHash(response.header.chunk_hash))
-    XCTAssertEqual(sameChunk.header.chunk_hash, response.header.chunk_hash)
-    XCTAssertEqual(sameChunk.header.shard_id, 0)
+    let sameChunk = try await self.provider.chunk(chunkId: ChunkId.chunkHash(response.header.chunkHash))
+    XCTAssertEqual(sameChunk.header.chunkHash, response.header.chunkHash)
+    XCTAssertEqual(sameChunk.header.shardId, 0)
   }
   
   func testGasPrice() async throws {
     let status = try await self.provider.status()
     
-    let blockHeight = NullableBlockId.blockHeight(status.sync_info.latest_block_height)
+    let blockHeight = NullableBlockId.blockHeight(status.syncInfo.latestBlockHeight)
     let response1 = try await self.provider.gasPrice(blockId: blockHeight)
-    XCTAssertGreaterThan(Int(response1.gas_price) ?? 0, 0)
+    XCTAssertGreaterThan(Int(response1.gasPrice) ?? 0, 0)
     
-    let blockHash = NullableBlockId.blockHash(status.sync_info.latest_block_hash)
+    let blockHash = NullableBlockId.blockHash(status.syncInfo.latestBlockHash)
     let response2 = try await self.provider.gasPrice(blockId: blockHash)
-    XCTAssertGreaterThan(Int(response2.gas_price) ?? 0, 0)
+    XCTAssertGreaterThan(Int(response2.gasPrice) ?? 0, 0)
     
     let response3 = try await self.provider.gasPrice(blockId: NullableBlockId.null)
-    XCTAssertGreaterThan(Int(response3.gas_price) ?? 0, 0)
+    XCTAssertGreaterThan(Int(response3.gasPrice) ?? 0, 0)
   }
   
   func testExperimentalGenesisConfig() async throws {
     let response = try await self.provider.experimentalGenesisConfig()
     
-    XCTAssertNotNil(response.chain_id)
-    XCTAssertNotNil(response.genesis_height)
+    XCTAssertNotNil(response.chainId)
+    XCTAssertNotNil(response.genesisHeight)
   }
   
   func testExperimentalProtocolConfig() async throws {
     let status = try await self.provider.status()
-    let latestHash = BlockId.blockHash(status.sync_info.latest_block_hash)
+    let latestHash = BlockId.blockHash(status.syncInfo.latestBlockHash)
     let blockQuery = BlockReference.blockId(latestHash)
     let response = try await self.provider.experimentalProtocolConfig(blockQuery: blockQuery)
     
-    XCTAssertNotNil(response.chain_id)
-    XCTAssertNotNil(response.genesis_height)
-    XCTAssertNotNil(response.runtime_config)
-    XCTAssertNotNil(response.runtime_config?.storage_amount_per_byte)
+    XCTAssertNotNil(response.chainId)
+    XCTAssertNotNil(response.genesisHeight)
+    XCTAssertNotNil(response.runtimeConfig)
+    XCTAssertNotNil(response.runtimeConfig?.storageAmountPerByte)
   }
 
   func testFetchValidatorInfo() async throws {
     let validators = try await self.provider.validators(blockId: NullableBlockId.null)
-    XCTAssertGreaterThanOrEqual(validators.current_validators.count, 1)
+    XCTAssertGreaterThanOrEqual(validators.currentValidators.count, 1)
   }
   
   func testAccessKeyChanges() async throws {
     let status = try await self.provider.status()
-    let changes = try await provider.accessKeyChanges(accountIdArray: [testAccountName], blockQuery: BlockReference.blockId(BlockId.blockHash(status.sync_info.latest_block_hash)))
-    XCTAssertEqual(status.sync_info.latest_block_hash, changes.block_hash)
+    let changes = try await provider.accessKeyChanges(accountIdArray: [testAccountName], blockQuery: BlockReference.blockId(BlockId.blockHash(status.syncInfo.latestBlockHash)))
+    XCTAssertEqual(status.syncInfo.latestBlockHash, changes.blockHash)
     XCTAssertNotNil(changes.changes)
   }
   
@@ -172,32 +172,32 @@ class ProviderSpec: XCTestCase {
     let near = try await TestUtils.setUpTestConnection()
     let testAccount = try await near.account(accountId: testAccountName)
     let keyBox = try await testAccount.getAccessKeys()
-    let publicKey = keyBox.keys.first?.public_key
-    let accessKeyWithPublicKey = AccessKeyWithPublicKey(account_id: testAccountName, public_key: publicKey!)
+    let publicKey = keyBox.keys.first?.publicKey
+    let accessKeyWithPublicKey = AccessKeyWithPublicKey(accountId: testAccountName, publicKey: publicKey!)
 
-    let changes = try await self.provider.singleAccessKeyChanges(accessKeyArray: [accessKeyWithPublicKey], blockQuery: BlockReference.blockId(BlockId.blockHash(status.sync_info.latest_block_hash)))
-    XCTAssertEqual(status.sync_info.latest_block_hash, changes.block_hash)
+    let changes = try await self.provider.singleAccessKeyChanges(accessKeyArray: [accessKeyWithPublicKey], blockQuery: BlockReference.blockId(BlockId.blockHash(status.syncInfo.latestBlockHash)))
+    XCTAssertEqual(status.syncInfo.latestBlockHash, changes.blockHash)
     XCTAssertNotNil(changes.changes)
   }
   
   func testAccountChanges() async throws {
     let status = try await self.provider.status()
-    let changes = try await self.provider.accountChanges(accountIdArray: [testAccountName], blockQuery: BlockReference.blockId(BlockId.blockHash(status.sync_info.latest_block_hash)))
-    XCTAssertEqual(status.sync_info.latest_block_hash, changes.block_hash)
+    let changes = try await self.provider.accountChanges(accountIdArray: [testAccountName], blockQuery: BlockReference.blockId(BlockId.blockHash(status.syncInfo.latestBlockHash)))
+    XCTAssertEqual(status.syncInfo.latestBlockHash, changes.blockHash)
     XCTAssertNotNil(changes.changes)
   }
   
   func testContractStateChanges() async throws {
     let status = try await self.provider.status()
-    let changes = try await self.provider.contractStateChanges(accountIdArray: [testAccountName], blockQuery: BlockReference.blockId(BlockId.blockHash(status.sync_info.latest_block_hash)), keyPrefix: nil)
-    XCTAssertEqual(status.sync_info.latest_block_hash, changes.block_hash)
+    let changes = try await self.provider.contractStateChanges(accountIdArray: [testAccountName], blockQuery: BlockReference.blockId(BlockId.blockHash(status.syncInfo.latestBlockHash)), keyPrefix: nil)
+    XCTAssertEqual(status.syncInfo.latestBlockHash, changes.blockHash)
     XCTAssertNotNil(changes.changes)
   }
   
   func testContractCodeChanges() async throws {
     let status = try await self.provider.status()
-    let changes = try await self.provider.contractCodeChanges(accountIdArray: [testAccountName], blockQuery: BlockReference.blockId(BlockId.blockHash(status.sync_info.latest_block_hash)))
-    XCTAssertEqual(status.sync_info.latest_block_hash, changes.block_hash)
+    let changes = try await self.provider.contractCodeChanges(accountIdArray: [testAccountName], blockQuery: BlockReference.blockId(BlockId.blockHash(status.syncInfo.latestBlockHash)))
+    XCTAssertEqual(status.syncInfo.latestBlockHash, changes.blockHash)
     XCTAssertNotNil(changes.changes)
   }
 

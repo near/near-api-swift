@@ -12,24 +12,24 @@ import AnyCodable
 public typealias Number = Int
 
 public struct SyncInfo: Codable {
-  let latest_block_hash: String
-  let latest_block_height: Number
-  let latest_block_time: String
-  let latest_state_root: String
+  let latestBlockHash: String
+  let latestBlockHeight: Number
+  let latestBlockTime: String
+  let latestStateRoot: String
   let syncing: Bool
 }
 
 public struct Validator: Codable {}
 
 public struct NodeStatusResult: Codable {
-  let chain_id: String
-  let rpc_addr: String
-  let sync_info: SyncInfo
+  let chainId: String
+  let rpcAddr: String
+  let syncInfo: SyncInfo
   let validators: [Validator]
 }
 
 public struct NetworkInfoResult: Decodable {
-  let peer_max_count: Number
+  let peerMaxCount: Number
 }
 
 public struct SimpleRPCResult: Decodable {
@@ -55,7 +55,7 @@ public enum NullableBlockId {
   case null
 }
 
-public func unwrapNullableBlockId(blockId: NullableBlockId) -> Any? {
+public func typeEraseNullableBlockId(blockId: NullableBlockId) -> Any? {
   switch blockId {
   case .blockHeight(let height):
    return height
@@ -71,7 +71,7 @@ public enum BlockReference {
   case finality(Finality)
 }
 
-public func unwrapBlockId(blockId: BlockId) -> Any {
+public func typeEraseBlockId(blockId: BlockId) -> Any {
   switch blockId {
   case .blockHeight(let height):
     return height
@@ -80,11 +80,11 @@ public func unwrapBlockId(blockId: BlockId) -> Any {
   }
 }
 
-public func unwrapBlockReferenceParams(blockQuery: BlockReference) -> [String: Any] {
+public func typeEraseBlockReferenceParams(blockQuery: BlockReference) -> [String: Any] {
   var params: [String: Any] = [:]
   switch blockQuery {
   case .blockId(let blockId):
-    params["block_id"] = unwrapBlockId(blockId: blockId)
+    params["block_id"] = typeEraseBlockId(blockId: blockId)
   case .finality(let finality):
     params["finality"] = finality.rawValue
   }
@@ -93,8 +93,8 @@ public func unwrapBlockReferenceParams(blockQuery: BlockReference) -> [String: A
 }
 
 public struct AccessKeyWithPublicKey: Codable {
-  let account_id: String
-  let public_key: String
+  let accountId: String
+  let publicKey: String
 }
 
 public enum ExecutionStatusBasic: String, Decodable {
@@ -144,12 +144,12 @@ public enum FinalExecutionStatusBasic: String, Codable {
 }
 
 public struct ExecutionError: Codable, Equatable{
-  let error_message: String?
-  let error_type: String?
+  let errorMessage: String?
+  let errorType: String?
 
-  init(error_message: String? = nil, error_type: String? = nil) {
-    self.error_message = error_message
-    self.error_type = error_type
+  init(errorMessage: String? = nil, errorType: String? = nil) {
+    self.errorMessage = errorMessage
+    self.errorType = errorType
   }
 }
 
@@ -189,8 +189,8 @@ public struct ExecutionOutcomeWithId: Decodable, Equatable {
 public struct ExecutionOutcome: Decodable, Equatable {
   let status: ExecutionStatus
   let logs: [String]
-  let receipt_ids: [String]
-  let gas_burnt: Number
+  let receiptIds: [String]
+  let gasBurnt: Number
 }
 
 public struct FinalExecutionOutcome: Decodable, Equatable {
@@ -198,9 +198,6 @@ public struct FinalExecutionOutcome: Decodable, Equatable {
   let transactionOutcome: ExecutionOutcomeWithId
   let receiptsOutcome: [ExecutionOutcomeWithId]
   let receipts: AnyDecodable?
-  private enum CodingKeys : String, CodingKey {
-    case status, transactionOutcome = "transaction_outcome", receiptsOutcome = "receipts_outcome", receipts
-  }
 }
 
 public struct TotalWeight: Codable {
@@ -209,31 +206,31 @@ public struct TotalWeight: Codable {
 
 public struct BlockHeader: Codable {
   let height: Number
-  let epoch_id: String
-  let next_epoch_id: String
+  let epochId: String
+  let nextEpochId: String
   let hash: String
-  let prev_hash: String
-  let prev_state_root: String
-  let chunk_receipts_root: String
-  let chunk_headers_root: String
-  let chunk_tx_root: String
-  let outcome_root: String
-  let chunks_included: Number
-  let challenges_root: String
+  let prevHash: String
+  let prevStateRoot: String
+  let chunkReceiptsRoot: String
+  let chunkHeadersRoot: String
+  let chunkTxRoot: String
+  let outcomeRoot: String
+  let chunksIncluded: Number
+  let challengesRoot: String
   let timestamp: Number
-  let timestamp_nanosec: String
-  let random_value: String
-  let validator_proposals: [ValidatorProposal]
-  let chunk_mask: [Bool]
-  let gas_price: String
-  let rent_paid: String
-  let validator_reward: String
-  let total_supply: String
+  let timestampNanosec: String
+  let randomValue: String
+  let validatorProposals: [ValidatorProposal]
+  let chunkMask: [Bool]
+  let gasPrice: String
+  let rentPaid: String
+  let validatorReward: String
+  let totalSupply: String
   //let challenges_result: [Any]
-  let last_final_block: String
-  let last_ds_final_block: String
-  let next_bp_hash: String
-  let block_merkle_root: String
+  let lastFinalBlock: String
+  let lastDsFinalBlock: String
+  let nextBpHash: String
+  let blockMerkleRoot: String
 }
 
 public typealias ChunkHash = String
@@ -251,23 +248,23 @@ public enum ChunkId {
 public struct ValidatorProposal: Codable {}
 
 public struct ChunkHeader: Codable {
-  let chunk_hash: ChunkHash
-  let prev_block_hash: String
-  let outcome_root: String
-  let prev_state_root: String
-  let encoded_merkle_root: String
-  let encoded_length: Number
-  let height_created: Number
-  let height_included: Number
-  let shard_id: ShardId
-  let gas_used: Number
-  let gas_limit: Number
-  let rent_paid: String
-  let validator_reward: String
-  let balance_burnt: String
-  let outgoing_receipts_root: String
-  let tx_root: String
-  let validator_proposals: [ValidatorProposal]
+  let chunkHash: ChunkHash
+  let prevBlockHash: String
+  let outcomeRoot: String
+  let prevStateRoot: String
+  let encodedMerkleRoot: String
+  let encodedLength: Number
+  let heightCreated: Number
+  let heightIncluded: Number
+  let shardId: ShardId
+  let gasUsed: Number
+  let gasLimit: Number
+  let rentPaid: String
+  let validatorReward: String
+  let balanceBurnt: String
+  let outgoingReceiptsRoot: String
+  let txRoot: String
+  let validatorProposals: [ValidatorProposal]
   let signature: String
 }
 
@@ -295,70 +292,70 @@ public struct BlockResult: Codable {
 
 public struct BlockChange: Codable {
   let type: String
-  let account_id: String
+  let accountId: String
 }
 
 public struct BlockChangeResult: Codable {
-  let block_hash: String
+  let blockHash: String
   let changes: [BlockChange]
 }
 
 public struct ChangeResult: Decodable {
-  let block_hash: String
+  let blockHash: String
   let changes: [AnyDecodable]
 }
 
 public struct ExperimentalNearProtocolConfig: Decodable {
-  let chain_id: String
-  let genesis_height: Number
-  let runtime_config: ExperimentalNearProtocolRuntimeConfig?
+  let chainId: String
+  let genesisHeight: Number
+  let runtimeConfig: ExperimentalNearProtocolRuntimeConfig?
 }
 
 public struct ExperimentalNearProtocolRuntimeConfig: Decodable {
-  let storage_amount_per_byte: String
+  let storageAmountPerByte: String
 }
 
 public struct GasPrice: Codable {
-  let gas_price: String
+  let gasPrice: String
 }
 
 public struct EpochValidatorInfo: Decodable {
   // Validators for the current epoch.
-  let next_validators: [NextEpochValidatorInfo]
+  let nextValidators: [NextEpochValidatorInfo]
   // Validators for the next epoch.
-  let current_validators: [CurrentEpochValidatorInfo]
+  let currentValidators: [CurrentEpochValidatorInfo]
   // Fishermen for the current epoch.
-  let next_fishermen: [ValidatorStakeView]
+  let nextFishermen: [ValidatorStakeView]
   // Fishermen for the next epoch.
-  let current_fishermen: [ValidatorStakeView]
+  let currentFishermen: [ValidatorStakeView]
   // Proposals in the current epoch.
-  let current_proposals: [ValidatorStakeView]
+  let currentProposals: [ValidatorStakeView]
   // Kickout in the previous epoch.
-  let prev_epoch_kickout: [ValidatorStakeView]
+  let prevEpochKickout: [ValidatorStakeView]
   // Epoch start height.
-  let epoch_start_height: Number
+  let epochStartHeight: Number
 }
 
 public struct CurrentEpochValidatorInfo: Decodable {
-  let account_id: String
-  let public_key: String
-  let is_slashed: Bool
+  let accountId: String
+  let publicKey: String
+  let isSlashed: Bool
   let stake: String
   let shards: [Number]
-  let num_produced_blocks: Number
-  let num_expected_blocks: Number
+  let numProducedBlocks: Number
+  let numExpectedBlocks: Number
 }
 
 public struct NextEpochValidatorInfo: Decodable {
-  let account_id: String
-  let public_key: String
+  let accountId: String
+  let publicKey: String
   let stake: String
   let shards: [Number]
 }
 
 public struct ValidatorStakeView: Decodable {
-  let account_id: String
-  let public_key: String
+  let accountId: String
+  let publicKey: String
   let stake: String
 }
 

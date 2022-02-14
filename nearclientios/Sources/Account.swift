@@ -34,18 +34,18 @@ public func sleep(millis: Double) async -> Void {
 }
 
 public struct AccountState: Codable {
-  public let account_id: String?
+  public let accountId: String?
   public let staked: String?
   public let locked: String
   public let amount: String
-  public let code_hash: String
-  public let storage_paid_at: Number
-  public let storage_usage: Number
+  public let codeHash: String
+  public let storagePaidAt: Number
+  public let storageUsage: Number
 }
 
 public struct KeyBox: Decodable {
-  let access_key: AccessKey
-  let public_key: String
+  let accessKey: AccessKey
+  let publicKey: String
 }
 
 public struct KeyBoxes: Decodable {
@@ -140,7 +140,7 @@ public final class Account {
 
     let status = try await connection.provider.status()
     _accessKey!.nonce += 1
-    let blockHash = status.sync_info.latest_block_hash.baseDecoded
+    let blockHash = status.syncInfo.latestBlockHash.baseDecoded
     let (txHash, signedTx) = try await signTransaction(receiverId: receiverId,
                                                        nonce: _accessKey!.nonce,
                                                        actions: actions,
@@ -165,8 +165,8 @@ public final class Account {
     printLogs(contractId: signedTx.transaction.receiverId, logs: flatLogs)
 
     if case .failure(let error) = result.status {
-      throw TypedError.error(type: "Transaction \(result.transactionOutcome.id) failed. \(error.error_message ?? "")",
-        message: error.error_type)
+      throw TypedError.error(type: "Transaction \(result.transactionOutcome.id) failed. \(error.errorMessage ?? "")",
+        message: error.errorType)
     }
     // TODO: if Tx is Unknown or Started.
     // TODO: deal with timeout on node side.
@@ -181,7 +181,7 @@ public final class Account {
 
     let status = try await connection.provider.status()
     _accessKey!.nonce += 1
-    let blockHash = status.sync_info.latest_block_hash.baseDecoded
+    let blockHash = status.syncInfo.latestBlockHash.baseDecoded
     let (_, signedTx) = try await signTransaction(receiverId: receiverId,
                                                        nonce: _accessKey!.nonce,
                                                        actions: actions,
@@ -309,10 +309,10 @@ public final class Account {
     let accessKeys = try await getAccessKeys()
     var authorizedApps: [AuthorizedApp] = []
     accessKeys.keys.forEach { item in
-      if case AccessKeyPermission.functionCall(let permission) = item.access_key.permission {
+      if case AccessKeyPermission.functionCall(let permission) = item.accessKey.permission {
         authorizedApps.append(AuthorizedApp(contractId: permission.receiverId,
                                             amount: permission.allowance ?? 0,
-                                            publicKey: item.public_key))
+                                            publicKey: item.publicKey))
       }
     }
     let result = AccountDetails(authorizedApps: authorizedApps, transactions: [])

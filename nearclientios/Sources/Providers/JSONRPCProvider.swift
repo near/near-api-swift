@@ -60,12 +60,14 @@ extension JSONRPCProvider {
   
   func processJsonRpc<T: Decodable>(request: [String: Any], json: Any) async throws -> T {
     let data = try JSONSerialization.data(withJSONObject: json, options: [])
-    debugPrint("=====================")
-    print(T.self)
-    print(String(decoding: data, as: UTF8.self))
-    debugPrint("=====================")
+//    debugPrint("=====================")
+//    print(T.self)
+//    print(String(decoding: data, as: UTF8.self))
+//    debugPrint("=====================")
     do {
-      let decoded = try JSONDecoder().decode(T.self, from: data)
+      let decoder = JSONDecoder()
+      decoder.keyDecodingStrategy = .convertFromSnakeCase
+      let decoded = try decoder.decode(T.self, from: data)
       return decoded
     } catch let error {
       print(error)
@@ -119,12 +121,12 @@ extension JSONRPCProvider: Provider {
   }
 
   public func block(blockQuery: BlockReference) async throws -> BlockResult {
-    let params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    let params: [String: Any] = typeEraseBlockReferenceParams(blockQuery: blockQuery)
     return try await sendJsonRpc(method: "block", paramsDict: params)
   }
   
   public func blockChanges(blockQuery: BlockReference) async throws -> BlockChangeResult {
-    let params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    let params: [String: Any] = typeEraseBlockReferenceParams(blockQuery: blockQuery)
     return try await sendJsonRpc(method: "EXPERIMENTAL_changes_in_block", paramsDict: params)
   }
 
@@ -134,14 +136,14 @@ extension JSONRPCProvider: Provider {
     case .chunkHash(let chunkHash):
       params["chunk_id"] = chunkHash
     case .blockShardId(let blockShardId):
-      params["block_id"] = unwrapBlockId(blockId: blockShardId.blockId)
+      params["block_id"] = typeEraseBlockId(blockId: blockShardId.blockId)
       params["shard_id"] = blockShardId.shardId
     }
     return try await sendJsonRpc(method: "chunk", paramsDict: params)
   }
   
   public func gasPrice(blockId: NullableBlockId) async throws -> GasPrice {
-    let params: Any? = unwrapNullableBlockId(blockId: blockId)
+    let params: Any? = typeEraseNullableBlockId(blockId: blockId)
     return try await sendJsonRpc(method: "gas_price", params: [params])
   }
   
@@ -150,17 +152,17 @@ extension JSONRPCProvider: Provider {
   }
   
   public func experimentalProtocolConfig(blockQuery: BlockReference) async throws -> ExperimentalNearProtocolConfig {
-    let params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    let params: [String: Any] = typeEraseBlockReferenceParams(blockQuery: blockQuery)
     return try await sendJsonRpc(method: "EXPERIMENTAL_protocol_config", paramsDict: params)
   }
 
   public func validators(blockId: NullableBlockId) async throws -> EpochValidatorInfo {
-    let params: Any? = unwrapNullableBlockId(blockId: blockId)
+    let params: Any? = typeEraseNullableBlockId(blockId: blockId)
     return try await sendJsonRpc(method: "validators", params: [params])
   }
   
   public func accessKeyChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult {
-    var params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    var params: [String: Any] = typeEraseBlockReferenceParams(blockQuery: blockQuery)
     params["changes_type"] = "all_access_key_changes"
     params["account_ids"] = accountIdArray
     
@@ -168,19 +170,19 @@ extension JSONRPCProvider: Provider {
   }
   
   public func singleAccessKeyChanges(accessKeyArray: [AccessKeyWithPublicKey], blockQuery: BlockReference) async throws -> ChangeResult {
-    var params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    var params: [String: Any] = typeEraseBlockReferenceParams(blockQuery: blockQuery)
     params["changes_type"] = "single_access_key_changes"
     params["keys"] = accessKeyArray.map { value in
       return [
-        "account_id": value.account_id,
-        "public_key": value.public_key
+        "account_id": value.accountId,
+        "public_key": value.publicKey
       ]
     }
     
     return try await sendJsonRpc(method: "EXPERIMENTAL_changes", paramsDict: params)
   }
   public func accountChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult {
-    var params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    var params: [String: Any] = typeEraseBlockReferenceParams(blockQuery: blockQuery)
     params["changes_type"] = "account_changes"
     params["account_ids"] = accountIdArray
     
@@ -188,7 +190,7 @@ extension JSONRPCProvider: Provider {
   }
   
   public func contractStateChanges(accountIdArray: [String], blockQuery: BlockReference, keyPrefix: String?) async throws -> ChangeResult {
-    var params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    var params: [String: Any] = typeEraseBlockReferenceParams(blockQuery: blockQuery)
     params["changes_type"] = "data_changes"
     params["account_ids"] = accountIdArray
     params["key_prefix_base64"] = keyPrefix ?? ""
@@ -197,7 +199,7 @@ extension JSONRPCProvider: Provider {
   }
   
   public func contractCodeChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult {
-    var params: [String: Any] = unwrapBlockReferenceParams(blockQuery: blockQuery)
+    var params: [String: Any] = typeEraseBlockReferenceParams(blockQuery: blockQuery)
     params["changes_type"] = "contract_code_changes"
     params["account_ids"] = accountIdArray
     

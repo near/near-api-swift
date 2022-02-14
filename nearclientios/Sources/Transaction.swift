@@ -16,7 +16,7 @@ public struct FunctionCallPermission {
 
 extension FunctionCallPermission: Decodable {
   private enum CodingKeys: String, CodingKey {
-    case allowance, receiverId = "receiver_id", methodNames = "method_names"
+    case allowance, receiverId, methodNames
   }
 
   public init(from decoder: Decoder) throws {

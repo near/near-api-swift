@@ -128,9 +128,9 @@ class AccessKeySpec: XCTestCase {
                                          amount: nil)
     let accessKeys = try await self.workingAccount.getAccessKeys()
     XCTAssertEqual(accessKeys.keys.count, 2)
-    let addedKey = accessKeys.keys.first(where: {$0.public_key == keyPair.getPublicKey().toString()})
+    let addedKey = accessKeys.keys.first(where: {$0.publicKey == keyPair.getPublicKey().toString()})
     XCTAssertNotNil(addedKey)
-    if case AccessKeyPermission.fullAccess(let permission) = addedKey!.access_key.permission {
+    if case AccessKeyPermission.fullAccess(let permission) = addedKey!.accessKey.permission {
       XCTAssertEqual(permission, FullAccessPermission())
     } else {
       XCTFail("AccessKeyPermission in not FullAccess")
