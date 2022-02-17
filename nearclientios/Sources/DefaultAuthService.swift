@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import WebKit
 
-public class DefaultAuthService: ExternalAuthService {
+public class DefaultAuthService: NSObject, ExternalAuthService {
   public static let shared = DefaultAuthService()
   
   var navController: UINavigationController?
@@ -20,6 +20,7 @@ public class DefaultAuthService: ExternalAuthService {
     let closeButton = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(self.dismiss))
     viewController.navigationItem.rightBarButtonItem = closeButton
     let webView = WKWebView()
+    webView.navigationDelegate = self
     webView.translatesAutoresizingMaskIntoConstraints = false
     viewController.view.addSubview(webView)
     webView.leadingAnchor.constraint(equalTo: viewController.view.leadingAnchor).isActive = true
@@ -35,5 +36,12 @@ public class DefaultAuthService: ExternalAuthService {
     navController?.dismiss(animated: true, completion: { [weak self] in
       self?.navController = nil
     })
+  }
+}
+
+extension DefaultAuthService: WKNavigationDelegate {
+  public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+    print(navigationAction.request)
+    decisionHandler(.allow)
   }
 }

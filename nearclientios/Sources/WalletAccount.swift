@@ -98,7 +98,7 @@ extension WalletAccount {
         - failureUrl: failureUrl url to redirect on failure
    */
   @discardableResult
-  public func requestSignIn(contractId: String, title: String, presentingViewController: UIViewController, successUrl: URL? = nil, failureUrl: URL? = nil, appUrl: URL? = nil, curve: KeyType = .ED25519) async throws -> Bool {
+  public func requestSignIn(contractId: String?, title: String, presentingViewController: UIViewController, successUrl: URL? = nil, failureUrl: URL? = nil, appUrl: URL? = nil, curve: KeyType = .ED25519) async throws -> Bool {
     guard getAccountId().isEmpty else {return true}
     guard try await _keyStore.getKey(networkId: _networkId, accountId: getAccountId()) == nil else {return true}
     

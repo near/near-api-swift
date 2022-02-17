@@ -76,7 +76,7 @@ class WelcomeViewController: UIViewController {
     Task {
       let appName = UIApplication.name ?? "signInTitle"
       (UIApplication.shared.delegate as? AppDelegate)?.walletSignIn = self
-      try! await walletAccount!.requestSignIn(contractId: "myContractId",
+      try! await walletAccount!.requestSignIn(contractId: nil,
                                               title: appName,
                                               presentingViewController: self,
                                               successUrl: URL(string: "nearclientios://success"),
