@@ -42,10 +42,8 @@ public let WALLET_STORAGE_SERVICE = "nearlib.wallet"
 extension Keychain: WalletStorage {}
 
 public protocol ExternalAuthService {
-  func openURL(_ url: URL) -> Bool
+  func openURL(_ url: URL, presentingViewController: UIViewController) -> Bool
 }
-
-extension UIApplication: ExternalAuthService {}
 
 public actor WalletAccount {
   private let _walletBaseUrl: String
@@ -100,8 +98,7 @@ extension WalletAccount {
         - failureUrl: failureUrl url to redirect on failure
    */
   @discardableResult
-  public func requestSignIn(contractId: String, title: String,
-                            successUrl: URL? = nil, failureUrl: URL? = nil, appUrl: URL? = nil, curve: KeyType = .ED25519) async throws -> Bool {
+  public func requestSignIn(contractId: String, title: String, presentingViewController: UIViewController, successUrl: URL? = nil, failureUrl: URL? = nil, appUrl: URL? = nil, curve: KeyType = .ED25519) async throws -> Bool {
     guard getAccountId().isEmpty else {return true}
     guard try await _keyStore.getKey(networkId: _networkId, accountId: getAccountId()) == nil else {return true}
     
@@ -109,11 +106,11 @@ extension WalletAccount {
       throw WalletAccountError.noRegisteredURLSchemes
     }
     if let successUrlScheme = successUrl?.scheme, appUrlSchemes.map({$0.absoluteString}).filter({$0.hasPrefix(successUrlScheme)}).isEmpty,
-      appUrl?.scheme != successUrlScheme {
+       appUrl?.scheme != successUrlScheme {
       throw WalletAccountError.successUrlWrongScheme
     }
     if let failureUrlScheme = failureUrl?.scheme, appUrlSchemes.map({$0.absoluteString}).filter({$0.hasPrefix(failureUrlScheme)}).isEmpty,
-      appUrl?.scheme != failureUrlScheme {
+       appUrl?.scheme != failureUrlScheme {
       throw WalletAccountError.failureUrlWrongScheme
     }
     let firstAppUrlScheme = appUrlSchemes.first!
@@ -121,7 +118,7 @@ extension WalletAccount {
     var newUrlComponents = URLComponents(string: _walletBaseUrl + LOGIN_WALLET_URL_SUFFIX)
     let successUrlPath = (successUrl ?? redirectUrl.appendingPathComponent("success")).absoluteString
     let failureUrlPath = (failureUrl ?? redirectUrl.appendingPathComponent("failure")).absoluteString
-
+    
     let title = URLQueryItem(name: "title", value: title)
     let contract_id = URLQueryItem(name: "contract_id", value: contractId)
     let success_url = URLQueryItem(name: "success_url", value: successUrlPath)
@@ -129,13 +126,15 @@ extension WalletAccount {
     let app_url = URLQueryItem(name: "app_url", value: redirectUrl.absoluteString)
     let accessKey = try keyPairFromRandom(curve: curve)
     let public_key = URLQueryItem(name: "public_key", value: accessKey.getPublicKey().toString())
-
+    
     newUrlComponents?.queryItems = [title, contract_id, success_url, failure_url, app_url, public_key]
     let accountId = PENDING_ACCESS_KEY_PREFIX + accessKey.getPublicKey().toString()
     try await _keyStore.setKey(networkId: _networkId, accountId: accountId, keyPair: accessKey)
     
     if let openUrl = newUrlComponents?.url {
-      return await MainActor.run { authService.openURL(openUrl) }
+      return await MainActor.run {
+        authService.openURL(openUrl, presentingViewController: presentingViewController)
+      }
     }
     return false
   }

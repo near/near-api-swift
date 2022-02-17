@@ -51,7 +51,7 @@ class WelcomeViewController: UIViewController {
                             contractName: "myContractId",
                             walletUrl: "https://wallet.testnet.near.org")
     near = try! Near(config: config)
-    return try! WalletAccount(near: near!, authService: UIApplication.shared)
+    return try! WalletAccount(near: near!, authService: DefaultAuthService.shared)
   }
   
   private func setupUI(with wallet: WalletAccount) async {
@@ -77,10 +77,11 @@ class WelcomeViewController: UIViewController {
       let appName = UIApplication.name ?? "signInTitle"
       (UIApplication.shared.delegate as? AppDelegate)?.walletSignIn = self
       try! await walletAccount!.requestSignIn(contractId: "myContractId",
-                                            title: appName,
-                                            successUrl: URL(string: "nearclientios://success"),
-                                            failureUrl: URL(string: "nearclientios://fail"),
-                                            appUrl: URL(string: "nearclientios://"))
+                                              title: appName,
+                                              presentingViewController: self,
+                                              successUrl: URL(string: "nearclientios://success"),
+                                              failureUrl: URL(string: "nearclientios://fail"),
+                                              appUrl: URL(string: "nearclientios://"))
     }
   }
   
