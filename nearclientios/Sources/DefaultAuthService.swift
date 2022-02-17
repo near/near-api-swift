@@ -13,6 +13,7 @@ public class DefaultAuthService: NSObject, ExternalAuthService {
   public static let shared = DefaultAuthService()
   
   var navController: UINavigationController?
+  public weak var walletSignIn: WalletSignInDelegate?
   
   public func openURL(_ url: URL, presentingViewController: UIViewController) -> Bool {
     let viewController = UIViewController()
@@ -41,7 +42,16 @@ public class DefaultAuthService: NSObject, ExternalAuthService {
 
 extension DefaultAuthService: WKNavigationDelegate {
   public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-    print(navigationAction.request)
-    decisionHandler(.allow)
+    defer {
+      decisionHandler(.allow)
+    }
+    guard let url = navigationAction.request.url else { return }
+    guard url.scheme == APP_SCHEME else { return }
+    walletSignIn?.completeSignIn(url: url)
+    dismiss()
   }
+}
+
+public protocol WalletSignInDelegate: AnyObject {
+  func completeSignIn(url: URL)
 }

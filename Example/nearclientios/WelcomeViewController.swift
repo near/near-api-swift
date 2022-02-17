@@ -9,11 +9,6 @@
 import UIKit
 import nearclientios
 
-protocol WalletSignInDelegate: AnyObject {
-  func completeSignIn(_ app: UIApplication,
-                      open url: URL, options: [UIApplication.OpenURLOptionsKey: Any])
-}
-
 class WelcomeViewController: UIViewController {
   
   private var walletAccount: WalletAccount?
@@ -75,19 +70,16 @@ class WelcomeViewController: UIViewController {
   @IBAction func tapShowAuthForm(_ sender: UIButton) {
     Task {
       let appName = UIApplication.name ?? "signInTitle"
-      (UIApplication.shared.delegate as? AppDelegate)?.walletSignIn = self
+      DefaultAuthService.shared.walletSignIn = self
       try! await walletAccount!.requestSignIn(contractId: nil,
                                               title: appName,
-                                              presentingViewController: self,
-                                              successUrl: URL(string: "nearclientios://success"),
-                                              failureUrl: URL(string: "nearclientios://fail"),
-                                              appUrl: URL(string: "nearclientios://"))
+                                              presentingViewController: self)
     }
   }
   
-  func _completeSignIn(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) async {
+  func _completeSignIn(url: URL) async {
     do {
-      try await walletAccount?.completeSignIn(app, open: url, options: options)
+      try await walletAccount?.completeSignIn(url: url)
     } catch {
       await MainActor.run {
         let alert = UIAlertController(title: "Error", message: "\(error)", preferredStyle: .alert)
@@ -102,9 +94,9 @@ class WelcomeViewController: UIViewController {
 }
 
 extension WelcomeViewController: WalletSignInDelegate {
-  func completeSignIn(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) {
+  func completeSignIn(url: URL) {
     Task {
-      await _completeSignIn(app, open: url, options: options)
+      await _completeSignIn(url: url)
     }
   }
 }

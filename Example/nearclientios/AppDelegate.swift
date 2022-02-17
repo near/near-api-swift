@@ -7,14 +7,11 @@
 //
 
 import UIKit
-import nearclientios
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
   
   var window: UIWindow?
-  
-  weak var walletSignIn: WalletSignInDelegate?
   
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     // Override point for customization after application launch.
@@ -42,27 +39,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   func applicationWillTerminate(_ application: UIApplication) {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
   }
-  
-  func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-    guard let appUrlSchemes = UIApplication.urlSchemes?.filter({ $0 == url.scheme }), !appUrlSchemes.isEmpty else {
-      return false
-    }
-    walletSignIn?.completeSignIn(app, open: url, options: options)
-    return true
-  }
-}
-
-extension AppDelegate {
-  func signIn(with wallet: WalletAccount) {
-    
-  }
 }
 
 extension UIApplication {
-  static var urlSchemes: [String]? {
-    return (Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes") as? [[String: Any]])?.first?["CFBundleURLSchemes"] as? [String]
-  }
-  
   static var name: String? {
      return Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String
   }
