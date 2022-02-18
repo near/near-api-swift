@@ -9,7 +9,7 @@
 import UIKit
 import nearclientios
 
-class WelcomeViewController: UIViewController {
+class WelcomeViewController: UIViewController, WalletSignInDelegate {
   
   private var walletAccount: WalletAccount?
   private var near: Near?
@@ -34,17 +34,19 @@ class WelcomeViewController: UIViewController {
   
   private func setupWallet() async -> WalletAccount {
     let keyStore = KeychainKeyStore(keychain: .init(service: "example.keystore"))
-    let config = NearConfig(networkId: "testnet",
-                            nodeUrl: URL(string: "https://rpc.testnet.near.org")!,
-                            masterAccount: nil,
-                            keyPath: nil,
-                            helperUrl: nil,
-                            initialBalance: nil,
-                            providerType: .jsonRPC(URL(string: "https://rpc.testnet.near.org")!),
-                            signerType: .inMemory(keyStore),
-                            keyStore: keyStore,
-                            contractName: "myContractId",
-                            walletUrl: "https://wallet.testnet.near.org")
+    let config = NearConfig(
+      networkId: "testnet",  // "default" for mainnet
+      nodeUrl: URL(string: "https://rpc.testnet.near.org")!, // "https://rpc.mainnet.near.org" for mainnet
+      masterAccount: nil,
+      keyPath: nil,
+      helperUrl: nil,
+      initialBalance: nil,
+      providerType: .jsonRPC(URL(string: "https://rpc.testnet.near.org")!), // "https://rpc.mainnet.near.org" for mainnet
+      signerType: .inMemory(keyStore),
+      keyStore: keyStore,
+      contractName: nil,
+      walletUrl: "https://wallet.testnet.near.org"  // "https://wallet.near.org" for mainnet
+    )
     near = try! Near(config: config)
     return try! WalletAccount(near: near!, authService: DefaultAuthService.shared)
   }
@@ -71,13 +73,11 @@ class WelcomeViewController: UIViewController {
     Task {
       let appName = UIApplication.name ?? "signInTitle"
       DefaultAuthService.shared.walletSignIn = self
-      try! await walletAccount!.requestSignIn(contractId: nil,
-                                              title: appName,
-                                              presentingViewController: self)
+      try! await walletAccount!.requestSignIn(contractId: nil, title: appName, presentingViewController: self)
     }
   }
   
-  func _completeSignIn(url: URL) async {
+  func completeSignIn(url: URL) async {
     do {
       try await walletAccount?.completeSignIn(url: url)
     } catch {
@@ -92,12 +92,3 @@ class WelcomeViewController: UIViewController {
     await setupUI(with: walletAccount!)
   }
 }
-
-extension WelcomeViewController: WalletSignInDelegate {
-  func completeSignIn(url: URL) {
-    Task {
-      await _completeSignIn(url: url)
-    }
-  }
-}
-

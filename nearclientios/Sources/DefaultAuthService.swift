@@ -47,11 +47,13 @@ extension DefaultAuthService: WKNavigationDelegate {
     }
     guard let url = navigationAction.request.url else { return }
     guard url.scheme == APP_SCHEME else { return }
-    walletSignIn?.completeSignIn(url: url)
+    Task {
+      await walletSignIn?.completeSignIn(url: url)
+    }
     dismiss()
   }
 }
 
 public protocol WalletSignInDelegate: AnyObject {
-  func completeSignIn(url: URL)
+  func completeSignIn(url: URL) async
 }

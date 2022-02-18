@@ -22,7 +22,7 @@ func getConfig(env: Environment) -> EnvironmentConfig {
   switch env {
   case .production, .development:
     return EnvironmentConfig(networkId: "default",
-                             nodeUrl: URL(string: "https://rpc.nearprotocol.com")!,
+                             nodeUrl: URL(string: "https://rpc.mainnet.near.org")!,
                              masterAccount: "test.near")
   case .local:
             //process.env.HOME ?
