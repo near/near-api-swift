@@ -6,20 +6,33 @@
 //  Copyright © 2019 CocoaPods. All rights reserved.
 //
 
-import PromiseKit
-import AwaitKit
 @testable import nearclientios
+import XCTest
 
 let networkId = "unittest"
 let testAccountName = "test.near"
 
-let INITIAL_BALANCE = UInt128(100000000000)
+let INITIAL_BALANCE = UInt128(stringLiteral: "500000000000000000000000000")
+let HELLO_WASM_BALANCE = UInt128(stringLiteral: "10000000000000000000000000")
+
+// Length of a random account. Set to 40 because in the protocol minimal allowed top-level account length should be at
+// least 32.
+let RANDOM_ACCOUNT_LENGTH = 40;
 
 enum TestUtils {}
 
+func unsafeWaitFor(_ f: @escaping () async -> ()) {
+  let sema = DispatchSemaphore(value: 0)
+  async {
+    await f()
+    sema.signal()
+  }
+  sema.wait()
+}
+
 extension TestUtils {
 
-  static func setUpTestConnection() throws -> Promise<Near> {
+  static func setUpTestConnection() async throws -> Near {
     let keyStore = InMemoryKeyStore()
     let keyPair = try keyPairFromString(encodedKey: "ed25519:2wyRcSwSuHtRVmkMCGjPwnzZmQLeXLzLLyED1NDMt4BjnKgQL6tF85yBx6Jr26D2dUNeC716RBoTxntVHsegogYw")
     try! await(keyStore.setKey(networkId: networkId, accountId: testAccountName, keyPair: keyPair))
@@ -35,34 +48,57 @@ extension TestUtils {
                             keyStore: keyStore,
                             contractName: "contractId",
                             walletUrl: environment.nodeUrl.absoluteString)
-    return try connect(config: config)
+    return try await connect(config: config)
   }
 
   // Generate some unique string with a given prefix using the alice nonce.
   static func generateUniqueString(prefix: String) -> String {
-    return prefix + "\(Int(Date().timeIntervalSince1970 * 1000))" + "\(Int.random(in: 0..<1000))"
+    var result = prefix + "-\(Int(Date().timeIntervalSince1970 * 1000))" + "-\(Int.random(in: 0..<1000000))"
+    let add_symbols = max(RANDOM_ACCOUNT_LENGTH - result.count, 1)
+    for _ in 0..<add_symbols {
+      result += "0"
+    }
+
+    return result
   }
 
-  static func createAccount(masterAccount: Account, amount: UInt128 = INITIAL_BALANCE, trials: UInt32 = 5) throws -> Promise<Account> {
-    try await(masterAccount.fetchState())
+  static func createAccount(masterAccount: Account, amount: UInt128 = INITIAL_BALANCE, trials: UInt32 = 5) async throws -> Account {
+    try await masterAccount.fetchState()
     let newAccountName = generateUniqueString(prefix: "test")
     let newPublicKey = try await(masterAccount.connection.signer.createKey(accountId: newAccountName,
-                                                                           networkId: networkId))
-    try await(masterAccount.createAccount(newAccountId: newAccountName, publicKey: newPublicKey, amount: amount))
-    return .value(Account(connection: masterAccount.connection, accountId: newAccountName))
+                                                                           networkId: networkId, curve: .ED25519))
+    _ = try await masterAccount.createAccount(newAccountId: newAccountName, publicKey: newPublicKey, amount: amount)
+    return Account(connection: masterAccount.connection, accountId: newAccountName)
   }
 
-  static func deployContract(workingAccount: Account, contractId: String, amount: UInt128 = UInt128(10000000)) throws -> Promise<Contract> {
-    let newPublicKey = try await(workingAccount.connection.signer.createKey(accountId: contractId, networkId: networkId))
+  static func deployContract(workingAccount: Account, contractId: String, amount: UInt128 = HELLO_WASM_BALANCE) async throws -> Contract {
+    let newPublicKey = try await workingAccount.connection.signer.createKey(accountId: contractId, networkId: networkId, curve: .ED25519)
     let data = Wasm().data
-    try await(workingAccount.createAndDeployContract(contractId: contractId,
+    _ = try await workingAccount.createAndDeployContract(contractId: contractId,
                                                      publicKey: newPublicKey,
                                                      data: data.bytes,
-                                                     amount: amount))
+                                                     amount: amount)
     let options = ContractOptions(viewMethods: [.getValue, .getLastResult],
                                   changeMethods: [.setValue,  .callPromise],
                                   sender: nil)
     let contract = Contract(account: workingAccount, contractId: contractId, options: options)
-    return .value(contract)
+    return contract
+  }
+}
+
+extension XCTest {
+  func XCTAssertThrowsError(
+    _ expression: @autoclosure () async throws -> Any,
+    _ message: @autoclosure () -> String = "",
+    file: StaticString = #filePath,
+    line: UInt = #line,
+    _ errorHandler: (_ error: Error) -> Void = { _ in }
+  ) async {
+    do {
+      _ = try await expression()
+      XCTFail(message(), file: file, line: line)
+    } catch {
+      errorHandler(error)
+    }
   }
 }

@@ -7,8 +7,6 @@
 //
 
 import Foundation
-import PromiseKit
-import AwaitKit
 
 /**
 // Format of the account stored on disk.
@@ -40,76 +38,49 @@ public enum UnencryptedFileSystemKeyStoreError: Error {
 }
 
 extension UnencryptedFileSystemKeyStore: KeyStore {
-  public func setKey(networkId: String, accountId: String, keyPair: KeyPair) -> Promise<Void> {
-    do {
-      let networkPath = "\(keyDir)/\(networkId)"
-      let fullNetworkPath = manager.targetDirectory.appendingPathComponent(networkPath).path
-      try manager.ensureDir(path: fullNetworkPath)
-      let content = AccountInfo(account_id: accountId, private_key: keyPair.toString(), secret_key: nil)
-      let encoded = try JSONEncoder().encode(content)
-      let fileUrl = getKeyFileUrl(networkPath: networkPath, accountId: accountId)
-      try encoded.write(to: fileUrl, options: [.atomic])
-      return .value(())
-    } catch let error {
-      return .init(error: error)
-    }
+  public func setKey(networkId: String, accountId: String, keyPair: KeyPair) async throws -> Void {
+    let networkPath = "\(keyDir)/\(networkId)"
+    let fullNetworkPath = manager.targetDirectory.appendingPathComponent(networkPath).path
+    try manager.ensureDir(path: fullNetworkPath)
+    let content = AccountInfo(account_id: accountId, private_key: keyPair.toString(), secret_key: nil)
+    let encoded = try JSONEncoder().encode(content)
+    let fileUrl = getKeyFileUrl(networkPath: networkPath, accountId: accountId)
+    try encoded.write(to: fileUrl, options: [.atomic])
   }
 
   /// Find key / account id.
-  public func getKey(networkId: String, accountId: String) -> Promise<KeyPair?> {
+  public func getKey(networkId: String, accountId: String) async throws -> KeyPair? {
     let networkPath = "\(keyDir)/\(networkId)"
     let path = getKeyFileUrl(networkPath: networkPath, accountId: accountId).path
-    guard manager.fileExists(atPath: path) else {return .value(nil)}
-    do {
-      let accountKeyPair = try await(UnencryptedFileSystemKeyStore.readKeyFile(path: path))
-      return .value(accountKeyPair.1)
-    } catch let error {
-      return .init(error: error)
-    }
+    guard manager.fileExists(atPath: path) else {return nil}
+    let accountKeyPair = try await UnencryptedFileSystemKeyStore.readKeyFile(path: path)
+    return accountKeyPair.1
   }
 
-  public func removeKey(networkId: String, accountId: String) -> Promise<Void> {
+  public func removeKey(networkId: String, accountId: String) async throws -> Void {
     let networkPath = "\(keyDir)/\(networkId)"
     let path = getKeyFileUrl(networkPath: networkPath, accountId: accountId).path
-    guard manager.fileExists(atPath: path) else {return .value(())}
-    do {
-      try manager.removeItem(atPath: path)
-      return .value(())
-    } catch let error {
-      return .init(error: error)
-    }
+    guard manager.fileExists(atPath: path) else {return}
+    try manager.removeItem(atPath: path)
   }
 
-  public func clear() -> Promise<Void> {
-    do {
-      let networksPath = manager.targetDirectory.appendingPathComponent(keyDir).path
-      try manager.removeItem(atPath: networksPath)
-      return .value(())
-    } catch let error {
-      return .init(error: error)
-    }
-  }
-
-  public func getNetworks() throws -> Promise<[String]> {
+  public func clear() async throws -> Void {
     let networksPath = manager.targetDirectory.appendingPathComponent(keyDir).path
-    do {
-      let files = try manager.contentsOfDirectory(atPath: networksPath)
-      return .value(files)
-    } catch let error {
-      return .init(error: error)
-    }
+    try manager.removeItem(atPath: networksPath)
   }
 
-  public func getAccounts(networkId: String) throws -> Promise<[String]> {
+  public func getNetworks() async throws -> [String] {
+    let networksPath = manager.targetDirectory.appendingPathComponent(keyDir).path
+    let files = try manager.contentsOfDirectory(atPath: networksPath)
+    return files
+  }
+
+  public func getAccounts(networkId: String) async throws -> [String] {
     let networkPath = "\(keyDir)/\(networkId)"
     let fullNetworkPath = manager.targetDirectory.appendingPathComponent(networkPath).path
-    guard manager.fileExists(atPath: fullNetworkPath) else {return .value([])}
-    do {
-      let files = try manager.contentsOfDirectory(atPath: fullNetworkPath)
-      return .value(files.filter {$0.hasSuffix(".json")}.map {$0.replacingOccurrences(of: ".json", with: "")})
-    } catch let error {
-      return .init(error: error)
-    }
+    guard manager.fileExists(atPath: fullNetworkPath) else {return []}
+    let files = try manager.contentsOfDirectory(atPath: fullNetworkPath)
+    return files.filter {$0.hasSuffix(".json")}.map {$0.replacingOccurrences(of: ".json", with: "")}
   }
 }
 
@@ -118,21 +89,21 @@ extension UnencryptedFileSystemKeyStore {
     return manager.targetDirectory.appendingPathComponent("\(networkPath)/\(accountId).json")
   }
 
-  private static func loadJsonFile(path: String) throws -> Promise<AccountInfo> {
+  private static func loadJsonFile(path: String) async throws -> AccountInfo {
     let content = try Data(contentsOf: URL(fileURLWithPath: path), options: [])
     let accountInfo = try JSONDecoder().decode(AccountInfo.self, from: content)
-    return .value(accountInfo)
+    return accountInfo
   }
 
-  static func readKeyFile(path: String) throws -> Promise<(String, KeyPair)> {
-    let accountInfo = try await(loadJsonFile(path: path))
+  static func readKeyFile(path: String) async throws -> (String, KeyPair) {
+    let accountInfo = try await loadJsonFile(path: path)
     // The private key might be in private_key or secret_key field.
     var privateKey = accountInfo.private_key
     if privateKey == nil, accountInfo.secret_key != nil {
       privateKey = accountInfo.secret_key
     }
-    guard privateKey != nil else {return .init(error: UnencryptedFileSystemKeyStoreError.noPrivateKey)}
+    guard privateKey != nil else {throw UnencryptedFileSystemKeyStoreError.noPrivateKey}
     let keyPair = try keyPairFromString(encodedKey: privateKey!)
-    return .value((accountInfo.account_id, keyPair))
+    return (accountInfo.account_id, keyPair)
   }
 }

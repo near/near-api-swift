@@ -7,32 +7,95 @@
 //
 
 import Foundation
-import PromiseKit
+import AnyCodable
 
 public typealias Number = Int
 
 public struct SyncInfo: Codable {
-  let latest_block_hash: String
-  let latest_block_height: Number
-  let latest_block_time: String
-  let latest_state_root: String
+  let latestBlockHash: String
+  let latestBlockHeight: Number
+  let latestBlockTime: String
+  let latestStateRoot: String
   let syncing: Bool
 }
 
 public struct Validator: Codable {}
 
 public struct NodeStatusResult: Codable {
-  let chain_id: String
-  let rpc_addr: String
-  let sync_info: SyncInfo
+  let chainId: String
+  let rpcAddr: String
+  let syncInfo: SyncInfo
   let validators: [Validator]
+}
+
+public struct NetworkInfoResult: Decodable {
+  let peerMaxCount: Number
+}
+
+public struct SimpleRPCResult: Decodable {
+  public let id: String
+  public let jsonrpc: String
+  private let result: String
+  
+  public var hash: String {
+    return result
+  }
+
 }
 
 public typealias BlockHash = String
 public typealias BlockHeight = Number
-//typealias BlockId = BlockHash | BlockHeight
-// TODO find correct representation way for this
-public typealias BlockId = BlockHash
+public enum BlockId {
+  case blockHash(String)
+  case blockHeight(Int)
+}
+public enum NullableBlockId {
+  case blockHash(String)
+  case blockHeight(Int)
+  case null
+}
+
+public func typeEraseNullableBlockId(blockId: NullableBlockId) -> Any? {
+  switch blockId {
+  case .blockHeight(let height):
+   return height
+  case .blockHash(let hash):
+    return hash
+  case .null:
+    return nil
+  }
+}
+
+public enum BlockReference {
+  case blockId(BlockId)
+  case finality(Finality)
+}
+
+public func typeEraseBlockId(blockId: BlockId) -> Any {
+  switch blockId {
+  case .blockHeight(let height):
+    return height
+  case .blockHash(let hash):
+    return hash
+  }
+}
+
+public func typeEraseBlockReferenceParams(blockQuery: BlockReference) -> [String: Any] {
+  var params: [String: Any] = [:]
+  switch blockQuery {
+  case .blockId(let blockId):
+    params["block_id"] = typeEraseBlockId(blockId: blockId)
+  case .finality(let finality):
+    params["finality"] = finality.rawValue
+  }
+  
+  return params
+}
+
+public struct AccessKeyWithPublicKey: Codable {
+  let accountId: String
+  let publicKey: String
+}
 
 public enum ExecutionStatusBasic: String, Decodable {
   case unknown = "Unknown"
@@ -70,7 +133,7 @@ public enum ExecutionStatus: Decodable, Equatable {
       self = .failure(value)
       return
     }
-    throw DecodingError.notExpected
+    throw NEARDecodingError.notExpected
   }
 }
 
@@ -81,12 +144,12 @@ public enum FinalExecutionStatusBasic: String, Codable {
 }
 
 public struct ExecutionError: Codable, Equatable{
-  let error_message: String?
-  let error_type: String?
+  let errorMessage: String?
+  let errorType: String?
 
-  init(error_message: String? = nil, error_type: String? = nil) {
-    self.error_message = error_message
-    self.error_type = error_type
+  init(errorMessage: String? = nil, errorType: String? = nil) {
+    self.errorMessage = errorMessage
+    self.errorType = errorType
   }
 }
 
@@ -114,7 +177,7 @@ public enum FinalExecutionStatus: Decodable, Equatable {
       self = .failure(value)
       return
     }
-    throw DecodingError.notExpected
+    throw NEARDecodingError.notExpected
   }
 }
 
@@ -126,14 +189,15 @@ public struct ExecutionOutcomeWithId: Decodable, Equatable {
 public struct ExecutionOutcome: Decodable, Equatable {
   let status: ExecutionStatus
   let logs: [String]
-  let receipt_ids: [String]
-  let gas_burnt: Number
+  let receiptIds: [String]
+  let gasBurnt: Number
 }
 
 public struct FinalExecutionOutcome: Decodable, Equatable {
   let status: FinalExecutionStatus
-  let transaction: ExecutionOutcomeWithId
-  let receipts: [ExecutionOutcomeWithId]
+  let transactionOutcome: ExecutionOutcomeWithId
+  let receiptsOutcome: [ExecutionOutcomeWithId]
+  let receipts: AnyDecodable?
 }
 
 public struct TotalWeight: Codable {
@@ -141,47 +205,67 @@ public struct TotalWeight: Codable {
 }
 
 public struct BlockHeader: Codable {
-  let approval_mask: String
-  let approval_sigs: String
-  let hash: String
   let height: Number
-  let prev_hash: String
-  let prev_state_root: String
+  let epochId: String
+  let nextEpochId: String
+  let hash: String
+  let prevHash: String
+  let prevStateRoot: String
+  let chunkReceiptsRoot: String
+  let chunkHeadersRoot: String
+  let chunkTxRoot: String
+  let outcomeRoot: String
+  let chunksIncluded: Number
+  let challengesRoot: String
   let timestamp: Number
-  let total_weight: TotalWeight
-  let tx_root: String
+  let timestampNanosec: String
+  let randomValue: String
+  let validatorProposals: [ValidatorProposal]
+  let chunkMask: [Bool]
+  let gasPrice: String
+  let rentPaid: String
+  let validatorReward: String
+  let totalSupply: String
+  //let challenges_result: [Any]
+  let lastFinalBlock: String
+  let lastDsFinalBlock: String
+  let nextBpHash: String
+  let blockMerkleRoot: String
 }
 
 public typealias ChunkHash = String
-public typealias ShardId = Int
-// TODO find correct representation way for this
-//public typealias BlockShardId = [BlockId, ShardId]
-public typealias BlockShardId = [BlockId]
-// TODO find correct representation way for this
-//internal typealias ChunkId = ChunkHash | BlockShardId
-public typealias ChunkId = ChunkHash
+public typealias ShardId = Number
+public struct BlockShardId {
+  let blockId: BlockId
+  let shardId: ShardId
+}
+
+public enum ChunkId {
+  case chunkHash(ChunkHash)
+  case blockShardId(BlockShardId)
+}
 
 public struct ValidatorProposal: Codable {}
 
 public struct ChunkHeader: Codable {
-  let balance_burnt: String
-  let chunk_hash: ChunkHash
-  let encoded_length: Number
-  let encoded_merkle_root: String
-  let gas_limit: Number
-  let gas_used: Number
-  let height_created: Number
-  let height_included: Number
-  let outgoing_receipts_root: String
-  let prev_block_hash: String
-  let prev_state_num_parts: Number
-  let prev_state_root_hash: String
-  let rent_paid: String
-  let shard_id: Number
+  let chunkHash: ChunkHash
+  let prevBlockHash: String
+  let outcomeRoot: String
+  let prevStateRoot: String
+  let encodedMerkleRoot: String
+  let encodedLength: Number
+  let heightCreated: Number
+  let heightIncluded: Number
+  let shardId: ShardId
+  let gasUsed: Number
+  let gasLimit: Number
+  let rentPaid: String
+  let validatorReward: String
+  let balanceBurnt: String
+  let outgoingReceiptsRoot: String
+  let txRoot: String
+  let validatorProposals: [ValidatorProposal]
   let signature: String
-  let tx_root: String
-  let validator_proposals: [ValidatorProposal]
-  let validator_reward: String
 }
 
 public struct Receipt: Codable {}
@@ -203,7 +287,76 @@ public struct Transaction: Codable {
 
 public struct BlockResult: Codable {
   let header: BlockHeader
-  let transactions: [Transaction]
+  let transactions: [Transaction]?
+}
+
+public struct BlockChange: Codable {
+  let type: String
+  let accountId: String
+}
+
+public struct BlockChangeResult: Codable {
+  let blockHash: String
+  let changes: [BlockChange]
+}
+
+public struct ChangeResult: Decodable {
+  let blockHash: String
+  let changes: [AnyDecodable]
+}
+
+public struct ExperimentalNearProtocolConfig: Decodable {
+  let chainId: String
+  let genesisHeight: Number
+  let runtimeConfig: ExperimentalNearProtocolRuntimeConfig?
+}
+
+public struct ExperimentalNearProtocolRuntimeConfig: Decodable {
+  let storageAmountPerByte: String
+}
+
+public struct GasPrice: Codable {
+  let gasPrice: String
+}
+
+public struct EpochValidatorInfo: Decodable {
+  // Validators for the current epoch.
+  let nextValidators: [NextEpochValidatorInfo]
+  // Validators for the next epoch.
+  let currentValidators: [CurrentEpochValidatorInfo]
+  // Fishermen for the current epoch.
+  let nextFishermen: [ValidatorStakeView]
+  // Fishermen for the next epoch.
+  let currentFishermen: [ValidatorStakeView]
+  // Proposals in the current epoch.
+  let currentProposals: [ValidatorStakeView]
+  // Kickout in the previous epoch.
+  let prevEpochKickout: [ValidatorStakeView]
+  // Epoch start height.
+  let epochStartHeight: Number
+}
+
+public struct CurrentEpochValidatorInfo: Decodable {
+  let accountId: String
+  let publicKey: String
+  let isSlashed: Bool
+  let stake: String
+  let shards: [Number]
+  let numProducedBlocks: Number
+  let numExpectedBlocks: Number
+}
+
+public struct NextEpochValidatorInfo: Decodable {
+  let accountId: String
+  let publicKey: String
+  let stake: String
+  let shards: [Number]
+}
+
+public struct ValidatorStakeView: Decodable {
+  let accountId: String
+  let publicKey: String
+  let stake: String
 }
 
 public enum ProviderType {
@@ -211,13 +364,26 @@ public enum ProviderType {
 }
 
 public protocol Provider {
-  func getNetwork() throws -> Promise<Network>
-  func status() throws -> Promise<NodeStatusResult>
-  func sendTransaction(signedTransaction: SignedTransaction) throws -> Promise<FinalExecutionOutcome>
-  func txStatus(txHash: [UInt8], accountId: String) throws -> Promise<FinalExecutionOutcome>
-  func query<T: Decodable>(path: String, data: String) throws -> Promise<T>
-  func block(blockId: BlockId) throws -> Promise<BlockResult>
-  func chunk(chunkId: ChunkId) throws -> Promise<ChunkResult>
+  func getNetwork() async throws -> Network
+  func status() async throws -> NodeStatusResult
+  func networkInfo() async throws -> NetworkInfoResult
+  func sendTransaction(signedTransaction: SignedTransaction) async throws -> FinalExecutionOutcome
+  func sendTransactionAsync(signedTransaction: SignedTransaction) async throws -> SimpleRPCResult
+  func txStatus(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome
+  func experimentalTxStatusWithReceipts(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome
+  func query<T: Decodable>(params: [String: Any]) async throws -> T
+  func block(blockQuery: BlockReference) async throws -> BlockResult
+  func blockChanges(blockQuery: BlockReference) async throws -> BlockChangeResult
+  func chunk(chunkId: ChunkId) async throws -> ChunkResult
+  func gasPrice(blockId: NullableBlockId) async throws -> GasPrice
+  func experimentalGenesisConfig() async throws -> ExperimentalNearProtocolConfig
+  func experimentalProtocolConfig(blockQuery: BlockReference) async throws -> ExperimentalNearProtocolConfig
+  func validators(blockId: NullableBlockId) async throws -> EpochValidatorInfo
+  func accessKeyChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult
+  func singleAccessKeyChanges(accessKeyArray: [AccessKeyWithPublicKey], blockQuery: BlockReference) async throws -> ChangeResult
+  func accountChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult
+  func contractStateChanges(accountIdArray: [String], blockQuery: BlockReference, keyPrefix: String?) async throws -> ChangeResult
+  func contractCodeChanges(accountIdArray: [String], blockQuery: BlockReference) async throws -> ChangeResult
 }
 
 public func getTransactionLastResult(txResult: FinalExecutionOutcome) -> Any? {

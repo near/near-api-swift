@@ -1,45 +1,28 @@
 PODS:
-  - AwaitKit (5.2.0):
-    - PromiseKit (~> 6)
-  - Base58Swift (2.1.7):
-    - BigInt (~> 3.1)
-  - BigInt (3.1.0):
-    - SipHash (~> 1.2)
-  - KeychainAccess (4.1.0)
-  - nearclientios (0.1.0):
-    - AwaitKit (~> 5.0)
-    - Base58Swift (~> 2.1.7)
-    - KeychainAccess (~> 4.1.0)
+  - AnyCodable-FlightSchool (0.6.2)
+  - Base58Swift (2.1.10):
+    - BigInt (~> 5.0.0)
+  - BigInt (5.0.0)
+  - KeychainAccess (4.2.2)
+  - nearclientios (1.0.0):
+    - AnyCodable-FlightSchool (~> 0.6.0)
+    - Base58Swift (~> 2.1.10)
+    - KeychainAccess (~> 4.2.2)
+    - secp256k1.swift
     - TweetNacl (~> 1.0)
-  - Nimble (8.0.4)
-  - PromiseKit (6.11.0):
-    - PromiseKit/CorePromise (= 6.11.0)
-    - PromiseKit/Foundation (= 6.11.0)
-    - PromiseKit/UIKit (= 6.11.0)
-  - PromiseKit/CorePromise (6.11.0)
-  - PromiseKit/Foundation (6.11.0):
-    - PromiseKit/CorePromise
-  - PromiseKit/UIKit (6.11.0):
-    - PromiseKit/CorePromise
-  - Quick (2.2.0)
-  - SipHash (1.2.2)
+  - secp256k1.swift (0.1.4)
   - TweetNacl (1.0.2)
 
 DEPENDENCIES:
   - nearclientios (from `../`)
-  - Nimble
-  - Quick
 
 SPEC REPOS:
   trunk:
-    - AwaitKit
+    - AnyCodable-FlightSchool
     - Base58Swift
     - BigInt
     - KeychainAccess
-    - Nimble
-    - PromiseKit
-    - Quick
-    - SipHash
+    - secp256k1.swift
     - TweetNacl
 
 EXTERNAL SOURCES:
@@ -47,17 +30,14 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  AwaitKit: 512626cd12c82b1fbffddc8f414d0364cb456004
-  Base58Swift: 149c9dd95d8712f00e4695b36baafb3031927256
-  BigInt: 76b5dfdfa3e2e478d4ffdf161aeede5502e2742f
-  KeychainAccess: 445e28864fe6d3458b41fa211bcdc39890e8bd5a
-  nearclientios: ea8e674ac9dde3cfd1e6f53f9dbb53f724bfd903
-  Nimble: 18d5360282923225d62b09d781f63abc1a0111fc
-  PromiseKit: e4863d06976e7dee5e41c04fc7371c16b3600292
-  Quick: 7fb19e13be07b5dfb3b90d4f9824c855a11af40e
-  SipHash: fad90a4683e420c52ef28063063dbbce248ea6d4
+  AnyCodable-FlightSchool: ac75ed9bae659e16a41ebfa6c71a663d6f2c111c
+  Base58Swift: 53d551f0b33d9478fa63b3445e453a772d6b31a7
+  BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
+  KeychainAccess: c0c4f7f38f6fc7bbe58f5702e25f7bd2f65abf51
+  nearclientios: 29ed49caa33e70c861dafea8c1a550e3fd802cce
+  secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
   TweetNacl: 3abf4d1d2082b0114e7a67410e300892448951e6
 
-PODFILE CHECKSUM: 94032e5674b919cac77bff067f1a3ae57504b308
+PODFILE CHECKSUM: bf2ede311928de0026e7155c3c779a7c3a7fed9d
 
-COCOAPODS: 1.9.2
+COCOAPODS: 1.11.2

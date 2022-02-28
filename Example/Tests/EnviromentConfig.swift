@@ -22,7 +22,7 @@ func getConfig(env: Environment) -> EnvironmentConfig {
   switch env {
   case .production, .development:
     return EnvironmentConfig(networkId: "default",
-                             nodeUrl: URL(string: "https://rpc.nearprotocol.com")!,
+                             nodeUrl: URL(string: "https://rpc.mainnet.near.org")!,
                              masterAccount: "test.near")
   case .local:
             //process.env.HOME ?
@@ -36,7 +36,7 @@ func getConfig(env: Environment) -> EnvironmentConfig {
                              masterAccount: "test.near")
   case .testRemote, .ci:
     return EnvironmentConfig(networkId: "shared-test",
-                             nodeUrl: URL(string: "http://shared-test.nearprotocol.com:3030")!,
+                             nodeUrl: URL(string: "https://rpc.ci-testnet.near.org")!,
                              masterAccount: "test.near")
   case .ciStaging:
     return EnvironmentConfig(networkId: "shared-test-staging",

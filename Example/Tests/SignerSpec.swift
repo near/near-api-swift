@@ -7,18 +7,13 @@
 //
 
 import XCTest
-import Quick
-import Nimble
 @testable import nearclientios
 
-class SignerSpec: QuickSpec {
-
-  override func spec() {
-    describe("SignerSpec") {
-      it("it should throw no key") {
-        let signer = InMemorySigner(keyStore: InMemoryKeyStore())
-        try! expect(signer.signMessage(message: "message".baseDecoded, accountId: "user", networkId: "network")).to(throwError(errorType: InMemorySignerError.self))
-      }
+class SignerSpec: XCTestCase {
+  func testNoKeyThrowsError() async throws {
+    let signer = InMemorySigner(keyStore: InMemoryKeyStore())
+    await XCTAssertThrowsError(try await signer.signMessage(message: "message".baseDecoded, accountId: "user", networkId: "network")) { error in
+      XCTAssertTrue(error is InMemorySignerError)
     }
   }
 }

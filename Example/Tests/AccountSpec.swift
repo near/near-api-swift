@@ -7,195 +7,154 @@
 //
 
 import XCTest
-import Quick
-import Nimble
-import AwaitKit
+
 @testable import nearclientios
+class AccountSpec: XCTestCase {
+  static var near: Near!
+  static var workingAccount: Account!
 
-class AccountSpec: QuickSpec {
-  var near: Near!
-  var workingAccount: Account!
-
-  override func spec() {
-    describe("AccountSpec") {
-      beforeSuite {
-        do {
-          self.near = try await(TestUtils.setUpTestConnection())
-          let masterAccount = try await(self.near.account(accountId: testAccountName))
-          let amount = INITIAL_BALANCE * UInt128(100)
-          self.workingAccount = try await(TestUtils.createAccount(masterAccount: masterAccount, amount: amount))
-        } catch let error {
-          fail("\(error)")
-        }
-      }
-
-      it("it should works with predefined account and returns correct name") {
-        do {
-          let status = try await(self.workingAccount.state())
-          expect(status.code_hash).to(equal("11111111111111111111111111111111"))
-        } catch let error {
-          fail("\(error)")
-        }
-      }
-
-      it("it should create account and then view account returns the created account") {
-        do {
-          let newAccountName = TestUtils.generateUniqueString(prefix: "test")
-          let newAccountPublicKey = try PublicKey.fromString(encodedKey: "9AhWenZ3JddamBoyMqnTbp7yVbRuvqAv3zwfrWgfVRJE")
-          try await(self.workingAccount.createAccount(newAccountId: newAccountName,
-                                                      publicKey: newAccountPublicKey,
-                                                      amount: INITIAL_BALANCE))
-          let newAccount = Account(connection: self.near.connection, accountId: newAccountName)
-          let state = try await(newAccount.state())
-          expect(state.amount).to(equal("\(INITIAL_BALANCE)"))
-        } catch let error {
-          fail("\(error)")
-        }
-      }
-
-      it("it should send money") {
-        do {
-          let sender = try await(TestUtils.createAccount(masterAccount: self.workingAccount))
-          let receiver = try await(TestUtils.createAccount(masterAccount: self.workingAccount))
-          try await(sender.sendMoney(receiverId: receiver.accountId, amount: UInt128(10000)))
-          try await(receiver.fetchState())
-          let state = try await(receiver.state())
-          let rightValue = INITIAL_BALANCE + UInt128(10000)
-          expect(state.amount).to(equal("\(rightValue)"))
-        } catch let error {
-          fail("\(error)")
-        }
-      }
-
-      it("it should delete account") {
-        do {
-          let sender = try await(TestUtils.createAccount(masterAccount: self.workingAccount))
-          let receiver = try await(TestUtils.createAccount(masterAccount: self.workingAccount))
-          try await(sender.deleteAccount(beneficiaryId: receiver.accountId))
-          let reloaded = Account(connection: sender.connection, accountId: sender.accountId)
-          try expect(reloaded.state()).to(throwError())
-        } catch let error {
-          fail("\(error)")
-        }
+  static let contractId = TestUtils.generateUniqueString(prefix: "test_contract")
+  static var contract: Contract!
+  
+  override class func setUp() {
+    super.setUp()
+    unsafeWaitFor {
+      do {
+        try await setUpAll()
+      } catch let error {
+        print(error)
       }
     }
-
-    describe("errors") {
-      it("while creating existing account") {
-        try! expect(self.workingAccount.createAccount(newAccountId: self.workingAccount.accountId,
-                                                     publicKey: PublicKey.fromString(encodedKey: "9AhWenZ3JddamBoyMqnTbp7yVbRuvqAv3zwfrWgfVRJE"),
-                                                     amount: 100)).to(throwError())
-      }
+  }
+  
+  class func setUpAll() async throws {
+    // Account setup
+    near = try await TestUtils.setUpTestConnection()
+    let masterAccount = try await near.account(accountId: testAccountName)
+    let amount = INITIAL_BALANCE
+    workingAccount = try await TestUtils.createAccount(masterAccount: masterAccount, amount: amount)
+    
+    // Contract setup
+    let newPublicKey = try await near.connection.signer.createKey(accountId: contractId, networkId: networkId, curve: .ED25519)
+    let data = Wasm().data
+    try await workingAccount.createAndDeployContract(contractId: contractId, publicKey: newPublicKey, data: data.bytes, amount: HELLO_WASM_BALANCE)
+    let options = ContractOptions(viewMethods: [.hello, .getValue, .getAllKeys, .returnHiWithLogs], changeMethods: [.setValue, .generateLogs, .triggerAssert, .testSetRemove], sender: nil)
+    contract = Contract(account: workingAccount, contractId: contractId, options: options)
+  }
+  
+  func testViewPredefinedAccountWithCorrectName() async throws {
+    let status = try await AccountSpec.workingAccount.state()
+    XCTAssertEqual(status.codeHash, "11111111111111111111111111111111")
+  }
+  
+  func testCreateAccountAndViewNewAccount() async throws {
+    let newAccountName = TestUtils.generateUniqueString(prefix: "test")
+    let newAccountPublicKey = try PublicKey.fromString(encodedKey: "9AhWenZ3JddamBoyMqnTbp7yVbRuvqAv3zwfrWgfVRJE")
+    let workingState = try await AccountSpec.workingAccount.state()
+    let amount = workingState.amount
+    let newAmount = UInt128(stringLiteral: amount) / UInt128(100)
+    try await AccountSpec.workingAccount.createAccount(newAccountId: newAccountName, publicKey: newAccountPublicKey, amount: newAmount)
+    let newAccount = Account(connection: AccountSpec.near.connection, accountId: newAccountName)
+    let state = try await newAccount.state()
+    XCTAssertEqual(state.amount, "\(newAmount)")
+  }
+  
+  func testCreateAccountAndViewNewAccountUsingSecp256k1Curve() async throws {
+    let newAccountName = TestUtils.generateUniqueString(prefix: "test")
+    let newAccountPublicKey = try PublicKey.fromString(encodedKey: "secp256k1:45KcWwYt6MYRnnWFSxyQVkuu9suAzxoSkUMEnFNBi9kDayTo5YPUaqMWUrf7YHUDNMMj3w75vKuvfAMgfiFXBy28")
+    let workingState = try await AccountSpec.workingAccount.state()
+    let amount = workingState.amount
+    let newAmount = UInt128(stringLiteral: amount) / UInt128(100)
+    try await AccountSpec.workingAccount.createAccount(newAccountId: newAccountName, publicKey: newAccountPublicKey, amount: newAmount)
+    let newAccount = Account(connection: AccountSpec.near.connection, accountId: newAccountName)
+    let state = try await newAccount.state()
+    XCTAssertEqual(state.amount, "\(newAmount)")
+  }
+  
+  func testSendMoney() async throws {
+    let workingState = try await AccountSpec.workingAccount.state()
+    let amountFraction = UInt128(stringLiteral: workingState.amount) / UInt128(100)
+    let sender = try await TestUtils.createAccount(masterAccount: AccountSpec.workingAccount, amount: amountFraction)
+    let receiver = try await TestUtils.createAccount(masterAccount: AccountSpec.workingAccount, amount: amountFraction)
+    try await sender.sendMoney(receiverId: receiver.accountId, amount: UInt128(10000))
+    try await receiver.fetchState()
+    let state = try await receiver.state()
+    XCTAssertEqual(state.amount, "\(amountFraction + UInt128(10000))")
+  }
+  
+  func testDeleteAccount() async throws {
+    let workingState = try await AccountSpec.workingAccount.state()
+    let amountFraction = UInt128(stringLiteral: workingState.amount) / UInt128(100)
+    let sender = try await TestUtils.createAccount(masterAccount: AccountSpec.workingAccount, amount: amountFraction)
+    let receiver = try await TestUtils.createAccount(masterAccount: AccountSpec.workingAccount, amount: amountFraction)
+    try await sender.deleteAccount(beneficiaryId: receiver.accountId)
+    try await receiver.fetchState()
+    let senderState = try await receiver.state()
+    XCTAssertGreaterThan(UInt128(stringLiteral: senderState.amount), amountFraction)
+    
+    let reloaded = Account(connection: sender.connection, accountId: sender.accountId)
+    await XCTAssertThrowsError(try await reloaded.state()) { error in
+      XCTAssertTrue(error is HTTPError)
     }
+  }
+  
+  // Errors
+  func testCreatingAnExistingAccountShouldThrow() async throws {
+    await XCTAssertThrowsError(try await AccountSpec.workingAccount.createAccount(newAccountId: AccountSpec.workingAccount.accountId, publicKey: PublicKey.fromString(encodedKey: "9AhWenZ3JddamBoyMqnTbp7yVbRuvqAv3zwfrWgfVRJE"), amount: 100)) { error in
+      XCTAssertTrue(error is TypedError)
+    }
+  }
+  
+  // With deploy contract
+  func testMakeFunctionCallsViaAccount() async throws {
+    let result: String = try await AccountSpec.workingAccount.viewFunction(contractId: AccountSpec.contractId, methodName: "hello", args: ["name": "trex"])
+    XCTAssertEqual(result, "hello trex")
 
-    describe("with deploy contract") {
-//      let oldLog;
-//      let logs;
-      let contractId = TestUtils.generateUniqueString(prefix: "test_contract")
-      var contract: Contract!
+    let setCallValue = TestUtils.generateUniqueString(prefix: "setCallPrefix")
+    let result2 = try await AccountSpec.workingAccount.functionCall(contractId: AccountSpec.contractId, methodName: "setValue", args: ["value": setCallValue], gas: nil, amount: 0)
+    XCTAssertEqual(getTransactionLastResult(txResult: result2) as? String, setCallValue)
+    
+    let testSetCallValue: String = try await AccountSpec.workingAccount.viewFunction(contractId: AccountSpec.contractId, methodName: "getValue", args: [:])
+    XCTAssertEqual(testSetCallValue, setCallValue)
+  }
+  
+  func testMakeFunctionCallsViaAccountWithGas() async throws {
+    let result: String = try await AccountSpec.contract.view(methodName: .hello, args: ["name": "trex"])
+    XCTAssertEqual(result, "hello trex")
 
-      beforeSuite {
-        do {
-          let newPublicKey = try await(self.near.connection.signer.createKey(accountId: contractId, networkId: networkId))
-          let data = Wasm().data
-          try await(self.workingAccount.createAndDeployContract(contractId: contractId,
-                                                                publicKey: newPublicKey,
-                                                                data: data.bytes,
-                                                                amount: UInt128(1000000)))
-          let options = ContractOptions(viewMethods: [.hello, .getValue, .getAllKeys, .returnHiWithLogs],
-                                        changeMethods: [.setValue, .generateLogs, .triggerAssert, .testSetRemove],
-                                        sender: nil)
-          contract = Contract(account: self.workingAccount, contractId: contractId, options: options)
-        } catch let error {
-          fail("\(error)")
-        }
-      }
+    let setCallValue = TestUtils.generateUniqueString(prefix: "setCallPrefix")
+    let result2 = try await AccountSpec.contract.change(methodName: .setValue, args: ["value": setCallValue], gas: 1000000 * 1000000) as? String
+    XCTAssertEqual(result2, setCallValue)
 
-      it("make function calls via account") {
-        do {
-          let result: String = try await(self.workingAccount.viewFunction(contractId: contractId,
-                                                                          methodName: "hello",
-                                                                          args: ["name": "trex"]))
-          expect(result).to(equal("hello trex"))
-
-          let setCallValue = TestUtils.generateUniqueString(prefix: "setCallPrefix")
-          let result2 = try await(self.workingAccount.functionCall(contractId: contractId,
-                                                                   methodName: "setValue",
-                                                                   args: ["value": setCallValue],
-                                                                   gas: nil,
-                                                                   amount: 0))
-          expect(getTransactionLastResult(txResult: result2) as? String).to(equal(setCallValue))
-          let testSetCallValue: String = try await(self.workingAccount.viewFunction(contractId: contractId,
-                                                                                    methodName: "getValue",
-                                                                                    args: [:]))
-          expect(testSetCallValue).to(equal(setCallValue))
-        } catch let error {
-          fail("\(error)")
-        }
-      }
-
-      it("should make function calls via contract") {
-        do {
-          let result: String = try await(contract.view(methodName: .hello, args: ["name": "trex"]))
-          expect(result).to(equal("hello trex"))
-
-          let setCallValue = TestUtils.generateUniqueString(prefix: "setCallPrefix")
-          let result2 = try await(contract.change(methodName: .setValue, args: ["value": setCallValue])) as? String
-          expect(result2).to(equal(setCallValue))
-          let testSetCallValue: String = try await(contract.view(methodName: .getValue))
-          expect(testSetCallValue).to(equal(setCallValue))
-        } catch let error {
-          fail("\(error)")
-        }
-      }
-
-      it("should make function calls via contract with gas") {
-        do {
-          let result: String = try await(contract.view(methodName: .hello, args: ["name": "trex"]))
-          expect(result).to(equal("hello trex"))
-
-          let setCallValue = TestUtils.generateUniqueString(prefix: "setCallPrefix")
-          let result2 = try await(contract.change(methodName: .setValue, args: ["value": setCallValue], gas: 100000)) as? String
-          expect(result2).to(equal(setCallValue))
-          let testSetCallValue: String = try await(contract.view(methodName: .getValue))
-          expect(testSetCallValue).to(equal(setCallValue))
-        } catch let error {
-          fail("\(error)")
-        }
-      }
-
-      it("should get logs from method result") {
-        do {
-          let logs = try await(contract.change(methodName: .generateLogs))
-//          expect(logs).to(equal([`[${contractId}]: LOG: log1`, `[${contractId}]: LOG: log2`]))]
-        } catch let error {
-          fail("\(error)")
-        }
-      }
-
-      it("can get logs from view call") {
-        do {
-          let result: String = try await(contract.view(methodName: .returnHiWithLogs))
-          expect(result).to(equal("Hi"))
-//          expect(logs).toEqual([`[${contractId}]: LOG: loooog1`, `[${contractId}]: LOG: loooog2`]);
-        } catch let error {
-          fail("\(error)")
-        }
-      }
-
-      it("can get assert message from method result") {
-          try! expect(contract.change(methodName: .triggerAssert)).to(throwError())
-          //          expect(logs[0]).toEqual(`[${contractId}]: LOG: log before assert`);
-          //          expect(logs[1]).toMatch(new RegExp(`^\\[${contractId}\\]: ABORT: "?expected to fail"?,? filename: "assembly/main.ts" line: \\d+ col: \\d+$`));
-      }
-
-      it("test set/remove") {
-        do {
-          try await(contract.change(methodName: .testSetRemove, args: ["value": "123"]))
-        } catch let error {
-          fail("\(error)")
-        }
-      }
+    let testSetCallValue: String = try await AccountSpec.contract.view(methodName: .getValue)
+    XCTAssertEqual(testSetCallValue, setCallValue)
+  }
+  
+//  func testShouldGetLogsFromMethodResult() async throws {
+//    let logs = try await contract.change(methodName: .generateLogs)
+//    expect(logs).to(equal([`[${contractId}]: LOG: log1`, `[${contractId}]: LOG: log2`]))]
+//  }
+  
+  func testCanGetLogsFromViewCall() async throws {
+    let result: String = try await AccountSpec.contract.view(methodName: .returnHiWithLogs)
+    XCTAssertEqual(result, "Hi")
+    //expect(logs).toEqual([`[${contractId}]: LOG: loooog1`, `[${contractId}]: LOG: loooog2`]);
+  }
+  
+  func testCanGetAssertMessageFromMethodResult() async throws {
+    await XCTAssertThrowsError(try await AccountSpec.contract.change(methodName: .triggerAssert) as Any) { error in
+      XCTAssertTrue(error is TypedError)
+      // This method in the testing contract is just designed to test logging after failure.
+      //expect(logs[0]).toEqual(`[${contractId}]: LOG: log before assert`)
+      //expect(logs[1]).toMatch(new RegExp(`^\\[${contractId}\\]: ABORT: "?expected to fail"?,?
+    }
+  }
+  
+  func testAttemptSetRemove() async throws {
+    do {
+      try await AccountSpec.contract.change(methodName: .testSetRemove, args: ["value": "123"])
+    } catch let error {
+      XCTFail(error.localizedDescription)
     }
   }
 }

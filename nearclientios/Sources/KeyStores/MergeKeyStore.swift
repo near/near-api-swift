@@ -7,8 +7,6 @@
 //
 
 import Foundation
-import PromiseKit
-import AwaitKit
 
 /**
  * Keystore which can be used to merge multiple key stores into one virtual key store.
@@ -23,48 +21,50 @@ public struct MergeKeyStore {
 }
 
 extension MergeKeyStore: KeyStore {
-  public func setKey(networkId: String, accountId: String, keyPair: KeyPair) -> Promise<Void> {
-    return keyStores[0].setKey(networkId: networkId, accountId: accountId, keyPair: keyPair)
+  public func setKey(networkId: String, accountId: String, keyPair: KeyPair) async throws -> Void {
+    return try await keyStores[0].setKey(networkId: networkId, accountId: accountId, keyPair: keyPair)
   }
 
-  public func getKey(networkId: String, accountId: String) -> Promise<KeyPair?> {
+  public func getKey(networkId: String, accountId: String) async throws -> KeyPair? {
     for keyStore in keyStores {
-      if let keyPair = try! await(keyStore.getKey(networkId: networkId, accountId: accountId)) {
-        return .value(keyPair)
+      if let keyPair = try await keyStore.getKey(networkId: networkId, accountId: accountId) {
+        return keyPair
       }
     }
-    return .value(nil)
+    return nil
   }
 
-  public func removeKey(networkId: String, accountId: String) -> Promise<Void> {
-    let promises = keyStores.map { $0.removeKey(networkId: networkId, accountId: accountId) }
-    return when(resolved: promises).asVoid()
+  public func removeKey(networkId: String, accountId: String) async throws -> Void {
+    for keyStore in keyStores {
+      try await keyStore.removeKey(networkId: networkId, accountId: accountId)
+    }
   }
 
-  public func clear() -> Promise<Void> {
-    let promises = keyStores.map { $0.clear() }
-    return when(resolved: promises).asVoid()
+  public func clear() async throws -> Void {
+    for keyStore in keyStores {
+      try await keyStore.clear()
+    }
   }
 
-  public func getNetworks() throws -> Promise<[String]> {
+  public func getNetworks() async throws -> [String] {
     var result = Set<String>()
     for keyStore in keyStores {
-      let networks = try await(keyStore.getNetworks())
+      let networks = try await keyStore.getNetworks()
       for network in networks {
         result.insert(network)
       }
     }
-    return .value(Array(result))
+    return Array(result)
   }
 
-  public func getAccounts(networkId: String) throws -> Promise<[String]> {
+  public func getAccounts(networkId: String) async throws -> [String] {
     var result = Set<String>()
     for keyStore in keyStores {
-      let accounts = try await(keyStore.getAccounts(networkId: networkId))
+      let accounts = try await keyStore.getAccounts(networkId: networkId)
       for account in accounts {
         result.insert(account)
       }
     }
-    return .value(Array(result))
+    return Array(result)
   }
 }

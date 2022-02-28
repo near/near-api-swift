@@ -20,9 +20,7 @@
 		324C5493238FC6C00097E566 /* TestUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324C5492238FC6C00097E566 /* TestUtils.swift */; };
 		324C5495238FCC110097E566 /* WalletAccountSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324C5494238FCC110097E566 /* WalletAccountSpec.swift */; };
 		324C549723900EB90097E566 /* AccountSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324C549623900EB90097E566 /* AccountSpec.swift */; };
-		324FD2C2238D21E500950035 /* FileSystemKeyStoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324FD2BE238D20C000950035 /* FileSystemKeyStoreSpec.swift */; };
 		324FD2C3238D21E800950035 /* KeystoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324FD2C0238D21DA00950035 /* KeystoreSpec.swift */; };
-		324FD2C5238DB6FC00950035 /* KeychainKeystoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324FD2C4238DB6FC00950035 /* KeychainKeystoreSpec.swift */; };
 		3283AE7823A02D70003E1846 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3283AE7723A02D70003E1846 /* Default-568h@2x.png */; };
 		32929BB123950B9F00BE56B5 /* AccessKeySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32929BB023950B9F00BE56B5 /* AccessKeySpec.swift */; };
 		32E06210239ECED100E8DB49 /* main.wasm in Resources */ = {isa = PBXBuildFile; fileRef = 32E0620F239ECED100E8DB49 /* main.wasm */; };
@@ -31,7 +29,6 @@
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
-		607FACEC1AFB9204008FA782 /* InMemoryKeystoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* InMemoryKeystoreSpec.swift */; };
 		B17C034D3808655474DCB66B /* Pods_nearclientios_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4DDB45CBDE24B4160D74230 /* Pods_nearclientios_Tests.framework */; };
 		D53FD32ACC638A15BE265C9C /* Pods_nearclientios_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1CAE1E7BE5E33A01D056CB26 /* Pods_nearclientios_Example.framework */; };
 /* End PBXBuildFile section */
@@ -61,9 +58,7 @@
 		324C5492238FC6C00097E566 /* TestUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtils.swift; sourceTree = "<group>"; };
 		324C5494238FCC110097E566 /* WalletAccountSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletAccountSpec.swift; sourceTree = "<group>"; };
 		324C549623900EB90097E566 /* AccountSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSpec.swift; sourceTree = "<group>"; };
-		324FD2BE238D20C000950035 /* FileSystemKeyStoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemKeyStoreSpec.swift; sourceTree = "<group>"; };
 		324FD2C0238D21DA00950035 /* KeystoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeystoreSpec.swift; sourceTree = "<group>"; };
-		324FD2C4238DB6FC00950035 /* KeychainKeystoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainKeystoreSpec.swift; sourceTree = "<group>"; };
 		3283AE7723A02D70003E1846 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		32929BB023950B9F00BE56B5 /* AccessKeySpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessKeySpec.swift; sourceTree = "<group>"; };
 		32E0620F239ECED100E8DB49 /* main.wasm */ = {isa = PBXFileReference; lastKnownFileType = file; path = main.wasm; sourceTree = "<group>"; };
@@ -79,7 +74,6 @@
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		607FACE51AFB9204008FA782 /* nearclientios_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = nearclientios_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		607FACEB1AFB9204008FA782 /* InMemoryKeystoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryKeystoreSpec.swift; sourceTree = "<group>"; };
 		8F012876A69C852C097B4BFD /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		CFCAECB67C9192AB083592B4 /* Pods-nearclientios_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-nearclientios_Tests.release.xcconfig"; path = "Target Support Files/Pods-nearclientios_Tests/Pods-nearclientios_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		D4B9A03936E199633849CEEE /* Pods-nearclientios_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-nearclientios_Tests.debug.xcconfig"; path = "Target Support Files/Pods-nearclientios_Tests/Pods-nearclientios_Tests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -123,9 +117,6 @@
 		324FD2BD238D1E8E00950035 /* KeyStores */ = {
 			isa = PBXGroup;
 			children = (
-				324FD2BE238D20C000950035 /* FileSystemKeyStoreSpec.swift */,
-				607FACEB1AFB9204008FA782 /* InMemoryKeystoreSpec.swift */,
-				324FD2C4238DB6FC00950035 /* KeychainKeystoreSpec.swift */,
 				324FD2C0238D21DA00950035 /* KeystoreSpec.swift */,
 				3204AD14238DB91700D3E07F /* MergeKeyStoreSpec.swift */,
 			);
@@ -262,7 +253,6 @@
 				607FACE11AFB9204008FA782 /* Sources */,
 				607FACE21AFB9204008FA782 /* Frameworks */,
 				607FACE31AFB9204008FA782 /* Resources */,
-				086DE58AF4249573DCED28CB /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -340,26 +330,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		086DE58AF4249573DCED28CB /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-nearclientios_Tests/Pods-nearclientios_Tests-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/Nimble/Nimble.framework",
-				"${BUILT_PRODUCTS_DIR}/Quick/Quick.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Nimble.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Quick.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-nearclientios_Tests/Pods-nearclientios_Tests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		71DBCE529C658AC9B250FEF7 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -389,25 +359,23 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-nearclientios_Example/Pods-nearclientios_Example-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/AwaitKit/AwaitKit.framework",
+				"${BUILT_PRODUCTS_DIR}/AnyCodable-FlightSchool/AnyCodable.framework",
 				"${BUILT_PRODUCTS_DIR}/Base58Swift/Base58Swift.framework",
 				"${BUILT_PRODUCTS_DIR}/BigInt/BigInt.framework",
 				"${BUILT_PRODUCTS_DIR}/KeychainAccess/KeychainAccess.framework",
-				"${BUILT_PRODUCTS_DIR}/PromiseKit/PromiseKit.framework",
-				"${BUILT_PRODUCTS_DIR}/SipHash/SipHash.framework",
 				"${BUILT_PRODUCTS_DIR}/TweetNacl/TweetNacl.framework",
 				"${BUILT_PRODUCTS_DIR}/nearclientios/nearclientios.framework",
+				"${BUILT_PRODUCTS_DIR}/secp256k1.swift/secp256k1.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AwaitKit.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AnyCodable.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Base58Swift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BigInt.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/KeychainAccess.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PromiseKit.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SipHash.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TweetNacl.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nearclientios.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/secp256k1.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -455,8 +423,6 @@
 			files = (
 				324C5491238FB8230097E566 /* SignerSpec.swift in Sources */,
 				3204AD18238DD8B200D3E07F /* KeyPairSpec.swift in Sources */,
-				324FD2C5238DB6FC00950035 /* KeychainKeystoreSpec.swift in Sources */,
-				324FD2C2238D21E500950035 /* FileSystemKeyStoreSpec.swift in Sources */,
 				324C548C238F00670097E566 /* SerializeSpec.swift in Sources */,
 				324FD2C3238D21E800950035 /* KeystoreSpec.swift in Sources */,
 				32300C842397A89100CEE803 /* Wasm.swift in Sources */,
@@ -468,7 +434,6 @@
 				3204AD15238DB91700D3E07F /* MergeKeyStoreSpec.swift in Sources */,
 				3204AD1C238E90F200D3E07F /* EnviromentConfig.swift in Sources */,
 				324C549723900EB90097E566 /* AccountSpec.swift in Sources */,
-				607FACEC1AFB9204008FA782 /* InMemoryKeystoreSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -550,7 +515,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -599,7 +564,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -614,6 +579,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 365QHZZ7E8;
 				INFOPLIST_FILE = nearclientios/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
@@ -630,6 +596,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 365QHZZ7E8;
 				INFOPLIST_FILE = nearclientios/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";

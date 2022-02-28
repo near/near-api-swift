@@ -7,8 +7,6 @@
 //
 
 import Foundation
-import PromiseKit
-import AwaitKit
 
 public protocol ContractOptionsProtocol {
   var viewMethods: [ViewMethod] {get}
@@ -58,20 +56,20 @@ public extension Contract {
 }
 
 public extension Contract {
-  func view<T: Decodable>(methodName: ChangeMethod, args: [String: Any] = [:]) throws -> Promise<T> {
-    return try account.viewFunction(contractId: contractId, methodName: methodName, args: args)
+  func view<T: Decodable>(methodName: ChangeMethod, args: [String: Any] = [:]) async throws -> T {
+    return try await account.viewFunction(contractId: contractId, methodName: methodName, args: args)
   }
 }
 
 public extension Contract {
   @discardableResult
   func change(methodName: ChangeMethod, args: [String: Any] = [:],
-              gas: UInt64? = nil, amount: UInt128 = 0) throws -> Promise<Any?> {
-    let rawResult = try await(account.functionCall(contractId: contractId,
+              gas: UInt64? = nil, amount: UInt128 = 0) async throws -> Any? {
+    let rawResult = try await account.functionCall(contractId: contractId,
                                                    methodName: methodName,
                                                    args: args,
                                                    gas: gas,
-                                                   amount: amount))
-    return .value(getTransactionLastResult(txResult: rawResult))
+                                                   amount: amount)
+    return getTransactionLastResult(txResult: rawResult)
   }
 }

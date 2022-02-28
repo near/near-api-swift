@@ -8,15 +8,8 @@
 
 import UIKit
 import nearclientios
-import PromiseKit
-import AwaitKit
 
-protocol WalletSignInDelegate: class {
-  func completeSignIn(_ app: UIApplication,
-                      open url: URL, options: [UIApplication.OpenURLOptionsKey: Any])
-}
-
-class WelcomeViewController: UIViewController {
+class WelcomeViewController: UIViewController, WalletSignInDelegate {
   
   private var walletAccount: WalletAccount?
   private var near: Near?
@@ -28,8 +21,10 @@ class WelcomeViewController: UIViewController {
   
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
-    walletAccount = setupWallet()
-    setupUI(with: walletAccount!)
+    Task {
+      walletAccount = await setupWallet()
+      await setupUI(with: walletAccount!)
+    }
   }
   
   override func didReceiveMemoryWarning() {
@@ -37,26 +32,30 @@ class WelcomeViewController: UIViewController {
     // Dispose of any resources that can be recreated.
   }
   
-  private func setupWallet() -> WalletAccount {
-    let keyStore = InMemoryKeyStore()
-    let config = NearConfig(networkId: "default",
-                            nodeUrl: URL(string: "https://rpc.nearprotocol.com")!,
-                            masterAccount: nil,
-                            keyPath: nil,
-                            helperUrl: nil,
-                            initialBalance: nil,
-                            providerType: .jsonRPC(URL(string: "https://rpc.nearprotocol.com")!),
-                            signerType: .inMemory(keyStore),
-                            keyStore: keyStore,
-                            contractName: "myContractId",
-                            walletUrl: "https://wallet.nearprotocol.com")
+  private func setupWallet() async -> WalletAccount {
+    let keyStore = KeychainKeyStore(keychain: .init(service: "example.keystore"))
+    let config = NearConfig(
+      networkId: "testnet",  // "default" for mainnet
+      nodeUrl: URL(string: "https://rpc.testnet.near.org")!, // "https://rpc.mainnet.near.org" for mainnet
+      masterAccount: nil,
+      keyPath: nil,
+      helperUrl: nil,
+      initialBalance: nil,
+      providerType: .jsonRPC(URL(string: "https://rpc.testnet.near.org")!), // "https://rpc.mainnet.near.org" for mainnet
+      signerType: .inMemory(keyStore),
+      keyStore: keyStore,
+      contractName: nil,
+      walletUrl: "https://wallet.testnet.near.org"  // "https://wallet.near.org" for mainnet
+    )
     near = try! Near(config: config)
-    return try! WalletAccount(near: near!)
+    return try! WalletAccount(near: near!, authService: DefaultAuthService.shared)
   }
   
-  private func setupUI(with wallet: WalletAccount) {
-    if wallet.isSignedIn() {
-     showAccountState(with: wallet)
+  private func setupUI(with wallet: WalletAccount) async {
+    if await wallet.isSignedIn() {
+      await MainActor.run {
+        showAccountState(with: wallet)
+      }
     } else {
       //Hide preloader
     }
@@ -71,25 +70,25 @@ class WelcomeViewController: UIViewController {
   }
   
   @IBAction func tapShowAuthForm(_ sender: UIButton) {
-    let appName = UIApplication.name ?? "signInTitle"
-    (UIApplication.shared.delegate as? AppDelegate)?.walletSignIn = self
-    try! await(walletAccount!.requestSignIn(contractId: "signInContract",
-                                            title: appName,
-                                            successUrl: URL(string: "nearclientios://success"),
-                                            failureUrl: URL(string: "nearclientios://fail"),
-                                            appUrl: URL(string: "nearclientios://")))
-  }
-}
-
-extension WelcomeViewController: WalletSignInDelegate {
-  func completeSignIn(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) {
-    do {
-      try await(walletAccount!.completeSignIn(app, open: url, options: options))
-    } catch {
-      let alert = UIAlertController(title: "Error", message: "\(error)", preferredStyle: .alert)
-      present(alert, animated: true, completion: nil)
+    Task {
+      let appName = UIApplication.name ?? "signInTitle"
+      DefaultAuthService.shared.walletSignIn = self
+      try! await walletAccount!.requestSignIn(contractId: nil, title: appName, presentingViewController: self)
     }
-    setupUI(with: walletAccount!)
+  }
+  
+  func completeSignIn(url: URL) async {
+    do {
+      try await walletAccount?.completeSignIn(url: url)
+    } catch {
+      await MainActor.run {
+        let alert = UIAlertController(title: "Error", message: "\(error)", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: { [weak self] _ in
+          self?.dismiss(animated: true, completion: nil)
+        }))
+        present(alert, animated: true, completion: nil)
+      }
+    }
+    await setupUI(with: walletAccount!)
   }
 }
-

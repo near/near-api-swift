@@ -7,8 +7,6 @@
 //
 
 import Foundation
-import PromiseKit
-import AwaitKit
 
 public struct FunctionCallPermission {
   let allowance: UInt128?
@@ -18,7 +16,7 @@ public struct FunctionCallPermission {
 
 extension FunctionCallPermission: Decodable {
   private enum CodingKeys: String, CodingKey {
-    case allowance, receiverId = "receiver_id", methodNames = "method_names"
+    case allowance, receiverId, methodNames
   }
 
   public init(from decoder: Decoder) throws {
@@ -65,7 +63,7 @@ public enum AccessKeyPermission {
   }
 }
 
-public enum DecodingError: Error {
+public enum NEARDecodingError: Error {
   case notExpected
 }
 
@@ -86,7 +84,7 @@ extension AccessKeyPermission: Decodable {
       let permission = try container.decode(FunctionCallPermission.self, forKey: .functionCall)
       self = .functionCall(permission)
     } else {
-      throw DecodingError.notExpected
+      throw NEARDecodingError.notExpected
     }
   }
 }
@@ -297,33 +295,35 @@ func deleteAccount(beneficiaryId: String) -> Action {
   return .deleteAccount(DeleteAccount(beneficiaryId: beneficiaryId))
 }
 
-public struct SignaturePayload: FixedLengthByteArray, BorshCodable {
-  public static let fixedLength: UInt32 = 64
-  public let bytes: [UInt8]
-  public init(bytes: [UInt8]) {
-    self.bytes = bytes
-  }
-}
+//public struct SignaturePayload: FixedLengthByteArray, BorshCodable {
+//  public static let fixedLength: UInt32 = 64
+//  public let bytes: [UInt8]
+//  public init(bytes: [UInt8]) {
+//    self.bytes = bytes
+//  }
+//}
 
 public struct CodableSignature {
   let keyType: KeyType
-  let data: SignaturePayload
+  let bytes: [UInt8]
 
-  init(signature: [UInt8]) {
-    self.keyType = KeyType.ED25519
-    self.data = SignaturePayload(bytes: signature)
+  init(signature: [UInt8], curve: KeyType) {
+    self.keyType = curve
+    self.bytes = signature
   }
 }
 
 extension CodableSignature: BorshCodable {
+
   public func serialize(to writer: inout Data) throws {
+
     try keyType.serialize(to: &writer)
-    try data.serialize(to: &writer)
+    writer.append(bytes, count: Int(keyType == .ED25519 ? 64 : 65))
   }
 
   public init(from reader: inout BinaryReader) throws {
     self.keyType = try .init(from: &reader)
-    self.data = try .init(from: &reader)
+    self.bytes = reader.read(count: keyType == .ED25519 ? 64 : 65)
   }
 }
 
@@ -441,8 +441,8 @@ enum SignError: Error {
 }
 
 func signTransaction(receiverId: String, nonce: UInt64, actions: [Action], blockHash: [UInt8],
-                     signer: Signer, accountId: String, networkId: String) throws -> Promise<([UInt8], SignedTransaction)> {
-  guard let publicKey = try await(signer.getPublicKey(accountId: accountId, networkId: networkId)) else {
+                     signer: Signer, accountId: String, networkId: String) async throws -> ([UInt8], SignedTransaction) {
+  guard let publicKey = try await signer.getPublicKey(accountId: accountId, networkId: networkId) else {
     throw SignError.noPublicKey
   }
   let transaction = CodableTransaction(signerId: accountId,
@@ -453,7 +453,8 @@ func signTransaction(receiverId: String, nonce: UInt64, actions: [Action], block
                                        actions: actions)
   let message = try BorshEncoder().encode(transaction)
   let hash = message.digest
-  let signature = try await(signer.signMessage(message: message.bytes, accountId: accountId, networkId: networkId))
-  let signedTx = SignedTransaction(transaction: transaction, signature: CodableSignature(signature: signature.signature))
-  return .value((hash, signedTx))
+  let signature = try await signer.signMessage(message: message.bytes, accountId: accountId, networkId: networkId)
+  
+  let signedTx = SignedTransaction(transaction: transaction, signature: CodableSignature(signature: signature.signature, curve: publicKey.keyType))
+  return (hash, signedTx)
 }
