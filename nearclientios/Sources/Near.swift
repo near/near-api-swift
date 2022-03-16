@@ -49,8 +49,8 @@ public struct NearConfig: NearConfigProtocol {
 }
 
 public struct Near {
-  let config: NearConfigProtocol
-  let connection: Connection
+  public let config: NearConfigProtocol
+  public let connection: Connection
   private let accountCreator: AccountCreator?
 }
 
