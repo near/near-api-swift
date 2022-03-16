@@ -113,7 +113,7 @@ public extension Near {
       - receiver: receiver
    */
   @available(*, deprecated, renamed: "yourAccount.sendMoney", message: "Backwards compatibility method. Use `yourAccount.sendMoney` instead")
-  private func sendTokens(amount: UInt128, originator: String, receiver: String) async throws -> String {
+  func sendTokens(amount: UInt128, originator: String, receiver: String) async throws -> String {
     print("near.sendTokens is deprecated. Use `yourAccount.sendMoney` instead.")
     let account = Account(connection: connection, accountId: originator)
     let result = try await account.sendMoney(receiverId: receiver, amount: amount)

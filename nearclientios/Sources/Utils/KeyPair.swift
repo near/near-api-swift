@@ -173,6 +173,11 @@ public struct KeyPairEd25519: Equatable {
     let newKeyPair = try NaclSign.KeyPair.keyPair()
     return try KeyPairEd25519(secretKey: newKeyPair.secretKey.baseEncoded)
   }
+    
+  public static func fromSeed(seed: Data) throws -> Self {
+    let newKeyPair = try NaclSign.KeyPair.keyPair(fromSeed: seed )
+    return try KeyPairEd25519(secretKey: newKeyPair.secretKey.baseEncoded)
+  }
 }
 
 extension KeyPairEd25519: KeyPair {
