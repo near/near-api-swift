@@ -277,7 +277,7 @@ public final class Account {
                                       actions: [nearclientios.stake(stake: amount, publicKey: publicKey)])
   }
 
-  public func viewFunction<T: Decodable>(contractId: String, methodName: String, args: [String: Any] = [:]) async throws -> T {
+  public func viewFunction<T: Decodable>(contractId: String, methodName: String, args: [String: Any] = [:], decodingStrategy: JSONDecoder.KeyDecodingStrategy = .useDefaultKeys) async throws -> T {
     let data = Data(json: args).base64EncodedString()
     let result: QueryResult = try await connection.provider.query(params: [
       "request_type": "call_function",
@@ -296,7 +296,9 @@ public final class Account {
     } catch {
       rawData = result.result.data
     }
-    let decodedResult = try JSONDecoder().decode(T.self, from: rawData)
+    let decoder = JSONDecoder()
+    decoder.keyDecodingStrategy = decodingStrategy
+    let decodedResult = try decoder.decode(T.self, from: rawData)
     return decodedResult
   }
 
