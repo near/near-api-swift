@@ -73,6 +73,13 @@ public struct QueryResult: Equatable, Decodable {
   let result: [UInt8]
 }
 
+public struct RPCError: Error, Decodable {
+  let blockHeight: Int
+  let blockHash: String
+  let logs: [String]
+  let error: String
+}
+
 public final class Account {
   let connection: Connection
   public let accountId: String
