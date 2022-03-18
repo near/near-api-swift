@@ -60,20 +60,25 @@ extension JSONRPCProvider {
   
   func processJsonRpc<T: Decodable>(request: [String: Any], json: Any) async throws -> T {
     let data = try JSONSerialization.data(withJSONObject: json, options: [])
-//    debugPrint("=====================")
-//    print(T.self)
-//    print(String(decoding: data, as: UTF8.self))
-//    debugPrint("=====================")
     do {
       let decoder = JSONDecoder()
       decoder.keyDecodingStrategy = .convertFromSnakeCase
       let decoded = try decoder.decode(T.self, from: data)
       return decoded
-    } catch let error {
-      print(error)
-      print(String(decoding: try! JSONSerialization.data(withJSONObject: request, options: []), as: UTF8.self))
-      print(T.self)
-      throw error
+    } catch {
+      // see if this error can be parsed into a standard RPCError, and return that if possible
+      do {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let decodedError = try decoder.decode(RPCError.self, from: data)
+        throw decodedError
+      } catch let error {
+        print(error)
+        print(String(decoding: try! JSONSerialization.data(withJSONObject: request, options: []), as: UTF8.self))
+        print(String(decoding: data, as: UTF8.self))
+        print(T.self)
+        throw error
+      }
     }
   }
 }
