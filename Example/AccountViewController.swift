@@ -66,7 +66,7 @@ extension AccountViewController {
   
   private func setupData(with accountState: AccountState) async {
     data.append(AccountStateField(title: "Account ID", value: await walletAccount!.getAccountId()))
-    let balance = String( )  //24 near indivisible units
+    let balance = "\(accountState.amount.toNearAmount(fracDigits: 5)) Ⓝ"
     data.append(AccountStateField(title: "Balance", value: balance))
     data.append(AccountStateField(title: "Storage (used/paid)", value: "\(accountState.storageUsage.toStorageUnit())/\(accountState.storagePaidAt.toStorageUnit())"))
     await MainActor.run {

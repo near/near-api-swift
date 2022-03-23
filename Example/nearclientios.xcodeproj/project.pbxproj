@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0815D6D023EC217C007BFD61 /* AccountViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0815D6CF23EC217C007BFD61 /* AccountViewController.swift */; };
+		0AC5360527EA55B8009B685B /* FormatSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC5360427EA55B8009B685B /* FormatSpec.swift */; };
 		3204AD15238DB91700D3E07F /* MergeKeyStoreSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3204AD14238DB91700D3E07F /* MergeKeyStoreSpec.swift */; };
 		3204AD18238DD8B200D3E07F /* KeyPairSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3204AD17238DD8B200D3E07F /* KeyPairSpec.swift */; };
 		3204AD1A238E8E7C00D3E07F /* ProviderSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3204AD19238E8E7C00D3E07F /* ProviderSpec.swift */; };
@@ -45,6 +46,7 @@
 
 /* Begin PBXFileReference section */
 		0815D6CF23EC217C007BFD61 /* AccountViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountViewController.swift; sourceTree = SOURCE_ROOT; };
+		0AC5360427EA55B8009B685B /* FormatSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatSpec.swift; sourceTree = "<group>"; };
 		1CAE1E7BE5E33A01D056CB26 /* Pods_nearclientios_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_nearclientios_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3204AD14238DB91700D3E07F /* MergeKeyStoreSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeKeyStoreSpec.swift; sourceTree = "<group>"; };
 		3204AD17238DD8B200D3E07F /* KeyPairSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyPairSpec.swift; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 				324C5488238EE6D00097E566 /* SerializeSpec.swift */,
 				324C5492238FC6C00097E566 /* TestUtils.swift */,
 				32300C832397A89100CEE803 /* Wasm.swift */,
+				0AC5360427EA55B8009B685B /* FormatSpec.swift */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -434,6 +437,7 @@
 				3204AD15238DB91700D3E07F /* MergeKeyStoreSpec.swift in Sources */,
 				3204AD1C238E90F200D3E07F /* EnviromentConfig.swift in Sources */,
 				324C549723900EB90097E566 /* AccountSpec.swift in Sources */,
+				0AC5360527EA55B8009B685B /* FormatSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
