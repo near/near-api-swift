@@ -182,22 +182,22 @@ public enum FinalExecutionStatus: Decodable, Equatable {
 }
 
 public struct ExecutionOutcomeWithId: Decodable, Equatable {
-  let id: String
-  let outcome: ExecutionOutcome
+  public let id: String
+  public let outcome: ExecutionOutcome
 }
 
 public struct ExecutionOutcome: Decodable, Equatable {
-  let status: ExecutionStatus
-  let logs: [String]
-  let receiptIds: [String]
-  let gasBurnt: Number
+  public let status: ExecutionStatus
+  public let logs: [String]
+  public let receiptIds: [String]
+  public let gasBurnt: Number
 }
 
 public struct FinalExecutionOutcome: Decodable, Equatable {
-  let status: FinalExecutionStatus
-  let transactionOutcome: ExecutionOutcomeWithId
-  let receiptsOutcome: [ExecutionOutcomeWithId]
-  let receipts: AnyDecodable?
+  public let status: FinalExecutionStatus
+  public let transactionOutcome: ExecutionOutcomeWithId
+  public let receiptsOutcome: [ExecutionOutcomeWithId]
+  public let receipts: AnyDecodable?
 }
 
 public struct TotalWeight: Codable {
