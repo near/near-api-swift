@@ -52,20 +52,28 @@ extension UInt128 {
   
 }
 
+struct ConversionError: Error {
+  let message = "Could not convert string to yoctoNEAR."
+}
+
 extension String {
   
   /// Convert human readable NEAR amount to internal indivisible units.
   /// - Returns: The parsed yoctoⓃ amount or null if no amount was passed in
-  public func toYoctoNearString() -> String {
+  public func toYoctoNearString() throws -> String {
     var parsed = self
     parsed = parsed.replacingOccurrences(of: ",", with: "").trimmingCharacters(in: NSCharacterSet.whitespacesAndNewlines)
+    let numberyPattern = "^\\d*\\.?\\d*$"
+    let numberyRegex = try! NSRegularExpression(pattern: numberyPattern)
+    if numberyRegex.matches(in: parsed, options: [], range: NSRange(location: 0, length: parsed.utf16.count)).count != 1 {
+      throw ConversionError()
+    }
     parsed = parsed.prefix(1) == "." ? "0\(parsed)" : parsed
     let split = parsed.split(separator: ".")
     let wholePart = split[0]
     let fractionPart = split.indices.contains(1) ? split[1] : ""
     if split.count > 2 || fractionPart.count > NEAR_NOMINATION_EXP {
-      print("Cannot parse \(self) as NEAR amount.")
-      return self
+      throw ConversionError()
     }
     
     return trimLeadingZeroes(value: "\(wholePart)\(fractionPart.padding(toLength: NEAR_NOMINATION_EXP, withPad: "0", startingAt: 0))")
