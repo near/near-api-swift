@@ -65,11 +65,18 @@ public extension Contract {
   @discardableResult
   func change(methodName: ChangeMethod, args: [String: Any] = [:],
               gas: UInt64? = nil, amount: UInt128 = 0) async throws -> Any? {
-    let rawResult = try await account.functionCall(contractId: contractId,
-                                                   methodName: methodName,
-                                                   args: args,
-                                                   gas: gas,
-                                                   amount: amount)
+    let rawResult = gas == nil ? try await account.functionCall(
+      contractId: contractId,
+      methodName: methodName,
+      args: args,
+      amount: amount
+    ) : try await account.functionCall(
+      contractId: contractId,
+      methodName: methodName,
+      args: args,
+      gas: gas!,
+      amount: amount
+    )
     return getTransactionLastResult(txResult: rawResult)
   }
 }
