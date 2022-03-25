@@ -8,14 +8,6 @@
 
 import Foundation
 
-/// Default amount of gas to be sent with the function calls. Used to pay for the fees
-/// incurred while running the contract execution. The unused amount will be refunded back to
-/// the originator.
-/// Due to protocol changes that charge upfront for the maximum possible gas price inflation due to
-/// full blocks, the price of max_prepaid_gas is decreased to `300 * 10**12`.
-/// For discussion see https://github.com/nearprotocol/NEPs/issues/67
-let DEFAULT_FUNC_CALL_AMOUNT: UInt64 = 30000000000000
-
 /// Default number of retries before giving up on a transactioin.
 let TX_STATUS_RETRY_NUMBER = 10
 
@@ -246,10 +238,16 @@ public final class Account {
   }
 
   public func functionCall(contractId: String, methodName: ChangeMethod, args: [String: Any] = [:],
-                            gas: UInt64?, amount: UInt128) async throws -> FinalExecutionOutcome {
-    let gasValue = gas ?? DEFAULT_FUNC_CALL_AMOUNT
+                            gas: UInt64 = 30000000000000, amount: UInt128) async throws -> FinalExecutionOutcome {
+    /// 30000000000000 is the default amount of gas to be sent with the function calls. Used to pay for the fees
+    /// incurred while running the contract execution. The unused amount will be refunded back to
+    /// the originator.
+    /// Due to protocol changes that charge upfront for the maximum possible gas price inflation due to
+    /// full blocks, the price of max_prepaid_gas is decreased to `300 * 10**12`.
+    /// For discussion see https://github.com/nearprotocol/NEPs/issues/67
+    
     let actions = [nearclientios.functionCall(methodName: methodName, args: Data(json: args).bytes,
-                                              gas: gasValue, deposit: amount)]
+                                              gas: gas, deposit: amount)]
     return try await signAndSendTransaction(receiverId: contractId, actions: actions)
   }
 

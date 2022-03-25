@@ -111,7 +111,7 @@ class AccountSpec: XCTestCase {
     XCTAssertEqual(result, "hello trex")
 
     let setCallValue = TestUtils.generateUniqueString(prefix: "setCallPrefix")
-    let result2 = try await AccountSpec.workingAccount.functionCall(contractId: AccountSpec.contractId, methodName: "setValue", args: ["value": setCallValue], gas: nil, amount: 0)
+    let result2 = try await AccountSpec.workingAccount.functionCall(contractId: AccountSpec.contractId, methodName: "setValue", args: ["value": setCallValue], amount: 0)
     XCTAssertEqual(getTransactionLastResult(txResult: result2) as? String, setCallValue)
     
     let testSetCallValue: String = try await AccountSpec.workingAccount.viewFunction(contractId: AccountSpec.contractId, methodName: "getValue", args: [:])
