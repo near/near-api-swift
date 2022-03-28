@@ -62,6 +62,10 @@ extension String {
   /// - Returns: The parsed yoctoⓃ amount or null if no amount was passed in
   public func toYoctoNearString() throws -> String {
     var parsed = self
+    // Edge cases not covered by our numberyPattern regex.
+    if (parsed == "" || parsed == ".") {
+      throw ConversionError()
+    }
     parsed = parsed.replacingOccurrences(of: ",", with: "").trimmingCharacters(in: NSCharacterSet.whitespacesAndNewlines)
     let numberyPattern = "^\\d*\\.?\\d*$"
     let numberyRegex = try! NSRegularExpression(pattern: numberyPattern)
