@@ -80,8 +80,11 @@ class FormatSpec: XCTestCase {
   
   func testFormatYoctoAmount() throws {
     for testCase in nearStringToYoctoStringTestCases {
-      let formatResult = testCase.amount.toYoctoNearString()
+      let formatResult = try testCase.amount.toYoctoNearString()
       XCTAssertEqual(formatResult, testCase.expected)
     }
+    
+    XCTAssertThrowsError(try "".toYoctoNearString())
+    XCTAssertThrowsError(try ".".toYoctoNearString())
   }
 }

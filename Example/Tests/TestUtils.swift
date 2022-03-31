@@ -87,7 +87,7 @@ extension TestUtils {
 }
 
 extension XCTest {
-  func XCTAssertThrowsError(
+  func AssertThrowsError(
     _ expression: @autoclosure () async throws -> Any,
     _ message: @autoclosure () -> String = "",
     file: StaticString = #filePath,
