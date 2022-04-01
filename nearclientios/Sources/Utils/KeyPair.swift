@@ -113,14 +113,14 @@ public protocol KeyPair {
   func getPublicKey() -> PublicKey
 }
 
-func keyPairFromRandom(curve: KeyType = .ED25519) throws -> KeyPair{
+public func keyPairFromRandom(curve: KeyType = .ED25519) throws -> KeyPair {
   switch curve {
   case .ED25519: return try KeyPairEd25519.fromRandom()
   case .SECP256k1: return try KeyPairSecp256k1.fromRandom()
   }
 }
 
-func keyPairFromString(encodedKey: String) throws -> KeyPair {
+public func keyPairFromString(encodedKey: String) throws -> KeyPair {
   let parts = encodedKey.split(separator: ":").map {String($0)}
   if parts.count == 1 {
     return try KeyPairEd25519(secretKey: parts[0])

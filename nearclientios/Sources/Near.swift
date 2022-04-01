@@ -60,6 +60,7 @@ public enum NearError: Error {
 }
 
 extension Near {
+  
   public init(config: NearConfigProtocol) throws {
     let connection = try Connection.fromConfig(config: config)
     var accountCreator: AccountCreator?
@@ -73,6 +74,17 @@ extension Near {
     }
     self.init(config: config, connection: connection, accountCreator: accountCreator)
   }
+  
+  // expose global functions as static functions in the Near namespace
+  public static func keyPairFromString(_ string: String) throws -> KeyPair {
+    return try nearclientios.keyPairFromString(encodedKey: string)
+  }
+  
+  // expose global functions as static functions in the Near namespace
+  public static func keyPairFromRandom(curve: KeyType) throws -> KeyPair {
+    return try nearclientios.keyPairFromRandom(curve: curve)
+  }
+  
 }
 
 public extension Near {
