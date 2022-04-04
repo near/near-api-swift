@@ -22,12 +22,23 @@ extension KeychainKeyStore: KeyStore {
   public func setKey(networkId: String, accountId: String, keyPair: KeyPair) async throws -> Void {
     keychain[storageKeyForSecretKey(networkId: networkId, accountId: accountId)] = keyPair.toString()
   }
+  
+  public func setKey(networkId: String, accountId: String, withKeyPairAsData keyPair: Data) async throws -> Void {
+    keychain[data: storageKeyForSecretKey(networkId: networkId, accountId: accountId)] = keyPair
+  }
 
   public func getKey(networkId: String, accountId: String) async throws -> KeyPair? {
     guard let value = keychain[storageKeyForSecretKey(networkId: networkId, accountId: accountId)] else {
       return nil
     }
     return try? keyPairFromString(encodedKey: value)
+  }
+  
+  public func getEncryptedKey(networkId: String, accountId: String) async throws -> Data? {
+    guard let value = keychain[data: storageKeyForSecretKey(networkId: networkId, accountId: accountId)] else {
+      return nil
+    }
+    return value
   }
 
   public func removeKey(networkId: String, accountId: String) async throws -> Void {

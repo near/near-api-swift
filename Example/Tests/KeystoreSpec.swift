@@ -20,6 +20,7 @@ class KeyStoreSpec: XCTestCase {
     keyStores.append(InMemoryKeyStore())
     keyStores.append(UnencryptedFileSystemKeyStore(keyDir: "test-keys"))
     keyStores.append(KeychainKeyStore(keychain: .init(service: "test.keystore")))
+    keyStores.append(SecureEnclaveKeyStore(keychainKeyStore: KeychainKeyStore(keychain: .init(service: "testEnclave.keystore"))))
     keyStores.append(MergeKeyStore(keyStores: [InMemoryKeyStore(), InMemoryKeyStore()]))
   }
   
