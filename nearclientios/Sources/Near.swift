@@ -61,8 +61,8 @@ public enum NearError: Error {
 
 extension Near {
   
-  public init(config: NearConfigProtocol) throws {
-    let connection = try Connection.fromConfig(config: config)
+  public init(config: NearConfigProtocol) {
+    let connection = Connection.fromConfig(config: config)
     var accountCreator: AccountCreator?
     if let masterAccount = config.masterAccount {
       // TODO: figure out better way of specifiying initial balance.
@@ -151,6 +151,6 @@ func connect(config: NearConfigProtocol) async throws -> Near {
       print("Failed to load master account key from \(keyPath): \(error)")
     }
   }
-  let near = try Near(config: configuration)
+  let near = Near(config: configuration)
   return near
 }

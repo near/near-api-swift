@@ -30,7 +30,7 @@ class WalletAccountSpec: XCTestCase {
 
   override func setUp() {
     self.keyStore = InMemoryKeyStore()
-    self.nearFake = try! Near(config: NearConfig(networkId: "networkId",
+    self.nearFake = try Near(config: NearConfig(networkId: "networkId",
                                                  nodeUrl: URL(string: self.walletUrl)!,
                                                  masterAccount: nil,
                                                  keyPath: nil,

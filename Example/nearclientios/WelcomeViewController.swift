@@ -47,8 +47,8 @@ class WelcomeViewController: UIViewController, WalletSignInDelegate {
       contractName: nil,
       walletUrl: "https://wallet.testnet.near.org"  // "https://wallet.near.org" for mainnet
     )
-    near = try! Near(config: config)
-    return try! WalletAccount(near: near!, authService: DefaultAuthService.shared)
+    near =  Near(config: config)
+    return try! WalletAccount(near: near!, authService: DefaultAuthService.shared) // a failed try here represents a configuration error, not a runtime error. It's safe to store a `WalletAccount!`.
   }
   
   private func setupUI(with wallet: WalletAccount) async {
