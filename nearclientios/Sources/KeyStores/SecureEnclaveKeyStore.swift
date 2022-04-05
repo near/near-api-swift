@@ -8,6 +8,7 @@
 import Foundation
 import CryptoKit
 import LocalAuthentication
+import KeychainAccess
 
 private let algorithm = SecKeyAlgorithm.eciesEncryptionCofactorVariableIVX963SHA256AESGCM
 
@@ -35,12 +36,14 @@ private enum SecureEnclaveKeyStoreError: Error {
 }
 
 public class SecureEnclaveKeyStore {
+  public let keychain: Keychain
   public let keychainKeyStore: KeychainKeyStore
   let requireUserPresence: Bool
   var context: LAContext?
 
-  public init(keychainKeyStore: KeychainKeyStore = KeychainKeyStore(keychain: .init(service: NEAR_KEYCHAIN_STORAGE_SERVICE)), requireUserPresence: Bool = true) {
-    self.keychainKeyStore = keychainKeyStore
+  public init(keychain: Keychain = .init(service: NEAR_KEYCHAIN_STORAGE_SERVICE), requireUserPresence: Bool = true) {
+    self.keychain = keychain
+    self.keychainKeyStore = .init(keychain: keychain)
     self.requireUserPresence = requireUserPresence
   }
 }
