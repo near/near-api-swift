@@ -94,7 +94,7 @@ class KeyStoreSpec: XCTestCase {
     try await withAllKeyStores(run: addTwoKeysToNetworkAndRetrieveThem)
   }
   func addTwoKeysToNetworkAndRetrieveThem(keyStore: KeyStore) async throws {
-    if keyStore is SecureEnclaveKeyStore {
+    if keyStore is SecureEnclaveKeyStore && (keyStore as! SecureEnclaveKeyStore).requireUserPresence {
       (keyStore as! SecureEnclaveKeyStore).context = LAContext()
     }
     let networkId = "twoKeyNetwork"
