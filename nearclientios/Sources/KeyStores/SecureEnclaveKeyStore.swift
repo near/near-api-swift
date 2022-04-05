@@ -7,9 +7,8 @@
 
 import Foundation
 import CryptoKit
+import LocalAuthentication
 
-private let requiresBiometry = true
-private let numberOfBitsInKey = 256
 private let algorithm = SecKeyAlgorithm.eciesEncryptionCofactorVariableIVX963SHA256AESGCM
 
 private enum SecureEnclaveKeyStoreError: Error {
@@ -35,11 +34,14 @@ private enum SecureEnclaveKeyStoreError: Error {
   }
 }
 
-public struct SecureEnclaveKeyStore {
-  private let keychainKeyStore: KeychainKeyStore
+public class SecureEnclaveKeyStore {
+  public let keychainKeyStore: KeychainKeyStore
+  let requireUserPresence: Bool
+  var context: LAContext?
 
-  public init(keychainKeyStore: KeychainKeyStore = KeychainKeyStore(keychain: .init(service: NEAR_KEYCHAIN_STORAGE_SERVICE))) {
+  public init(keychainKeyStore: KeychainKeyStore = KeychainKeyStore(keychain: .init(service: NEAR_KEYCHAIN_STORAGE_SERVICE)), requireUserPresence: Bool = true) {
     self.keychainKeyStore = keychainKeyStore
+    self.requireUserPresence = requireUserPresence
   }
 }
 
@@ -66,6 +68,13 @@ extension SecureEnclaveKeyStore: KeyStore {
   }
   
   public func clear() async throws -> Void {
+    let params: [String: Any] = [
+      kSecClass as String: kSecClassKey
+    ]
+    let status = SecItemDelete(params as CFDictionary)
+    if status != errSecSuccess && status != errSecItemNotFound {
+      throw SecureEnclaveKeyStoreError.unexpected(description: "Failed to delete all keys.")
+    }
     try await keychainKeyStore.clear()
   }
   
@@ -78,19 +87,12 @@ extension SecureEnclaveKeyStore: KeyStore {
   }
   
   private func createPrivateKey(withStorageKey storageKey: String) throws -> SecKey {
-    let flags: SecAccessControlCreateFlags = .privateKeyUsage
-    //    if requiresBiometry && userPresenceRequired {
-    //      flags = [.privateKeyUsage, .userPresence]
-    //    }
-    //    else {
-    //      flags = .privateKeyUsage
-    //    }
-    guard let access = SecAccessControlCreateWithFlags(kCFAllocatorDefault, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, flags, nil) else {
-      throw SecureEnclaveKeyStoreError.unexpected(description: "Unable to create flags to create private key")
-    }
+    let flags: SecAccessControlCreateFlags = requireUserPresence ? [.privateKeyUsage, .userPresence] : .privateKeyUsage
+
+    let access = SecAccessControlCreateWithFlags(kCFAllocatorDefault, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, flags, nil)!
     var attributes: [String: Any] = [
       kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
-      kSecAttrKeySizeInBits as String: numberOfBitsInKey,
+      kSecAttrKeySizeInBits as String: 256,
       kSecPrivateKeyAttrs as String: [
         kSecAttrIsPermanent as String: true,
         kSecAttrApplicationTag as String: storageKey as CFString,
@@ -111,14 +113,15 @@ extension SecureEnclaveKeyStore: KeyStore {
   }
   
   private func getPrivateKey(withStorageKey storageKey: String) throws -> SecKey {
-    let params: [String: Any] = [
+    var params: [String: Any] = [
       kSecClass as String: kSecClassKey,
       kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
       kSecAttrApplicationTag as String: storageKey as CFString,
       kSecReturnRef as String: true,
-      //kSecUseAuthenticationContext as String: context,
     ]
-    
+    if context != nil {
+      params[kSecUseAuthenticationContext as String] = context
+    }
     var raw: CFTypeRef?
     let status = SecItemCopyMatching(params as CFDictionary, &raw)
     guard status == errSecSuccess, let result = raw else {

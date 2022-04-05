@@ -46,7 +46,7 @@ extension KeychainKeyStore: KeyStore {
   }
 
   public func clear() async throws -> Void {
-    try? keychain.removeAll()
+    try keychain.removeAll()
   }
 
   public func getNetworks() async throws -> [String] {
@@ -63,7 +63,8 @@ extension KeychainKeyStore: KeyStore {
     var result = [String]()
     for key in storageKeys() {
       let components = key.components(separatedBy: ":")
-      if let keychainNetworkId = components.last, keychainNetworkId == networkId, let accountId = components.first {
+      let accountId = components[components.count - 2]
+      if let keychainNetworkId = components.last, keychainNetworkId == networkId, accountId != networkId {
         result.append(accountId)
       }
     }
