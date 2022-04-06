@@ -40,7 +40,7 @@ public class SecureEnclaveKeyStore {
   public let keychainKeyStore: KeychainKeyStore
   /// Ignored and forced to false on simulators.
   let requireUserPresence: Bool
-  var context: LAContext?
+  public var context: LAContext?
 
   public init(keychain: Keychain = .init(service: NEAR_KEYCHAIN_STORAGE_SERVICE), requireUserPresence: Bool = true) {
     var userPresence = requireUserPresence

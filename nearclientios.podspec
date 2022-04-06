@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'nearclientios'
-  s.version          = '1.0.12'
+  s.version          = '1.0.13'
   s.summary          = 'Swift SDK to interact with NEAR Protocol'
 
   s.description      = <<-DESC
