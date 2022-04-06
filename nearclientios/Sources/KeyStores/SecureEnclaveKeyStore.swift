@@ -38,13 +38,18 @@ private enum SecureEnclaveKeyStoreError: Error {
 public class SecureEnclaveKeyStore {
   public let keychain: Keychain
   public let keychainKeyStore: KeychainKeyStore
+  /// Ignored and forced to false on simulators.
   let requireUserPresence: Bool
   var context: LAContext?
 
   public init(keychain: Keychain = .init(service: NEAR_KEYCHAIN_STORAGE_SERVICE), requireUserPresence: Bool = true) {
+    var userPresence = requireUserPresence
+    #if targetEnvironment(simulator)
+    userPresence = false
+    #endif
     self.keychain = keychain
     self.keychainKeyStore = .init(keychain: keychain)
-    self.requireUserPresence = requireUserPresence
+    self.requireUserPresence = userPresence
   }
 }
 
