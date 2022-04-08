@@ -31,9 +31,18 @@ public struct AccountState: Codable {
   public let locked: String
   public let amount: String
   public let codeHash: String
-  public let storagePaidAt: Number
-  public let storageUsage: Number
+  public let storagePaidAt: Int
+  public let storageUsage: Int
 }
+
+public struct AccountBalance {
+  public let total: String
+  public let stateStaked: String
+  public let staked: String
+  public let available: String
+}
+
+public struct ProtocolConfigError: Error {}
 
 public struct KeyBox: Decodable {
   let accessKey: AccessKey
@@ -324,5 +333,21 @@ public final class Account {
     }
     let result = AccountDetails(authorizedApps: authorizedApps, transactions: [])
     return result
+  }
+  
+  public func getAccountBalance() async throws -> AccountBalance {
+    let protocolConfig = try await connection.provider.experimentalProtocolConfig(blockQuery: .finality(.final))
+    let state = try await self.state()
+    
+    guard let storageAmountPerByte = protocolConfig.runtimeConfig?.storageAmountPerByte else {
+      throw ProtocolConfigError()
+    }
+    let costPerByte = UInt128(stringLiteral: storageAmountPerByte)
+    let stateStaked = UInt128(integerLiteral: UInt64(state.storageUsage)) * costPerByte
+    let staked = UInt128(stringLiteral: state.locked)
+    let totalBalance = UInt128(stringLiteral: state.amount) + staked
+    let availableBalance = totalBalance - max(staked, stateStaked)
+    
+    return AccountBalance(total: totalBalance.toString(), stateStaked: stateStaked.toString(), staked: staked.toString(), available: availableBalance.toString())
   }
 }

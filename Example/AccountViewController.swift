@@ -75,7 +75,9 @@ extension AccountViewController {
   
   private func setupData(with accountState: AccountState) async {
     data.append(AccountStateField(title: "Account ID", value: await walletAccount!.getAccountId()))
-    let balance = "\(accountState.amount.toNearAmount(fracDigits: 5)) Ⓝ"
+    let account = try! await near!.account(accountId: walletAccount!.getAccountId())
+    let accountBalance = try! await account.getAccountBalance()
+    let balance = "\(accountBalance.available.toNearAmount(fracDigits: 5)) Ⓝ"
     data.append(AccountStateField(title: "Balance", value: balance))
     data.append(AccountStateField(title: "Storage (used/paid)", value: "\(accountState.storageUsage.toStorageUnit())/\(accountState.storagePaidAt.toStorageUnit())"))
     await MainActor.run {
@@ -105,7 +107,7 @@ extension AccountViewController {
   }
 }
 
-extension Number {
+extension Int {
   func toStorageUnit() -> String {
     let formatter = NumberFormatter()
     formatter.numberStyle = .decimal
