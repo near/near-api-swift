@@ -26,7 +26,7 @@ class AccountViewController: UITableViewController {
     title = "Near account"
     setupSignOutButton()
     Task {
-      accountState = await fetchAccountState()
+      accountState = try await fetchAccountState()
       await setupData(with: accountState!)
     }
     // Do any additional setup after loading the view, typically from a nib.
@@ -53,15 +53,24 @@ extension AccountViewController {
   }
 }
 
+enum AccountError: Error {
+  case cannotFetchAccountState
+}
+
 extension AccountViewController {
   func setup(near: Near, wallet: WalletAccount) {
     self.near = near
     walletAccount = wallet
   }
   
-  private func fetchAccountState() async -> AccountState {
-    let account = try! await near!.account(accountId: walletAccount!.getAccountId())
-    return try! await account.state()
+  private func fetchAccountState() async throws -> AccountState {
+    do {
+      let account = try await near!.account(accountId: walletAccount!.getAccountId())
+      let state = try await account.state()
+      return state
+    } catch {
+      throw AccountError.cannotFetchAccountState
+    }
   }
   
   private func setupData(with accountState: AccountState) async {

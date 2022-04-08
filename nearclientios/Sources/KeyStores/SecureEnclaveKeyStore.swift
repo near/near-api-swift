@@ -17,18 +17,21 @@ private enum SecureEnclaveKeyStoreError: Error {
   case cannotAccessPublicKey
   case encryptionNotSupported(algorithm: SecKeyAlgorithm)
   case decryptionNotSupported(algorithm: SecKeyAlgorithm)
+  case cannotDeleteKeys(osStatus: OSStatus)
   case unexpected(description: String)
   
   var errorDescription: String {
     switch self {
     case .cannotAccessPrivateKey(let osStatus):
-      return "Cannot access private key because: \(osStatus)"
+      return "Cannot access private key: \(osStatus)"
     case .cannotAccessPublicKey:
       return "Cannot access public key"
     case .encryptionNotSupported(let algorithm):
       return "Encryption not supported: \(algorithm)"
     case .decryptionNotSupported(let algorithm):
       return "Decryption not supported: \(algorithm)"
+    case .cannotDeleteKeys(let osStatus):
+      return "Cannot delete key: \(osStatus)"
     case .unexpected(let description):
       return description
     }
@@ -72,18 +75,28 @@ extension SecureEnclaveKeyStore: KeyStore {
   }
   
   public func removeKey(networkId: String, accountId: String) async throws -> Void {
+    let storageKey = storageKeyForSecretKey(networkId: networkId, accountId: accountId)
+    try delete(storageKey: storageKey)
     try await keychainKeyStore.removeKey(networkId: networkId, accountId: accountId)
   }
   
   public func clear() async throws -> Void {
-    let params: [String: Any] = [
-      kSecClass as String: kSecClassKey
+    try delete(storageKey: nil)
+    try await keychainKeyStore.clear()
+  }
+  
+  private func delete(storageKey: String?) throws -> Void {
+    var params: [String: Any] = [
+      kSecClass as String: kSecClassKey,
+      kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
     ]
+    if storageKey != nil {
+      params[kSecAttrApplicationTag as String] = storageKey! as CFString
+    }
     let status = SecItemDelete(params as CFDictionary)
     if status != errSecSuccess && status != errSecItemNotFound {
-      throw SecureEnclaveKeyStoreError.unexpected(description: "Failed to delete all keys.")
+      throw SecureEnclaveKeyStoreError.cannotDeleteKeys(osStatus: status)
     }
-    try await keychainKeyStore.clear()
   }
   
   public func getNetworks() async throws -> [String] {

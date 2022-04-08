@@ -8,6 +8,7 @@
 
 import UIKit
 import nearclientios
+import LocalAuthentication
 
 class WelcomeViewController: UIViewController, WalletSignInDelegate {
   
@@ -33,7 +34,8 @@ class WelcomeViewController: UIViewController, WalletSignInDelegate {
   }
   
   private func setupWallet() async -> WalletAccount {
-    let keyStore = KeychainKeyStore(keychain: .init(service: "example.keystore"))
+    let keyStore = SecureEnclaveKeyStore(keychain: .init(service: "example.keystore"))
+    keyStore.context = LAContext()
     let config = NearConfig(
       networkId: "testnet",  // "default" for mainnet
       nodeUrl: URL(string: "https://rpc.testnet.near.org")!, // "https://rpc.mainnet.near.org" for mainnet
