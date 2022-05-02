@@ -4,7 +4,7 @@ PODS:
     - BigInt (~> 5.0.0)
   - BigInt (5.0.0)
   - KeychainAccess (4.2.2)
-  - nearclientios (1.0.16):
+  - nearclientios (1.0.17):
     - AnyCodable-FlightSchool (~> 0.6.0)
     - Base58Swift (~> 2.1.10)
     - KeychainAccess (~> 4.2.2)

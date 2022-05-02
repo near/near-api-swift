@@ -150,7 +150,7 @@ extension CreateAccount: BorshCodable {
 }
 
 public struct DeployContract: IAction {
-  let code: [UInt8]
+  public let code: [UInt8]
 }
 
 extension DeployContract: BorshCodable {
@@ -165,10 +165,10 @@ extension DeployContract: BorshCodable {
 }
 
 public struct FunctionCall: IAction {
-  let methodName: String
-  let args: [UInt8]
-  let gas: UInt64
-  let deposit: UInt128
+  public let methodName: String
+  public let args: [UInt8]
+  public let gas: UInt64
+  public let deposit: UInt128
 }
 
 extension FunctionCall: BorshCodable {
@@ -188,7 +188,7 @@ extension FunctionCall: BorshCodable {
 }
 
 public struct Transfer: IAction {
-  let deposit: UInt128
+  public let deposit: UInt128
 }
 
 extension Transfer: BorshCodable {
@@ -202,8 +202,8 @@ extension Transfer: BorshCodable {
 }
 
 public struct Stake: IAction {
-  let stake: UInt128
-  let publicKey: PublicKey
+  public let stake: UInt128
+  public let publicKey: PublicKey
 }
 
 extension Stake: BorshCodable {
@@ -236,7 +236,7 @@ extension AddKey: BorshCodable {
 }
 
 public struct DeleteKey: IAction {
-  let publicKey: PublicKey
+  public let publicKey: PublicKey
 }
 
 extension DeleteKey: BorshCodable {
@@ -250,7 +250,7 @@ extension DeleteKey: BorshCodable {
 }
 
 public struct DeleteAccount: IAction {
-  let beneficiaryId: String
+  public let beneficiaryId: String
 }
 
 extension DeleteAccount: BorshCodable {
@@ -336,12 +336,12 @@ public struct BlockHashPayload: FixedLengthByteArray, BorshCodable {
 }
 
 public struct CodableTransaction {
-  let signerId: String
-  let publicKey: PublicKey
-  let nonce: UInt64
-  let receiverId: String
-  let blockHash: BlockHashPayload
-  let actions: [Action]
+  public let signerId: String
+  public let publicKey: PublicKey
+  public let nonce: UInt64
+  public let receiverId: String
+  public let blockHash: BlockHashPayload
+  public let actions: [Action]
 }
 
 extension CodableTransaction: BorshCodable {
