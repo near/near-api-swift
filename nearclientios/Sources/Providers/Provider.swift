@@ -192,6 +192,7 @@ public struct ExecutionOutcome: Decodable, Equatable {
 }
 
 public struct FinalExecutionOutcome: Decodable, Equatable {
+  public let transaction: Transaction
   public let status: FinalExecutionStatus
   public let transactionOutcome: ExecutionOutcomeWithId
   public let receiptsOutcome: [ExecutionOutcomeWithId]
@@ -274,13 +275,10 @@ public struct ChunkResult: Codable {
   let transactions: [Transaction]
 }
 
-public struct TransactionBody: Codable {}
-
-public struct Transaction: Codable {
-  let hash: String
-  let public_key: String
-  let signature: String
-  let body: TransactionBody
+public struct Transaction: Codable, Equatable {
+  public let hash: String
+  public let publicKey: String
+  public let signature: String
 }
 
 public struct BlockResult: Codable {

@@ -27,46 +27,75 @@ class ProviderSpec: XCTestCase {
   }
   
   func testCorrectFinalTransactionResult() {
-    let outcome = ExecutionOutcome(status: .successReceiptId("11112"),
-                                   logs: [],
-                                   receiptIds: ["11112"],
-                                   gasBurnt: 1)
-    let transaction = ExecutionOutcomeWithId(id: "11111", outcome: outcome)
-    let firstRecipientOutcome = ExecutionOutcome(status: .successValue("e30="),
-                                                 logs: [],
-                                                 receiptIds: ["11112"],
-                                                 gasBurnt: 9001)
-    let secondRecipientOutcome = ExecutionOutcome(status: .successValue(""),
-                                                  logs: [],
-                                                  receiptIds: [],
-                                                  gasBurnt: 0)
+    
+    let outcome = ExecutionOutcome(
+      status: .successReceiptId("11112"),
+      logs: [],
+      receiptIds: ["11112"],
+      gasBurnt: 1
+    )
+    let transactionOutcome = ExecutionOutcomeWithId(id: "11111", outcome: outcome)
+    let firstRecipientOutcome = ExecutionOutcome(
+      status: .successValue("e30="),
+      logs: [],
+      receiptIds: ["11112"],
+      gasBurnt: 9001
+    )
+    let secondRecipientOutcome = ExecutionOutcome(
+      status: .successValue(""),
+      logs: [],
+      receiptIds: [],
+      gasBurnt: 0
+    )
     let receipts = [ExecutionOutcomeWithId(id: "11112", outcome: firstRecipientOutcome),
                     ExecutionOutcomeWithId(id: "11113", outcome: secondRecipientOutcome)]
-    let result = FinalExecutionOutcome(status: .successValue("e30="),
-                                       transactionOutcome: transaction,
-                                       receiptsOutcome: receipts, receipts: nil)
+    let transaction = Transaction(
+      hash: "11111",
+      publicKey: "11112",
+      signature: "11113"
+    )
+    
+    let result = FinalExecutionOutcome(
+      transaction: transaction,
+      status: .successValue("e30="),
+      transactionOutcome: transactionOutcome,
+      receiptsOutcome: receipts, receipts: nil
+    )
     XCTAssertNotNil(getTransactionLastResult(txResult: result))
   }
   
   func testFinalTransactionResultWithNil() {
-    let outcome = ExecutionOutcome(status: .successReceiptId("11112"),
-                                   logs: [],
-                                   receiptIds: ["11112"],
-                                   gasBurnt: 1)
-    let transaction = ExecutionOutcomeWithId(id: "11111", outcome: outcome)
-    let firstRecipientOutcome = ExecutionOutcome(status: .failure(ExecutionError()),
-                                                 logs: [],
-                                                 receiptIds: ["11112"],
-                                                 gasBurnt: 9001)
-    let secondRecipientOutcome = ExecutionOutcome(status: .successValue(""),
-                                                  logs: [],
-                                                  receiptIds: [],
-                                                  gasBurnt: 0)
+    let outcome = ExecutionOutcome(
+      status: .successReceiptId("11112"),
+      logs: [],
+      receiptIds: ["11112"],
+      gasBurnt: 1
+    )
+    let transactionOutcome = ExecutionOutcomeWithId(id: "11111", outcome: outcome)
+    let firstRecipientOutcome = ExecutionOutcome(
+      status: .failure(ExecutionError()),
+      logs: [],
+      receiptIds: ["11112"],
+      gasBurnt: 9001
+    )
+    let secondRecipientOutcome = ExecutionOutcome(
+      status: .successValue(""),
+      logs: [],
+      receiptIds: [],
+      gasBurnt: 0
+    )
     let receipts = [ExecutionOutcomeWithId(id: "11112", outcome: firstRecipientOutcome),
                     ExecutionOutcomeWithId(id: "11113", outcome: secondRecipientOutcome)]
-    let result = FinalExecutionOutcome(status: .failure(ExecutionError()),
-                                       transactionOutcome: transaction,
-                                       receiptsOutcome: receipts, receipts: nil)
+    let transaction = Transaction(
+      hash: "11111",
+      publicKey: "11112",
+      signature: "11113"
+    )
+    let result = FinalExecutionOutcome(
+      transaction: transaction,
+      status: .failure(ExecutionError()),
+      transactionOutcome: transactionOutcome,
+      receiptsOutcome: receipts, receipts: nil)
     XCTAssertNil(getTransactionLastResult(txResult: result))
   }
   

@@ -140,7 +140,7 @@ public final class Account {
       message: "RetriesExceeded")
   }
 
-  private func signAndSendTransaction(receiverId: String, actions: [Action]) async throws -> FinalExecutionOutcome {
+  public func signAndSendTransaction(receiverId: String, actions: [Action]) async throws -> FinalExecutionOutcome {
     try await ready()
     guard _accessKey != nil else {
       throw TypedError.error(type: "Can not sign transactions, initialize account with available public key in Signer.", message: "KeyNotFound")
