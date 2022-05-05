@@ -9,9 +9,9 @@
 import Foundation
 
 public struct FunctionCallPermission {
-  let allowance: UInt128?
-  let receiverId: String
-  let methodNames: [String]
+  public let allowance: UInt128?
+  public let receiverId: String
+  public let methodNames: [String]
 }
 
 extension FunctionCallPermission: Decodable {
@@ -109,8 +109,8 @@ extension AccessKeyPermission: BorshCodable {
 }
 
 public struct AccessKey: Decodable {
-  var nonce: UInt64
-  let permission: AccessKeyPermission
+  public var nonce: UInt64
+  public let permission: AccessKeyPermission
 }
 
 extension AccessKey: BorshCodable {
@@ -219,8 +219,8 @@ extension Stake: BorshCodable {
 }
 
 public struct AddKey: IAction {
-  let publicKey: PublicKey
-  let accessKey: AccessKey
+  public let publicKey: PublicKey
+  public let accessKey: AccessKey
 }
 
 extension AddKey: BorshCodable {
