@@ -65,7 +65,7 @@ extension JSONRPCProvider {
       decoder.keyDecodingStrategy = .convertFromSnakeCase
       let decoded = try decoder.decode(T.self, from: data)
       return decoded
-    } catch let error {
+    } catch let originalError {
       // see if this error can be parsed into a standard RPCError, and return that if possible
       do {
         let decoder = JSONDecoder()
@@ -73,11 +73,11 @@ extension JSONRPCProvider {
         let decodedError = try decoder.decode(RPCError.self, from: data)
         throw decodedError
       } catch {
-        print(error)
+        print(originalError)
         print(String(decoding: try! JSONSerialization.data(withJSONObject: request, options: []), as: UTF8.self))
         print(String(decoding: data, as: UTF8.self))
         print(T.self)
-        throw error
+        throw originalError
       }
     }
   }
