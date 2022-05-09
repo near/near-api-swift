@@ -59,14 +59,14 @@ public enum AccountError: Error {
 }
 
 public struct AuthorizedApp: Equatable, Codable {
-  let contractId: String
-  let amount: UInt128
-  let publicKey: String
+  public let contractId: String
+  public let amount: UInt128
+  public let publicKey: String
 }
 
 public struct AccountDetails: Equatable, Codable {
-  let authorizedApps: [AuthorizedApp]
-  let transactions: [String]
+  public let authorizedApps: [AuthorizedApp]
+  public let transactions: [String]
 }
 
 public struct QueryResult: Equatable, Decodable {
