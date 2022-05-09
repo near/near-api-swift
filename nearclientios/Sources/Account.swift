@@ -45,12 +45,12 @@ public struct AccountBalance {
 public struct ProtocolConfigError: Error {}
 
 public struct KeyBox: Decodable {
-  let accessKey: AccessKey
-  let publicKey: String
+  public let accessKey: AccessKey
+  public let publicKey: String
 }
 
 public struct KeyBoxes: Decodable {
-  let keys: [KeyBox]
+  public let keys: [KeyBox]
 }
 
 public enum AccountError: Error {
