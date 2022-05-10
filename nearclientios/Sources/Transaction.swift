@@ -21,7 +21,8 @@ extension FunctionCallPermission: Decodable {
 
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    allowance = UInt128(stringLiteral: try container.decode(String.self, forKey: .allowance))
+    let allowanceLiteral = try container.decode(String?.self, forKey: .allowance)
+    allowance = allowanceLiteral != nil ? UInt128(stringLiteral: allowanceLiteral!) : nil
     receiverId = try container.decode(String.self, forKey: .receiverId)
     methodNames = try container.decode([String].self, forKey: .methodNames)
   }

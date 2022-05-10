@@ -60,7 +60,7 @@ public enum AccountError: Error {
 
 public struct AuthorizedApp: Equatable, Codable {
   public let contractId: String
-  public let amount: UInt128
+  public let amount: UInt128?
   public let publicKey: String
 }
 
@@ -340,7 +340,7 @@ public final class Account {
     accessKeys.keys.forEach { item in
       if case AccessKeyPermission.functionCall(let permission) = item.accessKey.permission {
         authorizedApps.append(AuthorizedApp(contractId: permission.receiverId,
-                                            amount: permission.allowance ?? 0,
+                                            amount: permission.allowance,
                                             publicKey: item.publicKey))
       }
     }
