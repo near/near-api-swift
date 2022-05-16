@@ -8,14 +8,6 @@
 
 import Foundation
 
-/// Default amount of gas to be sent with the function calls. Used to pay for the fees
-/// incurred while running the contract execution. The unused amount will be refunded back to
-/// the originator.
-/// Due to protocol changes that charge upfront for the maximum possible gas price inflation due to
-/// full blocks, the price of max_prepaid_gas is decreased to `300 * 10**12`.
-/// For discussion see https://github.com/nearprotocol/NEPs/issues/67
-let DEFAULT_FUNC_CALL_AMOUNT: UInt64 = 30000000000000
-
 /// Default number of retries before giving up on a transactioin.
 let TX_STATUS_RETRY_NUMBER = 10
 
@@ -39,17 +31,26 @@ public struct AccountState: Codable {
   public let locked: String
   public let amount: String
   public let codeHash: String
-  public let storagePaidAt: Number
-  public let storageUsage: Number
+  public let storagePaidAt: Int
+  public let storageUsage: Int
 }
 
+public struct AccountBalance {
+  public let total: String
+  public let stateStaked: String
+  public let staked: String
+  public let available: String
+}
+
+public struct ProtocolConfigError: Error {}
+
 public struct KeyBox: Decodable {
-  let accessKey: AccessKey
-  let publicKey: String
+  public let accessKey: AccessKey
+  public let publicKey: String
 }
 
 public struct KeyBoxes: Decodable {
-  let keys: [KeyBox]
+  public let keys: [KeyBox]
 }
 
 public enum AccountError: Error {
@@ -58,14 +59,14 @@ public enum AccountError: Error {
 }
 
 public struct AuthorizedApp: Equatable, Codable {
-  let contractId: String
-  let amount: UInt128
-  let publicKey: String
+  public let contractId: String
+  public let amount: UInt128?
+  public let publicKey: String
 }
 
 public struct AccountDetails: Equatable, Codable {
-  let authorizedApps: [AuthorizedApp]
-  let transactions: [String]
+  public let authorizedApps: [AuthorizedApp]
+  public let transactions: [String]
 }
 
 public struct QueryResult: Equatable, Decodable {
@@ -73,21 +74,42 @@ public struct QueryResult: Equatable, Decodable {
   let result: [UInt8]
 }
 
+public struct RPCError: Error, Decodable {
+  let blockHeight: Int
+  let blockHash: String
+  let logs: [String]
+  let error: String
+}
+
+public struct HandlerErrorCause: Decodable {
+  public let name: String
+}
+
+public struct HandlerError: Decodable {
+  public let cause: HandlerErrorCause
+  public let code: Int
+  public let message: String
+}
+
+public struct TransactionError: Error, Decodable {
+  public let error: HandlerError
+}
+
 public final class Account {
   let connection: Connection
   public let accountId: String
   private var _state: AccountState?
   private var _accessKey: AccessKey?
-
+  
   func ready() async throws -> Void {
     return try await fetchState()
   }
-
-  init(connection: Connection, accountId: String) {
+  
+  public init(connection: Connection, accountId: String) {
     self.connection = connection;
     self.accountId = accountId;
   }
-
+  
   func fetchState() async throws -> Void {
     _state = try await connection.provider.query(params: [
       "request_type": "view_account",
@@ -109,16 +131,16 @@ public final class Account {
     }
     return
   }
-
+  
   public func state() async throws -> AccountState {
     try await ready()
     return _state!
   }
-
+  
   private func printLogs(contractId: String, logs: [String]) {
     logs.forEach {print("[\(contractId)]: \($0)")}
   }
-
+  
   private func retryTxResult(txHash: [UInt8], accountId: String) async throws -> FinalExecutionOutcome {
     var waitTime = TX_STATUS_RETRY_WAIT
     for _ in [0 ..< TX_STATUS_RETRY_NUMBER] {
@@ -128,16 +150,15 @@ public final class Account {
       await sleep(millis: waitTime)
       waitTime *= TX_STATUS_RETRY_WAIT_BACKOFF
     }
-    throw TypedError.error(type: "Exceeded \(TX_STATUS_RETRY_NUMBER) status check attempts for transaction \(txHash.baseEncoded).",
-      message: "RetriesExceeded")
+    throw TypedError.error(type: "Exceeded \(TX_STATUS_RETRY_NUMBER) status check attempts for transaction \(txHash.baseEncoded).", message: "RetriesExceeded")
   }
-
-  private func signAndSendTransaction(receiverId: String, actions: [Action]) async throws -> FinalExecutionOutcome {
+  
+  public func signAndSendTransaction(receiverId: String, actions: [Action]) async throws -> FinalExecutionOutcome {
     try await ready()
     guard _accessKey != nil else {
       throw TypedError.error(type: "Can not sign transactions, initialize account with available public key in Signer.", message: "KeyNotFound")
     }
-
+    
     let status = try await connection.provider.status()
     _accessKey!.nonce += 1
     let blockHash = status.syncInfo.latestBlockHash.baseDecoded
@@ -148,48 +169,48 @@ public final class Account {
                                                        signer: connection.signer,
                                                        accountId: accountId,
                                                        networkId: connection.networkId)
-
+    
     let outcome: FinalExecutionOutcome?
     do {
       outcome = try await connection.provider.sendTransaction(signedTransaction: signedTx)
     } catch let error {
-      if case TypedError.error(let type, _) = error, type == "TimeoutError" {
+      if let transactionError = error as? TransactionError, transactionError.error.cause.name == "TIMEOUT_ERROR" {
         outcome = try await retryTxResult(txHash: txHash, accountId: accountId)
       } else {
         throw error
       }
     }
-
+    
     guard let result = outcome else {throw AccountError.noResult}
     let flatLogs = ([result.transactionOutcome] + result.receiptsOutcome).reduce([], {$0 + $1.outcome.logs})
     printLogs(contractId: signedTx.transaction.receiverId, logs: flatLogs)
-
+    
     if case .failure(let error) = result.status {
       throw TypedError.error(type: "Transaction \(result.transactionOutcome.id) failed. \(error.errorMessage ?? "")",
-        message: error.errorType)
+                             message: error.errorType)
     }
     // TODO: if Tx is Unknown or Started.
     // TODO: deal with timeout on node side.
     return result
   }
-
+  
   public func signAndSendTransactionAsync(receiverId: String, actions: [Action]) async throws -> SimpleRPCResult {
     try await ready()
     guard _accessKey != nil else {
       throw TypedError.error(type: "Can not sign transactions, initialize account with available public key in Signer.", message: "KeyNotFound")
     }
-
+    
     let status = try await connection.provider.status()
     _accessKey!.nonce += 1
     let blockHash = status.syncInfo.latestBlockHash.baseDecoded
     let (_, signedTx) = try await signTransaction(receiverId: receiverId,
-                                                       nonce: _accessKey!.nonce,
-                                                       actions: actions,
-                                                       blockHash: blockHash,
-                                                       signer: connection.signer,
-                                                       accountId: accountId,
-                                                       networkId: connection.networkId)
-
+                                                  nonce: _accessKey!.nonce,
+                                                  actions: actions,
+                                                  blockHash: blockHash,
+                                                  signer: connection.signer,
+                                                  accountId: accountId,
+                                                  networkId: connection.networkId)
+    
     let outcome: SimpleRPCResult
     do {
       outcome = try await connection.provider.sendTransactionAsync(signedTransaction: signedTx)
@@ -198,11 +219,11 @@ public final class Account {
     }
     return outcome
   }
-
-
+  
+  
   @discardableResult
-  func createAndDeployContract(contractId: String, publicKey: PublicKey,
-                                       data: [UInt8], amount: UInt128) async throws -> Account {
+  public func createAndDeployContract(contractId: String, publicKey: PublicKey,
+                                      data: [UInt8], amount: UInt128) async throws -> Account {
     let accessKey = fullAccessKey()
     let actions = [nearclientios.createAccount(),
                    nearclientios.transfer(deposit: amount),
@@ -212,44 +233,50 @@ public final class Account {
     let contractAccount = Account(connection: connection, accountId: contractId)
     return contractAccount
   }
-
+  
   @discardableResult
-  func sendMoney(receiverId: String, amount: UInt128) async throws -> FinalExecutionOutcome {
+  public func sendMoney(receiverId: String, amount: UInt128) async throws -> FinalExecutionOutcome {
     return try await signAndSendTransaction(receiverId: receiverId, actions: [nearclientios.transfer(deposit: amount)])
   }
-
+  
   @discardableResult
-  func createAccount(newAccountId: String, publicKey: PublicKey,
-                             amount: UInt128) async throws -> FinalExecutionOutcome {
+  public func createAccount(newAccountId: String, publicKey: PublicKey,
+                            amount: UInt128) async throws -> FinalExecutionOutcome {
     let accessKey = fullAccessKey()
     let actions = [nearclientios.createAccount(),
                    nearclientios.transfer(deposit: amount),
                    nearclientios.addKey(publicKey: publicKey, accessKey: accessKey)]
     return try await signAndSendTransaction(receiverId: newAccountId, actions: actions)
   }
-
+  
   @discardableResult
-  func deleteAccount(beneficiaryId: String) async throws -> FinalExecutionOutcome {
+  public func deleteAccount(beneficiaryId: String) async throws -> FinalExecutionOutcome {
     return try await signAndSendTransaction(receiverId: accountId,
-                                      actions: [nearclientios.deleteAccount(beneficiaryId: beneficiaryId)])
+                                            actions: [nearclientios.deleteAccount(beneficiaryId: beneficiaryId)])
   }
-
-  private func deployContract(data: [UInt8]) async throws -> FinalExecutionOutcome {
+  
+  public func deployContract(data: [UInt8]) async throws -> FinalExecutionOutcome {
     return try await signAndSendTransaction(receiverId: accountId, actions: [nearclientios.deployContract(code: data)])
   }
-
-  func functionCall(contractId: String, methodName: ChangeMethod, args: [String: Any] = [:],
-                            gas: UInt64?, amount: UInt128) async throws -> FinalExecutionOutcome {
-    let gasValue = gas ?? DEFAULT_FUNC_CALL_AMOUNT
+  
+  public func functionCall(contractId: String, methodName: ChangeMethod, args: [String: Any] = [:],
+                           gas: UInt64 = 30000000000000, amount: UInt128) async throws -> FinalExecutionOutcome {
+    /// 30000000000000 is the default amount of gas to be sent with the function calls. Used to pay for the fees
+    /// incurred while running the contract execution. The unused amount will be refunded back to
+    /// the originator.
+    /// Due to protocol changes that charge upfront for the maximum possible gas price inflation due to
+    /// full blocks, the price of max_prepaid_gas is decreased to `300 * 10**12`.
+    /// For discussion see https://github.com/nearprotocol/NEPs/issues/67
+    
     let actions = [nearclientios.functionCall(methodName: methodName, args: Data(json: args).bytes,
-                                              gas: gasValue, deposit: amount)]
+                                              gas: gas, deposit: amount)]
     return try await signAndSendTransaction(receiverId: contractId, actions: actions)
   }
-
+  
   // TODO: expand this API to support more options.
   @discardableResult
-  func addKey(publicKey: PublicKey, contractId: String?, methodName: String?,
-                      amount: UInt128?) async throws -> FinalExecutionOutcome {
+  public func addKey(publicKey: PublicKey, contractId: String?, methodName: String?,
+                     amount: UInt128?) async throws -> FinalExecutionOutcome {
     let accessKey: AccessKey
     if let contractId = contractId, !contractId.isEmpty {
       let methodNames = methodName.flatMap {[$0].filter {!$0.isEmpty}} ?? []
@@ -259,18 +286,18 @@ public final class Account {
     }
     return try await signAndSendTransaction(receiverId: accountId, actions: [nearclientios.addKey(publicKey: publicKey, accessKey: accessKey)])
   }
-
+  
   @discardableResult
-  func deleteKey(publicKey: PublicKey) async throws -> FinalExecutionOutcome {
+  public func deleteKey(publicKey: PublicKey) async throws -> FinalExecutionOutcome {
     return try await signAndSendTransaction(receiverId: accountId, actions: [nearclientios.deleteKey(publicKey: publicKey)])
   }
-
-  private func stake(publicKey: PublicKey, amount: UInt128) async throws -> FinalExecutionOutcome {
+  
+  public func stake(publicKey: PublicKey, amount: UInt128) async throws -> FinalExecutionOutcome {
     return try await signAndSendTransaction(receiverId: accountId,
-                                      actions: [nearclientios.stake(stake: amount, publicKey: publicKey)])
+                                            actions: [nearclientios.stake(stake: amount, publicKey: publicKey)])
   }
-
-  func viewFunction<T: Decodable>(contractId: String, methodName: String, args: [String: Any] = [:]) async throws -> T {
+  
+  public func viewFunction<T: Decodable>(contractId: String, methodName: String, args: [String: Any] = [:], decodingStrategy: JSONDecoder.KeyDecodingStrategy = .useDefaultKeys) async throws -> T {
     let data = Data(json: args).base64EncodedString()
     let result: QueryResult = try await connection.provider.query(params: [
       "request_type": "call_function",
@@ -289,21 +316,23 @@ public final class Account {
     } catch {
       rawData = result.result.data
     }
-    let decodedResult = try JSONDecoder().decode(T.self, from: rawData)
+    let decoder = JSONDecoder()
+    decoder.keyDecodingStrategy = decodingStrategy
+    let decodedResult = try decoder.decode(T.self, from: rawData)
     return decodedResult
   }
-
+  
   /// Returns array of {access_key: AccessKey, public_key: PublicKey} items.
-  func getAccessKeys() async throws -> KeyBoxes {
+  public func getAccessKeys() async throws -> KeyBoxes {
     let response: KeyBoxes = try await connection.provider.query(params: [
-        "request_type": "view_access_key_list",
-        "finality": Finality.optimistic.rawValue,
-        "account_id": accountId,
-      ])
+      "request_type": "view_access_key_list",
+      "finality": Finality.optimistic.rawValue,
+      "account_id": accountId,
+    ])
     return response
   }
-
-  func getAccountDetails() async throws -> AccountDetails {
+  
+  public func getAccountDetails() async throws -> AccountDetails {
     // TODO: update the response value to return all the different keys, not just app keys.
     // Also if we need this function, or getAccessKeys is good enough.
     let accessKeys = try await getAccessKeys()
@@ -311,11 +340,27 @@ public final class Account {
     accessKeys.keys.forEach { item in
       if case AccessKeyPermission.functionCall(let permission) = item.accessKey.permission {
         authorizedApps.append(AuthorizedApp(contractId: permission.receiverId,
-                                            amount: permission.allowance ?? 0,
+                                            amount: permission.allowance,
                                             publicKey: item.publicKey))
       }
     }
     let result = AccountDetails(authorizedApps: authorizedApps, transactions: [])
     return result
+  }
+  
+  public func getAccountBalance() async throws -> AccountBalance {
+    let protocolConfig = try await connection.provider.experimentalProtocolConfig(blockQuery: .finality(.final))
+    let state = try await self.state()
+    
+    guard let storageAmountPerByte = protocolConfig.runtimeConfig?.storageAmountPerByte else {
+      throw ProtocolConfigError()
+    }
+    let costPerByte = UInt128(stringLiteral: storageAmountPerByte)
+    let stateStaked = UInt128(integerLiteral: UInt64(state.storageUsage)) * costPerByte
+    let staked = UInt128(stringLiteral: state.locked)
+    let totalBalance = UInt128(stringLiteral: state.amount) + staked
+    let availableBalance = totalBalance - max(staked, stateStaked)
+    
+    return AccountBalance(total: totalBalance.toString(), stateStaked: stateStaked.toString(), staked: staked.toString(), available: availableBalance.toString())
   }
 }

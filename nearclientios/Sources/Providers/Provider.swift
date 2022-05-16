@@ -9,11 +9,9 @@
 import Foundation
 import AnyCodable
 
-public typealias Number = Int
-
 public struct SyncInfo: Codable {
   let latestBlockHash: String
-  let latestBlockHeight: Number
+  let latestBlockHeight: Int
   let latestBlockTime: String
   let latestStateRoot: String
   let syncing: Bool
@@ -29,7 +27,7 @@ public struct NodeStatusResult: Codable {
 }
 
 public struct NetworkInfoResult: Decodable {
-  let peerMaxCount: Number
+  let peerMaxCount: Int
 }
 
 public struct SimpleRPCResult: Decodable {
@@ -44,7 +42,7 @@ public struct SimpleRPCResult: Decodable {
 }
 
 public typealias BlockHash = String
-public typealias BlockHeight = Number
+public typealias BlockHeight = Int
 public enum BlockId {
   case blockHash(String)
   case blockHeight(Int)
@@ -182,30 +180,31 @@ public enum FinalExecutionStatus: Decodable, Equatable {
 }
 
 public struct ExecutionOutcomeWithId: Decodable, Equatable {
-  let id: String
-  let outcome: ExecutionOutcome
+  public let id: String
+  public let outcome: ExecutionOutcome
 }
 
 public struct ExecutionOutcome: Decodable, Equatable {
-  let status: ExecutionStatus
-  let logs: [String]
-  let receiptIds: [String]
-  let gasBurnt: Number
+  public let status: ExecutionStatus
+  public let logs: [String]
+  public let receiptIds: [String]
+  public let gasBurnt: Int
 }
 
 public struct FinalExecutionOutcome: Decodable, Equatable {
-  let status: FinalExecutionStatus
-  let transactionOutcome: ExecutionOutcomeWithId
-  let receiptsOutcome: [ExecutionOutcomeWithId]
-  let receipts: AnyDecodable?
+  public let transaction: Transaction
+  public let status: FinalExecutionStatus
+  public let transactionOutcome: ExecutionOutcomeWithId
+  public let receiptsOutcome: [ExecutionOutcomeWithId]
+  public let receipts: AnyDecodable?
 }
 
 public struct TotalWeight: Codable {
-  let num: Number
+  let num: Int
 }
 
 public struct BlockHeader: Codable {
-  let height: Number
+  let height: Int
   let epochId: String
   let nextEpochId: String
   let hash: String
@@ -215,9 +214,9 @@ public struct BlockHeader: Codable {
   let chunkHeadersRoot: String
   let chunkTxRoot: String
   let outcomeRoot: String
-  let chunksIncluded: Number
+  let chunksIncluded: Int
   let challengesRoot: String
-  let timestamp: Number
+  let timestamp: Int
   let timestampNanosec: String
   let randomValue: String
   let validatorProposals: [ValidatorProposal]
@@ -234,7 +233,7 @@ public struct BlockHeader: Codable {
 }
 
 public typealias ChunkHash = String
-public typealias ShardId = Number
+public typealias ShardId = Int
 public struct BlockShardId {
   let blockId: BlockId
   let shardId: ShardId
@@ -253,12 +252,12 @@ public struct ChunkHeader: Codable {
   let outcomeRoot: String
   let prevStateRoot: String
   let encodedMerkleRoot: String
-  let encodedLength: Number
-  let heightCreated: Number
-  let heightIncluded: Number
+  let encodedLength: Int
+  let heightCreated: Int
+  let heightIncluded: Int
   let shardId: ShardId
-  let gasUsed: Number
-  let gasLimit: Number
+  let gasUsed: Int
+  let gasLimit: Int
   let rentPaid: String
   let validatorReward: String
   let balanceBurnt: String
@@ -276,13 +275,10 @@ public struct ChunkResult: Codable {
   let transactions: [Transaction]
 }
 
-public struct TransactionBody: Codable {}
-
-public struct Transaction: Codable {
-  let hash: String
-  let public_key: String
-  let signature: String
-  let body: TransactionBody
+public struct Transaction: Codable, Equatable {
+  public let hash: String
+  public let publicKey: String
+  public let signature: String
 }
 
 public struct BlockResult: Codable {
@@ -307,7 +303,7 @@ public struct ChangeResult: Decodable {
 
 public struct ExperimentalNearProtocolConfig: Decodable {
   let chainId: String
-  let genesisHeight: Number
+  let genesisHeight: Int
   let runtimeConfig: ExperimentalNearProtocolRuntimeConfig?
 }
 
@@ -333,7 +329,7 @@ public struct EpochValidatorInfo: Decodable {
   // Kickout in the previous epoch.
   let prevEpochKickout: [ValidatorStakeView]
   // Epoch start height.
-  let epochStartHeight: Number
+  let epochStartHeight: Int
 }
 
 public struct CurrentEpochValidatorInfo: Decodable {
@@ -341,16 +337,16 @@ public struct CurrentEpochValidatorInfo: Decodable {
   let publicKey: String
   let isSlashed: Bool
   let stake: String
-  let shards: [Number]
-  let numProducedBlocks: Number
-  let numExpectedBlocks: Number
+  let shards: [Int]
+  let numProducedBlocks: Int
+  let numExpectedBlocks: Int
 }
 
 public struct NextEpochValidatorInfo: Decodable {
   let accountId: String
   let publicKey: String
   let stake: String
-  let shards: [Number]
+  let shards: [Int]
 }
 
 public struct ValidatorStakeView: Decodable {

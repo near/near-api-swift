@@ -12,7 +12,7 @@ import XCTest
 class SignerSpec: XCTestCase {
   func testNoKeyThrowsError() async throws {
     let signer = InMemorySigner(keyStore: InMemoryKeyStore())
-    await XCTAssertThrowsError(try await signer.signMessage(message: "message".baseDecoded, accountId: "user", networkId: "network")) { error in
+    await AssertThrowsError(try await signer.signMessage(message: "message".baseDecoded, accountId: "user", networkId: "network")) { error in
       XCTAssertTrue(error is InMemorySignerError)
     }
   }

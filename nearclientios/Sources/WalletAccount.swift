@@ -135,6 +135,12 @@ extension WalletAccount {
       try await _moveKeyFromTempToPermanent(accountId: accountId, publicKey: publicKey)
     }
   }
+  
+  public func completeSignIn(withKeyPair keyPair: KeyPair, accountId: String) async throws -> Void {
+    _authData = AuthData(accountId: accountId)
+    storage[_authDataKey] = accountId
+    try await _keyStore.setKey(networkId: _networkId, accountId: accountId, keyPair: keyPair)
+  }
 
   private func _moveKeyFromTempToPermanent(accountId: String, publicKey: String) async throws -> Void {
     let pendingAccountId = PENDING_ACCESS_KEY_PREFIX + publicKey

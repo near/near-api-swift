@@ -9,9 +9,9 @@
 import Foundation
 
 public struct FunctionCallPermission {
-  let allowance: UInt128?
-  let receiverId: String
-  let methodNames: [String]
+  public let allowance: UInt128?
+  public let receiverId: String
+  public let methodNames: [String]
 }
 
 extension FunctionCallPermission: Decodable {
@@ -21,7 +21,8 @@ extension FunctionCallPermission: Decodable {
 
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    allowance = UInt128(stringLiteral: try container.decode(String.self, forKey: .allowance))
+    let allowanceLiteral = try container.decode(String?.self, forKey: .allowance)
+    allowance = allowanceLiteral != nil ? UInt128(stringLiteral: allowanceLiteral!) : nil
     receiverId = try container.decode(String.self, forKey: .receiverId)
     methodNames = try container.decode([String].self, forKey: .methodNames)
   }
@@ -109,8 +110,8 @@ extension AccessKeyPermission: BorshCodable {
 }
 
 public struct AccessKey: Decodable {
-  var nonce: UInt64
-  let permission: AccessKeyPermission
+  public var nonce: UInt64
+  public let permission: AccessKeyPermission
 }
 
 extension AccessKey: BorshCodable {
@@ -150,7 +151,7 @@ extension CreateAccount: BorshCodable {
 }
 
 public struct DeployContract: IAction {
-  let code: [UInt8]
+  public let code: [UInt8]
 }
 
 extension DeployContract: BorshCodable {
@@ -165,10 +166,10 @@ extension DeployContract: BorshCodable {
 }
 
 public struct FunctionCall: IAction {
-  let methodName: String
-  let args: [UInt8]
-  let gas: UInt64
-  let deposit: UInt128
+  public let methodName: String
+  public let args: [UInt8]
+  public let gas: UInt64
+  public let deposit: UInt128
 }
 
 extension FunctionCall: BorshCodable {
@@ -188,7 +189,7 @@ extension FunctionCall: BorshCodable {
 }
 
 public struct Transfer: IAction {
-  let deposit: UInt128
+  public let deposit: UInt128
 }
 
 extension Transfer: BorshCodable {
@@ -202,8 +203,8 @@ extension Transfer: BorshCodable {
 }
 
 public struct Stake: IAction {
-  let stake: UInt128
-  let publicKey: PublicKey
+  public let stake: UInt128
+  public let publicKey: PublicKey
 }
 
 extension Stake: BorshCodable {
@@ -219,8 +220,8 @@ extension Stake: BorshCodable {
 }
 
 public struct AddKey: IAction {
-  let publicKey: PublicKey
-  let accessKey: AccessKey
+  public let publicKey: PublicKey
+  public let accessKey: AccessKey
 }
 
 extension AddKey: BorshCodable {
@@ -236,7 +237,7 @@ extension AddKey: BorshCodable {
 }
 
 public struct DeleteKey: IAction {
-  let publicKey: PublicKey
+  public let publicKey: PublicKey
 }
 
 extension DeleteKey: BorshCodable {
@@ -250,7 +251,7 @@ extension DeleteKey: BorshCodable {
 }
 
 public struct DeleteAccount: IAction {
-  let beneficiaryId: String
+  public let beneficiaryId: String
 }
 
 extension DeleteAccount: BorshCodable {
@@ -336,12 +337,12 @@ public struct BlockHashPayload: FixedLengthByteArray, BorshCodable {
 }
 
 public struct CodableTransaction {
-  let signerId: String
-  let publicKey: PublicKey
-  let nonce: UInt64
-  let receiverId: String
-  let blockHash: BlockHashPayload
-  let actions: [Action]
+  public let signerId: String
+  public let publicKey: PublicKey
+  public let nonce: UInt64
+  public let receiverId: String
+  public let blockHash: BlockHashPayload
+  public let actions: [Action]
 }
 
 extension CodableTransaction: BorshCodable {

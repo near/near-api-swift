@@ -8,6 +8,7 @@
 
 import UIKit
 import nearclientios
+import LocalAuthentication
 
 class WelcomeViewController: UIViewController, WalletSignInDelegate {
   
@@ -33,7 +34,8 @@ class WelcomeViewController: UIViewController, WalletSignInDelegate {
   }
   
   private func setupWallet() async -> WalletAccount {
-    let keyStore = KeychainKeyStore(keychain: .init(service: "example.keystore"))
+    let keyStore = SecureEnclaveKeyStore(keychain: .init(service: "example.keystore"))
+    keyStore.context = LAContext()
     let config = NearConfig(
       networkId: "testnet",  // "default" for mainnet
       nodeUrl: URL(string: "https://rpc.testnet.near.org")!, // "https://rpc.mainnet.near.org" for mainnet
@@ -47,8 +49,8 @@ class WelcomeViewController: UIViewController, WalletSignInDelegate {
       contractName: nil,
       walletUrl: "https://wallet.testnet.near.org"  // "https://wallet.near.org" for mainnet
     )
-    near = try! Near(config: config)
-    return try! WalletAccount(near: near!, authService: DefaultAuthService.shared)
+    near =  Near(config: config)
+    return try! WalletAccount(near: near!, authService: DefaultAuthService.shared) // a failed try here represents a configuration error, not a runtime error. It's safe to store a `WalletAccount!`.
   }
   
   private func setupUI(with wallet: WalletAccount) async {

@@ -43,7 +43,7 @@ public struct Connection {
 }
 
 public extension Connection {
-  static func fromConfig(config: ConnectionConfigProtocol) throws -> Connection {
+  static func fromConfig(config: ConnectionConfigProtocol) -> Connection {
     let provider = config.provider()
     let signer = config.signer()
     return Connection(networkId: config.networkId, provider: provider, signer: signer)

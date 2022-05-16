@@ -22,6 +22,10 @@ extension KeychainKeyStore: KeyStore {
   public func setKey(networkId: String, accountId: String, keyPair: KeyPair) async throws -> Void {
     keychain[storageKeyForSecretKey(networkId: networkId, accountId: accountId)] = keyPair.toString()
   }
+  
+  public func setKey(networkId: String, accountId: String, withKeyPairAsData keyPair: Data) async throws -> Void {
+    keychain[data: storageKeyForSecretKey(networkId: networkId, accountId: accountId)] = keyPair
+  }
 
   public func getKey(networkId: String, accountId: String) async throws -> KeyPair? {
     guard let value = keychain[storageKeyForSecretKey(networkId: networkId, accountId: accountId)] else {
@@ -29,13 +33,20 @@ extension KeychainKeyStore: KeyStore {
     }
     return try? keyPairFromString(encodedKey: value)
   }
+  
+  public func getEncryptedKey(networkId: String, accountId: String) async throws -> Data? {
+    guard let value = keychain[data: storageKeyForSecretKey(networkId: networkId, accountId: accountId)] else {
+      return nil
+    }
+    return value
+  }
 
   public func removeKey(networkId: String, accountId: String) async throws -> Void {
     keychain[storageKeyForSecretKey(networkId: networkId, accountId: accountId)] = nil
   }
 
   public func clear() async throws -> Void {
-    try? keychain.removeAll()
+    try keychain.removeAll()
   }
 
   public func getNetworks() async throws -> [String] {
@@ -52,7 +63,8 @@ extension KeychainKeyStore: KeyStore {
     var result = [String]()
     for key in storageKeys() {
       let components = key.components(separatedBy: ":")
-      if let keychainNetworkId = components.last, keychainNetworkId == networkId, let accountId = components.first {
+      let accountId = components[components.count - 2]
+      if let keychainNetworkId = components.last, keychainNetworkId == networkId, accountId != networkId {
         result.append(accountId)
       }
     }

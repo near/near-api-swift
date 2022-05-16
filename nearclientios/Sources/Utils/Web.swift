@@ -35,13 +35,20 @@ private func fetch(url: URL, params: [String: Any]?) async throws-> Any {
       if let json = result?["result"] {
         continuation.resume(returning: json)
       } else if let httpResponse = response as? HTTPURLResponse {
-        let json = try! JSONSerialization.data(withJSONObject: result, options: [])
-        debugPrint("=====================")
-        print(String(decoding: json, as: UTF8.self))
-        debugPrint("=====================")
-        let error = HTTPError.error(status: httpResponse.statusCode,
-                                    message: data.flatMap({ String(data: $0, encoding: .utf8) }))
-        continuation.resume(throwing: error)
+        do {
+          let decoder = JSONDecoder()
+          decoder.keyDecodingStrategy = .convertFromSnakeCase
+          let decodedError = try decoder.decode(TransactionError.self, from: data ?? Data())
+          continuation.resume(throwing: decodedError)
+        } catch {
+          let json = try! JSONSerialization.data(withJSONObject: result, options: [])
+          debugPrint("=====================")
+          print(String(decoding: json, as: UTF8.self))
+          debugPrint("=====================")
+          let error = HTTPError.error(status: httpResponse.statusCode,
+                                      message: data.flatMap({ String(data: $0, encoding: .utf8) }))
+          continuation.resume(throwing: error)
+        }
       } else {
         continuation.resume(throwing: HTTPError.unknown)
       }

@@ -49,8 +49,8 @@ public struct NearConfig: NearConfigProtocol {
 }
 
 public struct Near {
-  let config: NearConfigProtocol
-  let connection: Connection
+  public let config: NearConfigProtocol
+  public let connection: Connection
   private let accountCreator: AccountCreator?
 }
 
@@ -60,8 +60,9 @@ public enum NearError: Error {
 }
 
 extension Near {
-  public init(config: NearConfigProtocol) throws {
-    let connection = try Connection.fromConfig(config: config)
+  
+  public init(config: NearConfigProtocol) {
+    let connection = Connection.fromConfig(config: config)
     var accountCreator: AccountCreator?
     if let masterAccount = config.masterAccount {
       // TODO: figure out better way of specifiying initial balance.
@@ -73,6 +74,17 @@ extension Near {
     }
     self.init(config: config, connection: connection, accountCreator: accountCreator)
   }
+  
+  // expose global functions as static functions in the Near namespace
+  public static func keyPairFromString(_ string: String) throws -> KeyPair {
+    return try nearclientios.keyPairFromString(encodedKey: string)
+  }
+  
+  // expose global functions as static functions in the Near namespace
+  public static func keyPairFromRandom(curve: KeyType) throws -> KeyPair {
+    return try nearclientios.keyPairFromRandom(curve: curve)
+  }
+  
 }
 
 public extension Near {
@@ -113,7 +125,7 @@ public extension Near {
       - receiver: receiver
    */
   @available(*, deprecated, renamed: "yourAccount.sendMoney", message: "Backwards compatibility method. Use `yourAccount.sendMoney` instead")
-  private func sendTokens(amount: UInt128, originator: String, receiver: String) async throws -> String {
+  func sendTokens(amount: UInt128, originator: String, receiver: String) async throws -> String {
     print("near.sendTokens is deprecated. Use `yourAccount.sendMoney` instead.")
     let account = Account(connection: connection, accountId: originator)
     let result = try await account.sendMoney(receiverId: receiver, amount: amount)
@@ -139,6 +151,6 @@ func connect(config: NearConfigProtocol) async throws -> Near {
       print("Failed to load master account key from \(keyPath): \(error)")
     }
   }
-  let near = try Near(config: configuration)
+  let near = Near(config: configuration)
   return near
 }

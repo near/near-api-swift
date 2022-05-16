@@ -26,7 +26,7 @@ class AccountViewController: UITableViewController {
     title = "Near account"
     setupSignOutButton()
     Task {
-      accountState = await fetchAccountState()
+      accountState = try await fetchAccountState()
       await setupData(with: accountState!)
     }
     // Do any additional setup after loading the view, typically from a nib.
@@ -53,20 +53,31 @@ extension AccountViewController {
   }
 }
 
+enum AccountError: Error {
+  case cannotFetchAccountState
+}
+
 extension AccountViewController {
   func setup(near: Near, wallet: WalletAccount) {
     self.near = near
     walletAccount = wallet
   }
   
-  private func fetchAccountState() async -> AccountState {
-    let account = try! await near!.account(accountId: walletAccount!.getAccountId())
-    return try! await account.state()
+  private func fetchAccountState() async throws -> AccountState {
+    do {
+      let account = try await near!.account(accountId: walletAccount!.getAccountId())
+      let state = try await account.state()
+      return state
+    } catch {
+      throw AccountError.cannotFetchAccountState
+    }
   }
   
   private func setupData(with accountState: AccountState) async {
     data.append(AccountStateField(title: "Account ID", value: await walletAccount!.getAccountId()))
-    let balance = String( )  //24 near indivisible units
+    let account = try! await near!.account(accountId: walletAccount!.getAccountId())
+    let accountBalance = try! await account.getAccountBalance()
+    let balance = "\(accountBalance.available.toNearAmount(fracDigits: 5)) Ⓝ"
     data.append(AccountStateField(title: "Balance", value: balance))
     data.append(AccountStateField(title: "Storage (used/paid)", value: "\(accountState.storageUsage.toStorageUnit())/\(accountState.storagePaidAt.toStorageUnit())"))
     await MainActor.run {
@@ -96,7 +107,7 @@ extension AccountViewController {
   }
 }
 
-extension Number {
+extension Int {
   func toStorageUnit() -> String {
     let formatter = NumberFormatter()
     formatter.numberStyle = .decimal

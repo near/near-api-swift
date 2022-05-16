@@ -33,8 +33,8 @@ class ViewController: UIViewController, WalletSignInDelegate {
       contractName: nil,
       walletUrl: "https://wallet.testnet.near.org" // "https://wallet.near.org" for mainnet
     )
-    near = try! Near(config: config)
-    walletAccount = try! WalletAccount(near: near!, authService: DefaultAuthService.shared)
+    near = try Near(config: config)
+    walletAccount = try! WalletAccount(near: near!, authService: DefaultAuthService.shared) // a failed try here represents a configuration error, not a runtime error. It's safe to store a `WalletAccount!`.
     let appName = UIApplication.name ?? "signInTitle"
     DefaultAuthService.shared.walletSignIn = self
     try! await walletAccount!.requestSignIn(contractId: nil, title: appName, presentingViewController: self)

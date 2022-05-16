@@ -89,8 +89,8 @@ class AccessKeySpec: XCTestCase {
                                      accountId: self.workingAccount.accountId,
                                      keyPair: keyPair)
     
-    await XCTAssertThrowsError(try await self.contract.change(methodName: .setValue, args: ["value": "test"]) as Any) { error in
-      XCTAssertTrue(error is DecodingError)
+    await AssertThrowsError(try await self.contract.change(methodName: .setValue, args: ["value": "test"]) as Any) { error in
+      XCTAssertTrue(error is RPCError)
     }
   }
   

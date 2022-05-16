@@ -1,10 +1,10 @@
 PODS:
-  - AnyCodable-FlightSchool (0.6.2)
+  - AnyCodable-FlightSchool (0.6.3)
   - Base58Swift (2.1.10):
     - BigInt (~> 5.0.0)
   - BigInt (5.0.0)
   - KeychainAccess (4.2.2)
-  - nearclientios (1.0.0):
+  - nearclientios (1.0.23):
     - AnyCodable-FlightSchool (~> 0.6.0)
     - Base58Swift (~> 2.1.10)
     - KeychainAccess (~> 4.2.2)
@@ -30,14 +30,14 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  AnyCodable-FlightSchool: ac75ed9bae659e16a41ebfa6c71a663d6f2c111c
+  AnyCodable-FlightSchool: 1c9890be5884140c60da5fde1b66380dec4c244a
   Base58Swift: 53d551f0b33d9478fa63b3445e453a772d6b31a7
   BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
   KeychainAccess: c0c4f7f38f6fc7bbe58f5702e25f7bd2f65abf51
-  nearclientios: 29ed49caa33e70c861dafea8c1a550e3fd802cce
+  nearclientios: 18bcd3fb0bc12ecb7772e94fc9e99f878e4fc2ef
   secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
   TweetNacl: 3abf4d1d2082b0114e7a67410e300892448951e6
 
 PODFILE CHECKSUM: bf2ede311928de0026e7155c3c779a7c3a7fed9d
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.11.3

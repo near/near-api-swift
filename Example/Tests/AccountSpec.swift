@@ -93,14 +93,14 @@ class AccountSpec: XCTestCase {
     XCTAssertGreaterThan(UInt128(stringLiteral: senderState.amount), amountFraction)
     
     let reloaded = Account(connection: sender.connection, accountId: sender.accountId)
-    await XCTAssertThrowsError(try await reloaded.state()) { error in
+    await AssertThrowsError(try await reloaded.state()) { error in
       XCTAssertTrue(error is HTTPError)
     }
   }
   
   // Errors
   func testCreatingAnExistingAccountShouldThrow() async throws {
-    await XCTAssertThrowsError(try await AccountSpec.workingAccount.createAccount(newAccountId: AccountSpec.workingAccount.accountId, publicKey: PublicKey.fromString(encodedKey: "9AhWenZ3JddamBoyMqnTbp7yVbRuvqAv3zwfrWgfVRJE"), amount: 100)) { error in
+    await AssertThrowsError(try await AccountSpec.workingAccount.createAccount(newAccountId: AccountSpec.workingAccount.accountId, publicKey: PublicKey.fromString(encodedKey: "9AhWenZ3JddamBoyMqnTbp7yVbRuvqAv3zwfrWgfVRJE"), amount: 100)) { error in
       XCTAssertTrue(error is TypedError)
     }
   }
@@ -111,7 +111,7 @@ class AccountSpec: XCTestCase {
     XCTAssertEqual(result, "hello trex")
 
     let setCallValue = TestUtils.generateUniqueString(prefix: "setCallPrefix")
-    let result2 = try await AccountSpec.workingAccount.functionCall(contractId: AccountSpec.contractId, methodName: "setValue", args: ["value": setCallValue], gas: nil, amount: 0)
+    let result2 = try await AccountSpec.workingAccount.functionCall(contractId: AccountSpec.contractId, methodName: "setValue", args: ["value": setCallValue], amount: 0)
     XCTAssertEqual(getTransactionLastResult(txResult: result2) as? String, setCallValue)
     
     let testSetCallValue: String = try await AccountSpec.workingAccount.viewFunction(contractId: AccountSpec.contractId, methodName: "getValue", args: [:])
@@ -142,7 +142,7 @@ class AccountSpec: XCTestCase {
   }
   
   func testCanGetAssertMessageFromMethodResult() async throws {
-    await XCTAssertThrowsError(try await AccountSpec.contract.change(methodName: .triggerAssert) as Any) { error in
+    await AssertThrowsError(try await AccountSpec.contract.change(methodName: .triggerAssert) as Any) { error in
       XCTAssertTrue(error is TypedError)
       // This method in the testing contract is just designed to test logging after failure.
       //expect(logs[0]).toEqual(`[${contractId}]: LOG: log before assert`)

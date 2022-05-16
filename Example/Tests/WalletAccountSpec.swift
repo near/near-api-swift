@@ -30,7 +30,7 @@ class WalletAccountSpec: XCTestCase {
 
   override func setUp() {
     self.keyStore = InMemoryKeyStore()
-    self.nearFake = try! Near(config: NearConfig(networkId: "networkId",
+    self.nearFake = try Near(config: NearConfig(networkId: "networkId",
                                                  nodeUrl: URL(string: self.walletUrl)!,
                                                  masterAccount: nil,
                                                  keyPath: nil,
@@ -70,7 +70,7 @@ class WalletAccountSpec: XCTestCase {
     XCTAssertEqual(newUrl.scheme, "http")
     XCTAssertEqual(newUrl.host, "example.com")
     let params = newUrl.queryParameters!
-    XCTAssertEqual(params["title"], "signInTitle")
+    XCTAssertEqual(params["referrer"], "signInTitle")
     XCTAssertEqual(params["contract_id"], "signInContract")
     XCTAssertEqual(params["success_url"], "\(APP_SCHEME)://success")
     XCTAssertEqual(params["failure_url"], "\(APP_SCHEME)://fail")
