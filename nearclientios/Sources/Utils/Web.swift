@@ -41,10 +41,11 @@ private func fetch(url: URL, params: [String: Any]?) async throws-> Any {
           let decodedError = try decoder.decode(TransactionError.self, from: data ?? Data())
           continuation.resume(throwing: decodedError)
         } catch {
-          let json = try! JSONSerialization.data(withJSONObject: result, options: [])
-          debugPrint("=====================")
-          print(String(decoding: json, as: UTF8.self))
-          debugPrint("=====================")
+          if let json = try? JSONSerialization.data(withJSONObject: result as Any, options: []) {
+            debugPrint("=====================")
+            print(String(decoding: json, as: UTF8.self))
+            debugPrint("=====================")
+          }
           let error = HTTPError.error(status: httpResponse.statusCode,
                                       message: data.flatMap({ String(data: $0, encoding: .utf8) }))
           continuation.resume(throwing: error)
