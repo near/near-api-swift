@@ -25,23 +25,23 @@ extension UInt128 {
     return offsets
   }()
   
-  private func nearComponents(fracDigits: Int = NEAR_NOMINATION_EXP) -> (String, String) {
+  private func nearComponents(fracDigits: Int = NEAR_NOMINATION_EXP, exponent: Int = NEAR_NOMINATION_EXP) -> (String, String) {
     var balance = self
-    if fracDigits != NEAR_NOMINATION_EXP {
+    if fracDigits != exponent {
       // Adjust balance for rounding at given number of digits
-      let roundingExp = NEAR_NOMINATION_EXP - fracDigits - 1
+      let roundingExp = exponent - fracDigits - 1
       if roundingExp > 0 {
         balance += UInt128.roundingOffsets[roundingExp]
       }
     }
     
     let balanceString = balance.toString()
-    let digitOffset = balanceString.count - NEAR_NOMINATION_EXP
+    let digitOffset = balanceString.count - exponent
     
     let wholeStr = String(digitOffset > 0 ? balanceString.prefix(digitOffset) : "0")
-    var fractionStr = String(balanceString.suffix(digitOffset > 0 ? NEAR_NOMINATION_EXP : balanceString.count))
+    var fractionStr = String(balanceString.suffix(digitOffset > 0 ? exponent : balanceString.count))
     
-    fractionStr = String(String(fractionStr.reversed()).padding(toLength: NEAR_NOMINATION_EXP, withPad: "0", startingAt: 0).reversed())
+    fractionStr = String(String(fractionStr.reversed()).padding(toLength: exponent, withPad: "0", startingAt: 0).reversed())
     fractionStr = String(fractionStr.prefix(fracDigits))
     return (wholeStr, fractionStr)
   }
@@ -49,16 +49,16 @@ extension UInt128 {
   /// Convert account balance value from internal indivisible units to NEAR.
   /// - Parameter fracDigits: number of fractional digits to preserve in formatted string. Balance is rounded to match given number of digits.
   /// - Returns: Value in Ⓝ
-  public func toNearAmount(fracDigits: Int = NEAR_NOMINATION_EXP) -> String {
-    let (wholeStr, fractionStr) = nearComponents(fracDigits: fracDigits)
+  public func toNearAmount(fracDigits: Int = NEAR_NOMINATION_EXP, withExponent exponent: Int = NEAR_NOMINATION_EXP) -> String {
+    let (wholeStr, fractionStr) = nearComponents(fracDigits: fracDigits, exponent: exponent)
     return trimTrailingZeroes(value: "\(formatWithCommas(value: wholeStr)).\(fractionStr)")
   }
   
   /// Convert account balance value from internal indivisible units to NEAR
   /// - Parameter fracDigits: number of fractional digits to preserve in formatted string. Balance is rounded to match given number of digits.
   /// - Returns: Value as double in  Ⓝ
-  public func toNearDouble(fracDigits: Int = NEAR_NOMINATION_EXP) -> Double {
-    let (wholeStr, fractionStr) = nearComponents(fracDigits: fracDigits)
+  public func toNearDouble(fracDigits: Int = NEAR_NOMINATION_EXP, withExponent exponent: Int = NEAR_NOMINATION_EXP) -> Double {
+    let (wholeStr, fractionStr) = nearComponents(fracDigits: fracDigits, exponent: exponent)
     return Double("\(wholeStr).\(fractionStr)")!
   }
   

@@ -4,7 +4,7 @@ PODS:
     - BigInt (~> 5.0.0)
   - BigInt (5.0.0)
   - KeychainAccess (4.2.2)
-  - nearclientios (1.0.27):
+  - nearclientios (1.0.28):
     - AnyCodable-FlightSchool (~> 0.6.0)
     - Base58Swift (~> 2.1.10)
     - KeychainAccess (~> 4.2.2)
@@ -34,7 +34,7 @@ SPEC CHECKSUMS:
   Base58Swift: 53d551f0b33d9478fa63b3445e453a772d6b31a7
   BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
   KeychainAccess: c0c4f7f38f6fc7bbe58f5702e25f7bd2f65abf51
-  nearclientios: a903ee3a3bfd7ff7f67686b4ad9e551c6b3bbe4b
+  nearclientios: 257fff27a65daa9e3b5818a5a6fb0aae79dceba9
   secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
   TweetNacl: 3abf4d1d2082b0114e7a67410e300892448951e6
 
