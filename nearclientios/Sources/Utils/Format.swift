@@ -71,8 +71,9 @@ struct ConversionError: Error {
 extension String {
   
   /// Convert human readable NEAR amount to internal indivisible units.
-  /// - Returns: The parsed yoctoⓃ amount or null if no amount was passed in
-  public func toYoctoNearString() throws -> String {
+  /// Custom exponent here could be used for Fungible Tokens where the number of decimals differs from NEAR.
+  /// - Returns: The parsed yoctoⓃ amount
+  public func toYoctoNearString(withExponent exponent: Int = NEAR_NOMINATION_EXP) throws -> String {
     var parsed = self
     // Edge cases not covered by our numberyPattern regex.
     if (parsed == "" || parsed == ".") {
@@ -88,11 +89,18 @@ extension String {
     let split = parsed.split(separator: ".")
     let wholePart = split[0]
     let fractionPart = split.indices.contains(1) ? split[1] : ""
-    if split.count > 2 || fractionPart.count > NEAR_NOMINATION_EXP {
+    if split.count > 2 || fractionPart.count > exponent {
       throw ConversionError()
     }
     
-    return trimLeadingZeroes(value: "\(wholePart)\(fractionPart.padding(toLength: NEAR_NOMINATION_EXP, withPad: "0", startingAt: 0))")
+    return trimLeadingZeroes(value: "\(wholePart)\(fractionPart.padding(toLength: exponent, withPad: "0", startingAt: 0))")
+  }
+  
+  /// Convert human readable NEAR amount to internal indivisible units.
+  /// Custom exponent here could be used for Fungible Tokens where the number of decimals differs from NEAR.
+  /// - Returns: The parsed yoctoⓃ amount
+  public func toYoctoNear(withExponent exponent: Int = NEAR_NOMINATION_EXP) throws -> UInt128 {
+    return UInt128(stringLiteral: try self.toYoctoNearString(withExponent: exponent))
   }
   
   /// Convert account balance value from internal indivisible units to NEAR.
