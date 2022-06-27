@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 import KeychainAccess
 
 public let APP_SCHEME = "x-nearclientios"
