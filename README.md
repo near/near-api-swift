@@ -54,11 +54,21 @@ nearclientios makes use of Swift's async/await and thus requires iOS 13.
 
 ## Installation
 
+### CocoaPods
 nearclientios is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
 ```ruby
 pod 'nearclientios'
+```
+
+### Swift Package Manager
+Once you have your Swift package set up, you can add nearclientios as a dependency in Package.swift.
+
+```swift
+dependencies: [
+  .package(url: "https://github.com/near/near-api-swift", .upToNextMajor(from: "1.0.29"))
+]
 ```
 
 ## Author
