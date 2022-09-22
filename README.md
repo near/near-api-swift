@@ -69,7 +69,10 @@ Once you have your Swift package set up, you can add nearclientios as a dependen
 dependencies: [
   .package(url: "https://github.com/near/near-api-swift", .upToNextMajor(from: "1.0.29"))
 ]
+
 ```
+## Examples
+https://github.com/LyubomyrBurday/near_basic basic nearclientios function calls
 
 ## Author
 
