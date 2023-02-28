@@ -72,7 +72,8 @@ dependencies: [
 
 ```
 ## Examples
-https://github.com/LyubomyrBurday/near_basic basic nearclientios function calls
+
+* [Basic nearclientios function calls](https://github.com/LyubomyrBurday/near_basic)
 
 ## Author
 
